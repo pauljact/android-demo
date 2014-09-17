@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">JactFirstDemo</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="jact_motto">Play With Purpose</string>
+    <string name="jact_username">Username</string>
+    <string name="jact_password">Password</string>
+    <string name="jact_login">Login</string>
+    <string name="broncos_activity_label">Go Broncos!</string>
+    <string name="google_activity_label">Google Search</string>
+    <string name="google_results_activity_label">Google Search Results</string>
+    <string name="jact_logged_in_home_activity_label">Jact - Play With Purpose</string>
+
+</resources>
