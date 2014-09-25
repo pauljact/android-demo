@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#0055CC"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".JactLoginActivity">
+
+    <TextView
+        android:id="@+id/jact_motto_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/jact_icon"
+        android:layout_marginLeft="23dp"
+        android:layout_marginTop="14dp"
+        android:layout_toRightOf="@+id/jact_icon"
+        android:text="@string/jact_motto"
+        android:textSize="24dp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/jact_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="19dp"
+        android:layout_marginTop="17dp"
+        android:contentDescription="@string/jact_motto"
+        android:src="@drawable/ic_launcher"
+        android:onClick="goToGoogleSearchActivityButtonClick" />
+
+   	<Button
+   	    android:id="@+id/jact_home_to_google_search"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_alignLeft="@+id/jact_icon"
+   	    android:layout_alignParentBottom="true"
+   	    android:layout_marginBottom="16dp"
+   	    android:text="Google Search"
+   	    android:onClick="doGoogleHomeButtonClick" />
+
+   	<Button
+   	    android:id="@+id/jact_home_to_broncos"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_alignBaseline="@+id/jact_home_to_google_search"
+   	    android:layout_alignBottom="@+id/jact_home_to_google_search"
+   	    android:layout_alignParentRight="true"
+   	    android:layout_marginRight="17dp"
+   	    android:text="Go Broncos!"
+   	    android:onClick="goToBroncosActivityButtonClick" />
+
+   	<EditText
+   	    android:id="@+id/username_edittext"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="32dp"
+   	    android:layout_alignLeft="@+id/jact_password"
+   	    android:layout_alignRight="@+id/jact_password"
+   	    android:layout_below="@+id/jact_icon"
+   	    android:layout_marginTop="50dp"
+   	    android:background="#FFFFCC"
+   	    android:ems="10"
+   	    android:hint="@string/jact_username" >
+   	    <requestFocus />
+   	</EditText>
+
+   	<EditText
+   	    android:id="@+id/jact_password"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="32dp"
+   	    android:layout_below="@+id/username_edittext"
+   	    android:layout_centerHorizontal="true"
+   	    android:layout_marginTop="26dp"
+   	    android:background="#FFFFCC"
+   	    android:ems="10"
+   	    android:hint="@string/jact_password"
+   	    android:inputType="textPassword" >
+   	</EditText>
+
+   	<Button
+   	    android:id="@+id/google_search_button"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_below="@+id/jact_password"
+   	    android:layout_centerHorizontal="true"
+   	    android:layout_marginTop="30dp"
+   	    android:onClick="doLoginButtonClick"
+   	    android:text="@string/jact_login" />
+
+   	<TextView
+   	    android:id="@+id/login_error_textview"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_alignLeft="@+id/username_edittext"
+   	    android:layout_alignRight="@+id/username_edittext"
+   	    android:layout_below="@+id/jact_icon"
+   	    android:layout_marginTop="17dp"
+   	    android:textSize="14dip" 
+        android:textColor="#ff0000"
+        android:visibility="invisible"
+   	    android:text="Wrong username or password" />
+
+</RelativeLayout>
