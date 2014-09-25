@@ -78,7 +78,7 @@ public class JactLoginActivity extends Activity {
               String url = "http://us7.jact.com:3080/rest/user/login";
               return doJactLogin(url);
             } catch (IOException e) {
-              return "Unable to retrieve web page. URL may be invalid.";
+              return "";
             }
 	     }
 	     
@@ -105,6 +105,8 @@ public class JactLoginActivity extends Activity {
     		   json.put("password", password.getText().toString().trim());
     		   json_str = json.toString();
     		 } catch (JSONException e) {
+    			 String empty_str = "";
+    			 return empty_str;
     		 }
 
    		     DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
@@ -116,7 +118,8 @@ public class JactLoginActivity extends Activity {
    		     connection.connect();
    		     int response = connection.getResponseCode();
    		     if (response != 200) {
-   		       return "";
+    		   String empty_str = "";
+   		       return empty_str;
    		     }
    		     //Log.d(DEBUG_TAG, "The response is: " + response);
    		     is = connection.getInputStream();
