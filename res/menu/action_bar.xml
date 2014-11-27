@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:jactns="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/menu_main_profile"
+          android:title="@string/menu_profile" />
+    <item android:id="@+id/menu_about_jact"
+          android:title="@string/menu_about_jact" />
+    <item android:id="@+id/menu_contact_us"
+          android:title="@string/menu_contact_us" />
+    <item android:id="@+id/menu_faq"
+          android:title="@string/menu_faq" />
+    <item android:id="@+id/menu_user_agreement"
+          android:title="@string/menu_user_agreement" />
+    <item android:id="@+id/menu_privacy_policy"
+          android:title="@string/menu_privacy_policy" />
+    <item android:id="@+id/menu_logout"
+          android:title="@string/menu_logout" />
+</menu>

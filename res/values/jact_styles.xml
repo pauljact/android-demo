@@ -1,0 +1,54 @@
+<resources>
+    <style name="JactBaseTheme" parent="@style/Theme.AppCompat.Light">
+        <!-- <item name="android:accountPreferences">jact_preferences.xml</item> -->
+        <!-- <item name="android:action[Bar|Button|Dropdown|Menu|Mode]...">Various Action Bar settings </item> -->
+        <!-- <item name="android:background...">Various background settings (here, 'background' means: when e.g. a menu is in foreground)</item> -->
+        <!-- <item name="android:button...">Various button settings</item> -->
+    	<item name="android:background">#B6B6B4</item>
+        <!-- <item name="android:color">#00FF00</item> -->
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:typeface">sans</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:editTextStyle">@android:style/Widget.EditText</item>
+    </style>
+    
+    <style name="JactMainTheme" parent="JactBaseTheme">
+        <!-- Inherits from JactBaseTheme above, but is otherwise empty.
+             The purpose of having a separate theme here, which is
+             empty and is thus completely defined by its parent,
+             is so that higher versions
+             can add functionality to JactMainTheme, but not have to
+             re-define the JactBaseTheme attributes that will be
+             common across all Android versions. See e.g. the
+             JactMainTheme styles in the res/values-vXX/styles.xml files. 
+         -->
+    </style>
+    
+    <style name="DrawerTextViewBase">
+        <item name="android:textColor">#fff</item>
+        <item name="android:paddingRight">16dp</item>
+    	<item name="android:paddingLeft">16dp</item>
+    	<item name="android:gravity">center_vertical</item>
+    	<item name="android:layout_height">wrap_content</item>
+    	<item name="android:layout_width">match_parent</item>
+    </style>
+    
+    <style name="DrawerTextView" parent="DrawerTextViewBase">
+        <!-- Inherits from DrawerTextViewBase; nothing new to add here
+             (Additional style settings are added in the styles.xml
+             file of the v-11 folder).
+         -->
+    </style>
+    
+    <style name="BlueButton">
+   	    <item name="android:textColor">#FFFFFF</item>
+   	    <item name="android:background">#43BFC7</item>
+    </style>
+    
+    <style name="GreenButton">
+   	    <item name="android:textColor">#FFFFFF</item>
+   	    <item name="android:background">#4CC417</item>
+    </style>
+</resources>
