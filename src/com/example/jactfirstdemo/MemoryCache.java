@@ -1,28 +1,29 @@
 package com.example.jactfirstdemo;
 
-import java.lang.ref.SoftReference;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
  
 public class MemoryCache {
-    private Map<String, SoftReference<Bitmap>> cache_ =
-    	Collections.synchronizedMap(new HashMap<String, SoftReference<Bitmap>>());
+	private static final int CACHE_SIZE = 1 * 1024 * 1024;  // 1Mb
+	private LruCache<String, Bitmap> cache_;
+    //private Map<String, SoftReference<Bitmap>> cache_ =
+    //	Collections.synchronizedMap(new HashMap<String, SoftReference<Bitmap>>());
  
-    public Bitmap get(String id){
-        if (!cache_.containsKey(id)) {
-            return null;
-        }
-        SoftReference<Bitmap> ref = cache_.get(id);
-        return ref.get();
+	public MemoryCache() {
+		cache_ = new LruCache<String, Bitmap>(CACHE_SIZE);
+	}
+	
+    public Bitmap get(String id) {
+    	return (Bitmap) cache_.get(id);
     }
  
-    public void put(String id, Bitmap bitmap){
-        cache_.put(id, new SoftReference<Bitmap>(bitmap));
+    public void put(String id, Bitmap bitmap) {
+    	if (cache_.get(id) == null) {
+    		cache_.put(id, bitmap);
+    	}
     }
  
     public void Clear() {
-        cache_.clear();
+        cache_.evictAll();
     }
 }

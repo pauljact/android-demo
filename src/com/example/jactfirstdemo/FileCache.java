@@ -5,34 +5,36 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import android.content.Context;
+import android.util.Log;
  
 public class FileCache {
     private File cache_dir_;
+    private long max_dir_size_;
  
-    public FileCache(Context context) {
-        // Find the dir to save cached images
-        if (android.os.Environment.getExternalStorageState().equals(
-        		android.os.Environment.MEDIA_MOUNTED)) {
-            cache_dir_ = new File(android.os.Environment.getExternalStorageDirectory(),
-            		              "LazyList");
-        } else {
-            cache_dir_ = context.getCacheDir();
-        }
+    public FileCache(File cache_parent_dir, String dir, long max_size) {
+    	cache_dir_ = new File(cache_parent_dir, dir);
         if (!cache_dir_.exists()) {
           cache_dir_.mkdirs();
         }
+        max_dir_size_ = max_size;
     }
- 
-    public File getFile(String url) {
-        //I identify images by hashcode. Not a perfect solution, good for the demo.
-        //String filename = String.valueOf(url.hashCode());
-        //Another possible solution (thanks to grantland)
+    
+    public File getEncodedFilename(String url) {
+    	if (JactFileUtils.GetDirSize(cache_dir_) > max_dir_size_) {
+    		Log.i("PHB", "FileCache::getFile. Not enough space in CacheDir to create new file.");
+    		JactFileUtils.TrimDirToMaxSize(cache_dir_, max_dir_size_);
+    	}
         String filename = "PHB_foo";
 		try {
 			filename = URLEncoder.encode(url, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
+			// TODO(PHB): Implement this.
 			e.printStackTrace();
+			Log.e("PHB ERROR", "FileCache::getFile: UnsupportedEncodingException:\n" +
+			                   e.toString());
+		}
+		if (filename == "PHB_foo") {
+		  Log.e("PHB ERROR", "FileCache::getFile: Never reset file name.");
 		}
         File f = new File(cache_dir_, filename);
         return f;
@@ -43,7 +45,7 @@ public class FileCache {
         if (files == null) {
             return;
         }
-        for (File f:files) {
+        for (File f : files) {
             f.delete();
         }
     }

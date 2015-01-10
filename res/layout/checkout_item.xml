@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/checkout_item_rl"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/products_bg_selector"
+    android:orientation="horizontal"
+    android:padding="5dp" >
+    <!-- android:theme="@style/number_picker_style"
+    android:background="@color/transparent" -->
+    
+    <LinearLayout
+        android:id="@+id/checkout_item_ll"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+    	android:background="@color/transparent"
+    	android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:weightSum="1.0">
+        
+    <!--  ListRow Left side Thumbnail image -->
+    <LinearLayout android:id="@+id/checkout_item_thumbnail"
+		android:layout_width="0dp"
+		android:layout_weight="0.18"
+        android:layout_height="wrap_content" 
+    	android:gravity="center"
+        android:background="@drawable/products_image_bg"
+        android:layout_marginRight="1dp">
+        <ImageView
+            android:id="@+id/checkout_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+        />
+        <!--android:layout_width="wrap_content"
+            android:layout_height="wrap_content" -->
+    </LinearLayout>
+    
+    <!-- Title Of Product-->
+    <LinearLayout
+		android:layout_width="0dp"
+		android:layout_weight="0.40"
+        android:background="@color/transparent"
+		android:orientation="vertical">
+    <TextView
+        android:id="@+id/checkout_drawing_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:text="Drawing"
+        android:textColor="#FF2200"
+        android:typeface="sans"
+        android:textSize="16sp"
+        android:textStyle="bold"/>
+    <TextView
+        android:id="@+id/checkout_item_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+    	android:gravity="left"
+        android:background="@color/transparent"
+        android:textColor="@color/black"
+        android:typeface="sans"
+        android:textSize="12sp"
+        android:textStyle="bold"/>
+    </LinearLayout>
+    
+    <!-- Price -->
+    <LinearLayout
+		android:layout_width="0dp"
+		android:layout_weight="0.27"
+		android:orientation="vertical">
+    <TextView
+        android:id="@+id/checkout_item_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+    	android:gravity="center"
+        android:textSize="12sp"
+        android:textColor="@color/turquois"
+        android:textStyle="bold"/>
+    <TextView
+        android:id="@+id/checkout_price_seperator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textColor="@color/turquois"
+        android:textStyle="bold"
+   	    android:text="+"/>
+    <TextView
+        android:id="@+id/checkout_item_price_two"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+    	android:gravity="center"
+        android:textSize="12sp"
+        android:textColor="@color/turquois"
+        android:textStyle="bold"/>
+    </LinearLayout>
+ 	
+    <!-- Quantity -->
+    <LinearLayout
+        android:id="@+id/checkout_quantity_ll"
+   	    android:layout_width="0dp"
+   	    android:layout_weight="0.10"
+  	    android:layout_height="wrap_content"
+    	android:gravity="right"
+   		android:background="@color/transparent"
+   		android:orientation="horizontal">
+    	<Spinner
+  			android:id="@+id/cart_quantity_spinner"
+   	    	android:layout_width="wrap_content"
+  	    	android:layout_height="wrap_content"
+  			android:dropDownWidth="wrap_content"
+  	    	android:popupBackground="@color/white"
+    		android:gravity="right"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+        	android:textSize="12sp"
+        	android:textColor="@color/black"
+        	android:textStyle="bold"
+  	    	android:spinnerMode="dropdown"/>
+    		<!-- android:dropDownWidth="match_parent"
+    		     android:spinnerMode="dialog"
+    		     android:prompt="@string/state_str" -->
+    </LinearLayout>
+    
+    <!-- Empty Text View, to hold Product ID -->
+    <TextView
+        android:id="@+id/checkout_item_pid"
+		android:layout_width="0dp"
+		android:layout_weight="0.01"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:visibility="gone"/>
+    </LinearLayout>
+ 
+</RelativeLayout>

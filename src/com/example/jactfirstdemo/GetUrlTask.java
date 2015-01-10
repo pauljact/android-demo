@@ -13,9 +13,6 @@ import java.util.Map;
 
 import org.apache.http.util.ByteArrayBuffer;
 
-import com.example.jactfirstdemo.JactLoggedInHomeActivity.OnTaskCompleted;
-
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -47,6 +44,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
   private Bitmap picture_;
   private String webpage_;
   private String cookies_;
+  private String extra_params_;
   private FetchStatus status_;
 
     // Constructor; sets calling_activity_ and type_.
@@ -65,17 +63,25 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
     //   3) (Optional) cookies that should be used for the connection
     //   4) (Optional) info that should be sent with the request (e.g. url
     //      parameters); it is only used if connection type is 'POST'.
+    //   5) (Optional) *Hack*: parameter that will be passed to calling activity
+    //      that provides the calling activity with additional info it may need
+    //      to handle the response.
     protected Void doInBackground(String... params) {      
       // Sanity check params.
       if (params.length < 1) {
-    	  Log.e("PHB", "Error: No url specified to fetch.");
+    	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. No url specified to fetch.");
     	  status_ = FetchStatus.ERROR_PARAMS_LENGTH;
     	  return null;
       } else if (params.length < 2 ||
     		     (params[1] != "GET" && params[1] != "POST")) { 
-        Log.e("PHB", "Error: No connection type (GET or POST) specified.");
+    	Log.e("PHB ERROR", "GetUrlTask::doInBackground. No connection type (GET or POST) specified.");
     	status_ = FetchStatus.ERROR_PARAMS_LENGTH;
     	return null;
+      }
+      if (params.length > 4) {
+        extra_params_ = params[4];
+      } else {
+        extra_params_ = "";
       }
       
       // Use session cookies, if included in params.
@@ -84,7 +90,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
         cookie_manager = new java.net.CookieManager();
         List<String> cookie_headers = Arrays.asList(params[2].split("_|_"));
         for (String cookie : cookie_headers) {
-          Log.e("PHB", "cookie: " + cookie);
+          Log.e("PHB ERROR", "GetUrlTask::doInBackground. Cookie: " + cookie);
           cookie_manager.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
         }
       }
@@ -134,14 +140,16 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
        	if (response != 200) {
           if (response == 403) {
             // TODO(PHB): Handle error here.
-            Log.e("bar", "Error: Server responded with 403, likely because " +
+        	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. " +
+                         "Server responded with 403, likely because " +
                          "logged-in credentials (cookies) were not properly " +
                          "transferred to the server.");
             status_ = FetchStatus.ERROR_403;
             return null;
           } else {
             // TODO(PHB): Handle error here.
-    		Log.e("PHB", "Bad response (" + response + ") for task.");
+        	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. Bad response (" +
+                                 response + ") for task.");
             status_ = FetchStatus.ERROR_RESPONSE_CODE;
             return null;
           }
@@ -168,17 +176,17 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
         	  return null;
           }
         } else {
-          Log.e("PHB", "Error: Unknown target url type.");
+          Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unknown target url type.");
           status_ = FetchStatus.ERROR_WEBPAGE_TYPE;
           return null;
         }
       } catch (IOException e) {
-        Log.e("PHB", "Error connecting to remote server:\n" + e.getMessage());
+    	Log.e("PHB ERROR", "GetUrlTask::doInBackground. Error connecting to remote server: " + params[0] + "\n" + e.getMessage());
         // TODO(PHB): Handle Exception gracefully.
         status_ = FetchStatus.ERROR_IO_EXCEPTION;
         return null;
       } catch (NullPointerException e) {
-          Log.e("PHB", "Null Ptr exception");
+    	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. Null Ptr exception");
           // TODO(PHB): Handle Exception gracefully.
           status_ = FetchStatus.ERROR_IO_EXCEPTION;
           return null;
@@ -191,7 +199,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
           }
         } catch (IOException ex) {
           // TODO(PHB): Handle exception.
-          Log.e("PHB", "Error in closing is_ stream:\n" + ex.getMessage());
+        	Log.e("PHB ERROR", "GetUrlTask::doInBackground. Error in closing is_ stream:\n" + ex.getMessage());
           status_ = FetchStatus.ERROR_OTHER_EXCEPTION;
           return null;
         }
@@ -213,7 +221,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
         String webPage = new String(baf.toByteArray());
         return webPage;
       } catch (IOException e) {
-        Log.e("bar", "Error reading returned webpage:\n" + e.getMessage());
+    	Log.e("PHB ERROR", "GetUrlTask::ParseResultAsString. Error reading returned webpage:\n" + e.getMessage());
   	    // TODO(PHB): Handle exception
   	    return "";
       }
@@ -221,17 +229,17 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  
     protected void onPostExecute(Void result) {
       if (status_ == null || callback_ == null) {
-    	  Log.e("PHB", "Null pointer here");
+        Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Null pointer here");
       }
       if (status_ != FetchStatus.SUCCESS) {
-    	  callback_.ProcessFailedResponse(status_);
+    	  callback_.ProcessFailedResponse(status_, extra_params_);
       } else if (!webpage_.isEmpty()) {
-        callback_.ProcessUrlResponse(webpage_, cookies_);
+        callback_.ProcessUrlResponse(webpage_, cookies_, extra_params_);
       } else if (picture_ != null) {
-        callback_.ProcessUrlResponse(picture_, cookies_);
+        callback_.ProcessUrlResponse(picture_, cookies_, extra_params_);
       } else {
-        Log.e("bar", "Error: Webpage not successfully parsed.");
-        callback_.ProcessFailedResponse(FetchStatus.ERROR_OTHER_EXCEPTION);
+    	Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Webpage not successfully parsed.");
+        callback_.ProcessFailedResponse(FetchStatus.ERROR_OTHER_EXCEPTION, extra_params_);
         // TODO(PHB): Error. Abort gracefully.
       }
     }

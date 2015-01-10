@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:jactns="http://schemas.android.com/apk/res-auto">
+      xmlns:jactns="http://schemas.android.com/apk/res-auto"
+      android:id="@+id/menu_master">
+    <item android:id="@+id/menu_shopping_cart"
+          android:title="@string/menu_shopping_cart"
+          android:icon="@drawable/cart_transparent"
+          android:showAsAction="always"
+          jactns:showAsAction="always"/>
     <item android:id="@+id/menu_main_profile"
           android:title="@string/menu_profile" />
     <item android:id="@+id/menu_about_jact"

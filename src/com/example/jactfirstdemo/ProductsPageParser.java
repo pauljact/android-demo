@@ -1,0 +1,451 @@
+package com.example.jactfirstdemo;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.util.Log;
+
+public class ProductsPageParser {
+	
+  static final String jact_icons_website_ = "https://us7.jact.com:3081/sites/default/files/styles/medium/public/";
+  
+  public static class ProductItem {
+    public String nid_;
+    public String title_;
+    public String pid_;
+    public String node_type_;
+    public String date_;
+    public String sku_;
+    public boolean promote_;
+    public String img_url_;
+    public String drawing_url_;
+    public String bux_;
+    public String usd_;
+    public String points_;
+    public ArrayList<String> types_;
+  }  
+  // Website node keys.
+  static final String WEBSITE_NID = "nid";
+  static final String WEBSITE_TITLE = "node_title";
+  static final String WEBSITE_PID = "commerce_product_field_data_field_product_product_id";
+  static final String WEBSITE_NODE_TYPE = "node_type";
+  static final String WEBSITE_DATE = "drawing date";
+  static final String WEBSITE_DRAWING_DATE = "Drawing_Ends";
+  static final String WEBSITE_SKU = "commerce_product_field_data_field_product_sku";
+  static final String WEBSITE_PROMOTE = "Promote";
+  static final String WEBSITE_VALUE = "value";
+  static final String WEBSITE_IMAGE = "field_product_image";
+  static final String WEBSITE_IMAGE_URI = "uri";
+  static final String WEBSITE_PRICE = "Price";
+  static final String WEBSITE_PRICE_AMOUNT = "amount";
+  static final String WEBSITE_PRICE_CURRENCY = "currency_code";
+  static final String WEBSITE_POINT_PRICE = "Point_Price";
+  static final String WEBSITE_PRODUCT_TYPE = "Product_Type";
+    
+  static private void ParseRewardsNodeTitle(String node, ProductItem item) {
+    if (!node.isEmpty()) {
+      item.title_ = node;
+    }
+  }
+  
+  static private void ParseDrawingsNodeTitle(String node, ProductItem item) {
+    String title = ParseTitleFromNodeTitle(node);
+    if (!title.isEmpty()) {
+      item.title_ = title;
+    }
+  }
+  
+  static private void ParseRewardsNodeId(String node, ProductItem item) {
+    if (!node.isEmpty()) {
+      item.nid_ = node;
+    }
+  }
+	  
+  static private void ParseDrawingsNodeId(String node_id, ProductItem item) {
+    // Parse Image URL.
+    String image_url = ParseImageUrlFromNodeId(node_id);
+    if (!image_url.isEmpty()) {
+      item.img_url_ = image_url;
+    }
+
+    // Parse Drawing URL.
+    String drawing_url  = ParseDrawingUrlFromNodeId(node_id);
+    if (!drawing_url.isEmpty()) {
+      item.drawing_url_ = drawing_url;
+    }
+  }
+  
+  static private void ParseRewardsProductId(String node, ProductItem item) {
+    if (!node.isEmpty()) {
+      item.pid_ = node;
+    }
+  }
+  
+  static private void ParseDrawingsProductId(String node, ProductItem item) {
+    if (!node.isEmpty()) {
+      item.pid_ = node;
+    }
+  }
+  
+  static private void ParseDrawingsDate(String node, ProductItem item) {
+    String date = ParseDateFromDrawingDate(node);
+	if (!date.isEmpty()) {
+      item.date_ = date;
+	}
+  }
+  
+  static private void ParseRewardsSku(String node, ProductItem item) {
+    if (!node.isEmpty()) {
+      item.sku_ = node;
+    }
+  }
+  
+  static private void ParseRewardsNodeType(String node, ProductItem item) {
+    if (!node.isEmpty()) {
+      item.node_type_ = node;
+    }
+  }
+  
+  static private void ParseRewardsPromote(JSONObject node, ProductItem item) {
+	if (!node.has(WEBSITE_PROMOTE) || node.isNull(WEBSITE_PROMOTE)) {
+	  item.promote_ = false;
+	  return;
+	}
+	try {
+	  /* Currently, when Promote tag is present, it is a JSONObject; but when it is absent,
+	     it is an empty JSONArray. Contrast this to e.g. Points Price, which is a JSONObject
+	     whether or not it is empty. The below code parses the empty Promote Tag case, but
+	     throws an exception (... JSONObject cannot be converted to JSONArray...) when
+	     Promote Tag is non-empty. Instead, we comment out this code, and handle the case
+	     when promote tag is non-empty, which throws the opposite exception when it is
+	     empty; which is fine, since we don't want to do anything in this case anyway.
+	     But should update server code to make empty Promote Tag still be a JSONObject,
+	     e.g. just as PointsPrice is.
+	  JSONArray promote = new JSONArray(node.getString(WEBSITE_PROMOTE));
+	  if (promote.length() == 0) {
+	    map.put(PRODUCT_PROMOTE_KEY, "false");
+	    Log.e("PHB", "ProductsPageParse::ParseRewardsPromote. Empty Promote tag:\n" + promote.toString());
+	    return;
+	  }
+	  */
+	  JSONObject promote = new JSONObject(node.getString(WEBSITE_PROMOTE));
+	  if (promote == null || promote.length() == 0) {
+		  item.promote_ = false;
+	    return;
+	  }
+	  String value = promote.getString(WEBSITE_VALUE);
+	  if (value.isEmpty()) {
+		  item.promote_ = false;
+	  } else if (value.equalsIgnoreCase("0")) {
+		  item.promote_ = false;
+	  } else if (value.equalsIgnoreCase("1")) {
+		  item.promote_ = true;
+	  } else {
+		  item.promote_ = false;
+        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Unrecognize Promote->Value tag: " + value);
+	  }
+	} catch (JSONException e) {
+		  item.promote_ = false;
+	  Log.w("PHB WARNING", "ProductsPageParse::ParseRewardsPromote. JSONException for Promote tag\n" +
+	                       node.toString() + "\nException: " + e.getMessage());
+      // TODO(PHB): Handle exception gracefully.
+    }
+  }
+  static private void ParseRewardsDrawingDate(JSONObject node, ProductItem item) {
+    if (!node.has(WEBSITE_DRAWING_DATE) || node.isNull(WEBSITE_DRAWING_DATE)) {
+	  return;
+	}
+	try {
+	  JSONObject date = new JSONObject(node.getString(WEBSITE_DRAWING_DATE));
+	  String value = date.getString(WEBSITE_VALUE);
+	  if (!value.isEmpty()) {
+	    item.date_ = value;
+	  } else {
+        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Empty Drawing Date->Value tag");
+	  }
+	} catch (JSONException e) {
+	  Log.w("PHB WARNING", "ProductsPageParse::ParseRewardsDrawingDate. JSONException for Drawing_Ends tag\n" +
+	                       node.toString() + "\nException: " + e.getMessage());
+      // TODO(PHB): Handle exception gracefully.
+    }
+  }
+  
+  static private void ParseRewardsImage(JSONObject node, ProductItem item) {
+	if (!node.has(WEBSITE_IMAGE) || node.isNull(WEBSITE_IMAGE)) {
+      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsImage. Unable to find Image tag:\n" + node.toString());
+      // TODO(PHB): Handle missing image.
+	  return;
+	}
+	try {
+	  JSONObject image = new JSONObject(node.getString(WEBSITE_IMAGE));
+	  String value = image.getString(WEBSITE_IMAGE_URI);
+	  if (value.isEmpty()) {
+        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsImage. Unable to find Image uri:\n" + node.toString());
+        // TODO(PHB): Handle missing image.
+        return;
+	  }
+	  int prefix_index = value.indexOf("public://");
+	  if (prefix_index != 0) {
+        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsImage. Unable to parse Image uri:\n" + node.toString());
+        // TODO(PHB): Handle missing image.
+        return;
+	  }
+	  String image_url = value.substring(9);  // 9 is the length of prefix "public://" that should be removed.
+	  item.img_url_ = jact_icons_website_ + image_url;
+	} catch (JSONException e) {
+      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsImage. Unable to parse Image tag:\n" + node.toString());
+      // TODO(PHB): Handle exception gracefully.
+    }
+  }
+  
+  static private void ParseRewardsPrice(JSONObject node, ProductItem item) {
+	if (!node.has(WEBSITE_PRICE) || node.isNull(WEBSITE_PRICE)) {
+      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPrice. Unable to find Price tag:\n" + node.toString());
+      // TODO(PHB): Handle missing price.
+	  return;
+	}
+	try {
+	  JSONObject price = new JSONObject(node.getString(WEBSITE_PRICE));
+	  String amount = price.getString(WEBSITE_PRICE_AMOUNT);
+	  String currency = price.getString(WEBSITE_PRICE_CURRENCY);
+	  if (amount.isEmpty() || currency.isEmpty()) {
+        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPrice. Unable to find Price amount:\n" + node.toString());
+        // TODO(PHB): Handle missing price.
+        return;
+	  }
+	  if (!currency.equalsIgnoreCase("BUX") &&
+	      !currency.equalsIgnoreCase("USD") &&
+		  !currency.equalsIgnoreCase("Points")) {
+        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPrice. Unrecognize currency: " + currency);
+        // TODO(PHB): Handle missing price.
+        return;
+	  }
+	  if (currency.equalsIgnoreCase("BUX")) {
+	    if (amount.substring(amount.length() - 2).equalsIgnoreCase("00")) {
+	      item.bux_ = amount.substring(0, amount.length() - 2);
+	    } else {
+	      Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsPrice. BUX should be divisible by 100: " + amount);
+	      item.bux_ = amount;
+	    }
+	  } else if (currency.equalsIgnoreCase("USD")) {
+	    if (amount.substring(amount.length() - 2).equalsIgnoreCase("00")) {
+	      item.usd_ = amount.substring(0, amount.length() - 2);
+	    } else {
+	      Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsPrice. USD should be divisible by 100: " + amount);
+	      item.usd_ = amount;
+	    }
+	  } else {
+	    item.points_ = amount;
+	  }
+	} catch (JSONException e) {
+      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPrice. Unable to parse Price tag:\n" + node.toString());
+      // TODO(PHB): Handle exception gracefully.
+    }
+  }
+  
+  static private void ParseRewardsPointPrice(JSONObject node, ProductItem item) {
+	if (!node.has(WEBSITE_POINT_PRICE) || node.isNull(WEBSITE_POINT_PRICE)) {
+		Log.e("PHB", "ProductsPageParse::ParseRewardsPointPrice. No Point Price found");
+	  return;
+	}
+	try {
+	  // See comment in 'ParseRewardsPromote()' above; the same JSONArray/JSONObject issue
+	  // is present here as well.
+	  JSONObject promote = new JSONObject(node.getString(WEBSITE_POINT_PRICE));
+	  String value = promote.getString(WEBSITE_VALUE);
+	  if (!value.isEmpty()) {
+		if (item.points_ != null && !item.points_.isEmpty()) {
+		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointPrice. Duplicate entries for Price in points:\n" + node.toString());	
+		} else {
+	      item.points_ = value;
+		}
+	  }
+	} catch (JSONException e) {
+      Log.w("PHB WARNING", "ProductsPageParse::ParseRewardsPointPrice. Unable to parse Point Price tag:\n" + node.toString());
+      // TODO(PHB): Handle exception gracefully.
+    }
+  }
+  
+  static private void ParseRewardsProductType(JSONObject node, ProductItem item) {
+	if (!node.has(WEBSITE_PRODUCT_TYPE) || node.isNull(WEBSITE_PRODUCT_TYPE)) {
+	  return;
+	}
+	try {
+	  JSONArray product_types = new JSONArray(node.getString(WEBSITE_PRODUCT_TYPE));
+	  if (product_types == null || product_types.length() < 1) return;
+	  item.types_ = new ArrayList<String>(product_types.length());
+      for (int i = 0; i < product_types.length(); i++) {
+        item.types_.add(product_types.getString(i));
+      }
+	} catch (JSONException e) {
+      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsProductType. Unable to parse ProductType:\n" + node.toString());
+      // TODO(PHB): Handle exception gracefully.
+    }
+  }
+  
+  static public void ParseRewardsPage(String response,
+          ArrayList<ProductItem> products_list) {
+    try {
+      JSONArray products = new JSONArray(response);
+      for (int i = 0; i < products.length(); i++) {
+        JSONObject product = products.getJSONObject(i);
+        ProductItem item = new ProductItem();
+        
+        // Parse node_title.
+        ParseRewardsNodeTitle(product.getString(WEBSITE_TITLE), item);
+        
+        // Parse sku.
+        ParseRewardsSku(product.getString(WEBSITE_SKU), item);
+        
+        // Parse node_type.
+        ParseRewardsNodeType(product.getString(WEBSITE_NODE_TYPE), item);
+        
+        // Parse nid.
+        ParseRewardsNodeId(product.getString(WEBSITE_NID), item);
+        
+        // Parse product_id.
+        ParseRewardsProductId(product.getString(WEBSITE_PID), item);
+        
+        // Parse Promote.
+        ParseRewardsPromote(product, item);
+        
+        // Parse Image.
+        ParseRewardsImage(product, item);
+        
+        // Parse Price.
+        ParseRewardsPrice(product, item);
+        
+        // Parse Point_Price.
+        ParseRewardsPointPrice(product, item);
+        
+        // Parse Product_Type.
+        ParseRewardsProductType(product, item);
+        
+        // Parse Drawing Date.
+        ParseRewardsDrawingDate(product, item);
+        
+        // Add product info to products_list.
+        products_list.add(item);
+      }
+    } catch (JSONException e) {
+        Log.e("PHB ERROR", "ProductsPageParser.ParseRewardsPage: Failed to parse response");
+        // TODO(PHB): Handle exception.
+    }
+  }
+  
+  static public void ParseDrawingsPage(String response, ArrayList<ProductItem> products_list) {
+    try {
+      JSONArray products = new JSONArray(response);
+      for (int i = 0; i < products.length(); i++) {
+        JSONObject product = products.getJSONObject(i);
+        ProductItem item = new ProductItem();
+        
+        // Parse nid.
+        ParseDrawingsNodeId(product.getString(WEBSITE_NID), item);
+        
+        // Parse node_title.
+        ParseDrawingsNodeTitle(product.getString(WEBSITE_TITLE), item);
+        
+        // Parse product_id.
+        ParseDrawingsProductId(product.getString(WEBSITE_PID), item);
+       
+        // Parse Date.
+        // TODO(PHB): Note the space in 'drawing date' below. If the json tag gets correctly
+        // updated to 'drawing_date', you'll need to update the string below accordingly.
+        ParseDrawingsDate(product.getString(WEBSITE_DATE), item);
+        
+        // Add product info to products_list.
+	  	products_list.add(item);
+      }
+    } catch (JSONException e) {
+      Log.e("PHB ERROR", "ProductsPageParser.ParseDrawingsPage: Failed to parse response");
+      // TODO(PHB): Handle exception.
+    }
+  }
+    
+  static private String ParseDateFromDrawingDate(String date) {
+    if (date == null || date.isEmpty()) return "";
+    int expected_start = date.indexOf("<span class=\"");
+    if (expected_start < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseDateFromDrawingsDate: Unexpected format of node_title: " + date);
+      return "";
+    }
+    String first_cut = date.substring(expected_start);
+    int end_link = first_cut.indexOf("\">");
+    if (end_link < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseDateFromDrawingsDate: Unexpected format of node_title: " + date);
+      return "";
+    }
+    String second_cut = first_cut.substring(end_link + 2);
+    int close_tag = second_cut.indexOf("</span>");
+    if (close_tag < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseDateFromDrawingsDate: Unexpected format of node_title: " + date);
+      return "";
+    }
+    return second_cut.substring(0, close_tag);
+  }
+
+  static private String ParseTitleFromNodeTitle(String node_title) {
+    if (node_title == null || node_title.isEmpty()) return "";
+    int expected_start = node_title.indexOf("<a href=\"");
+    if (expected_start < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseTitleFromNodeTitle: Unexpected format of node_title: " + node_title);
+      return "";
+    }
+    String first_cut = node_title.substring(expected_start); 
+    int end_link = first_cut.indexOf("\">");
+    if (end_link < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseTitleFromNodeTitle: Unexpected format of node_title: " + node_title);
+      return "";
+    }
+    String second_cut = first_cut.substring(end_link + 2);
+    int close_tag = second_cut.indexOf("</a>");
+    if (close_tag < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseTitleFromNodeTitle: Unexpected format of node_title: " + node_title);
+      return "";
+    }
+    return second_cut.substring(0, close_tag);
+  }
+    
+  static private String ParseImageUrlFromNodeId(String nid) {
+    if (nid == null || nid.isEmpty()) return "";
+    int expected_start = nid.indexOf("<img ");
+    if (expected_start < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseImageUrlFromNodeId: Unexpected format of nid: " + nid);
+      return "";
+    }
+    String first_cut = nid.substring(expected_start);
+    int start_src = first_cut.indexOf("src=\"");
+    if (start_src < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseImageUrlFromNodeId: Unexpected format of node_title: " + nid);
+      return "";
+    }
+    String second_cut = first_cut.substring(start_src + 5);
+    int end_src = second_cut.indexOf("\"");
+    if (end_src < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseImageUrlFromNodeId: Unexpected format of node_title: " + nid);
+      return "";
+    }
+    return second_cut.substring(0, end_src);
+  }
+    
+  static private String ParseDrawingUrlFromNodeId(String nid) {
+    if (nid == null || nid.isEmpty()) return "";
+    int expected_start = nid.indexOf("<a href=\"");
+    if (expected_start < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseDrawingUrlFromNodeId: Unexpected format of nid: " + nid);
+      return "";
+    }
+    String first_cut = nid.substring(expected_start + 8);
+    int end_link = first_cut.indexOf("\">");
+    if (end_link < 0) {
+      Log.e("PHB ERROR", "ProductsActivity.ParseDrawingUrlFromNodeId: Unexpected format of node_title: " + nid);
+      return "";
+    }
+    return first_cut.substring(0, end_link);
+  }
+}

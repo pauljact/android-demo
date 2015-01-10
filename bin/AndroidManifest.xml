@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="9"
+        android:minSdkVersion="11"
         android:targetSdkVersion="17" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -29,8 +29,10 @@
         <activity
             android:name="com.example.jactfirstdemo.JactLoggedInHomeActivity"
         	android:icon="@drawable/ic_launcher"
-        	android:label="@string/jact_logged_in_home_activity_label"
+        	android:label="@string/app_name"
+        	android:launchMode="singleTask"
             android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            <!-- android:label="@string/jact_logged_in_home_activity_label" -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.jactfirstdemo.JactLoginActivity" />
@@ -39,12 +41,101 @@
         <activity
             android:name="com.example.jactfirstdemo.ProductsActivity"
         	android:icon="@drawable/ic_launcher"
-        	android:label="@string/jact_logged_in_home_activity_label"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
+        	android:label="@string/rewards_label"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        
+        <!-- Update to GamesActivity, once ready
+        <activity
+            android:name="com.example.jactfirstdemo.PrizesActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/games_label"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity> -->
+        
+        <activity
+            android:name="com.example.jactfirstdemo.ShoppingCartActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/cart_activity_label"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        
+        <activity
+            android:name="com.example.jactfirstdemo.ShippingActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/shipping_label"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        
+        <activity
+            android:name="com.example.jactfirstdemo.ShippingNewActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/shipping_label"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        
+        <activity
+            android:name="com.example.jactfirstdemo.BillingNewActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/billing_label"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        
+        <activity
+            android:name="com.example.jactfirstdemo.BillingActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/billing_label"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        
+        <activity
+            android:name="com.example.jactfirstdemo.ReviewCartActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/review_label"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        
+        <activity
+            android:name="com.example.jactfirstdemo.FaqActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/faq_label"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
         </activity>
     </application>
-
 </manifest>

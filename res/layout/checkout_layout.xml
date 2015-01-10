@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/checkout_drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<!-- The main content view -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/checkout_content_frame"
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    android:background="@drawable/glossy">
+    
+    <!-- Step Navigation -->
+    <LinearLayout
+        android:id="@+id/checkout_navigation_steps"
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+    	android:background="@color/white"
+    	android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:weightSum="1.0">
+		   	<TextView
+		   	    android:layout_height="wrap_content"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.25"
+		   		android:layout_marginTop="4dp"
+		   		android:layout_marginBottom="4dp"
+		   		android:gravity="center"
+		   	    android:textSize="20sp"
+		   	    android:textStyle="bold"
+		   	    android:text="@string/cart_str"
+		   	    android:textColor="@color/yellow"
+    			android:background="@color/transparent"/>
+		   	<TextView
+		   	    android:layout_height="wrap_content"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.25"
+		   		android:layout_marginTop="4dp"
+		   		android:layout_marginBottom="4dp"
+		   		android:gravity="center"
+		   	    android:textSize="20sp"
+		   	    android:textStyle="bold"
+		   	    android:text="@string/shipping_str"
+		   	    android:textColor="@color/translucent_gray"
+    			android:background="@color/transparent"/>
+		   	<TextView
+		   	    android:layout_height="wrap_content"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.25"
+		   		android:layout_marginTop="4dp"
+		   		android:layout_marginBottom="4dp"
+		   		android:gravity="center"
+		   	    android:textSize="20sp"
+		   	    android:textStyle="bold"
+		   	    android:text="@string/billing_str"
+		   	    android:textColor="@color/translucent_gray"
+    			android:background="@color/transparent"/>
+		   	<TextView
+		   	    android:layout_height="wrap_content"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.25"
+		   		android:layout_marginTop="4dp"
+		   		android:layout_marginBottom="4dp"
+		   		android:gravity="center"
+		   	    android:textSize="20sp"
+		   	    android:textStyle="bold"
+		   	    android:text="@string/submit_str"
+		   	    android:textColor="@color/translucent_gray"
+    			android:background="@color/transparent"/>
+    </LinearLayout>    
+
+    <!-- Contents Bar (e.g. Items, Price, Quantity) -->
+    <LinearLayout
+        android:id="@+id/checkout_header_bar"
+        android:layout_below="@id/checkout_navigation_steps"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="30dp"
+        android:layout_marginTop="1dp"
+   	    android:layout_marginBottom="0dp"
+    	android:background="@color/white"
+    	android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:weightSum="1.0">
+		   	<LinearLayout
+    			android:orientation="horizontal"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.19"
+   	    		android:layout_height="fill_parent"
+    			android:background="@color/white"
+		   	    android:gravity="left"
+			   	android:layout_marginRight="5dp"
+			   	android:layout_marginLeft="0dp">
+			   	<TextView
+			   	    android:id="@+id/checkout_header_bar_items"
+			   	    android:layout_width="wrap_content"
+			   	    android:layout_height="wrap_content"
+			   		android:layout_marginTop="4dp"
+			   		android:layout_marginBottom="4dp"
+			   	    android:textSize="16sp"
+			   	    android:textStyle="bold"
+			   	    android:text="Items"
+			   	    android:textColor="@color/dark_blue"
+	    			android:background="@color/transparent"/>
+			</LinearLayout>
+		   	<LinearLayout
+    			android:orientation="horizontal"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.30"
+   	    		android:layout_height="fill_parent"
+			   	android:layout_marginTop="4dp"
+			   	android:layout_marginBottom="4dp"
+    			android:background="@color/white"
+		   	    android:gravity="center"
+			   	android:layout_marginRight="5dp"
+			   	android:layout_marginLeft="5dp">
+			   	<TextView
+			   	    android:id="@+id/checkout_header_bar_title"
+			   	    android:layout_width="wrap_content"
+			   	    android:layout_height="wrap_content"
+			   	    android:text="Title"
+			   	    android:gravity="left"
+			   	    android:textSize="16sp"
+			   	    android:textStyle="bold"
+			   	    android:textColor="@color/dark_blue"
+	    			android:background="@color/transparent"/>	   	    
+		   	</LinearLayout>
+		   	<LinearLayout
+    			android:orientation="horizontal"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.30"
+   	    		android:layout_height="fill_parent"
+			   	android:layout_marginTop="4dp"
+			   	android:layout_marginBottom="4dp"
+    			android:background="@color/white"
+		   	    android:gravity="right"
+			   	android:layout_marginRight="5dp"
+			   	android:layout_marginLeft="5dp">
+			   	<TextView
+			   	    android:id="@+id/checkout_header_bar_price"
+			   	    android:layout_width="wrap_content"
+			   	    android:layout_height="wrap_content"
+			   	    android:text="Price"
+			   	    android:textSize="16sp"
+			   	    android:gravity="left"
+			   	    android:textStyle="bold"
+			   	    android:textColor="@color/dark_blue"
+	    			android:background="@color/transparent"/>
+			</LinearLayout>
+			<LinearLayout
+    			android:orientation="horizontal"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.21"
+   	    		android:layout_height="fill_parent"
+			   	android:layout_marginTop="4dp"
+			   	android:layout_marginBottom="4dp"
+    			android:background="@color/white"
+		   	    android:gravity="right"
+			   	android:layout_marginRight="5dp"
+			   	android:layout_marginLeft="5dp">
+			   	<TextView
+			   	    android:id="@+id/checkout_header_bar_quantity"
+			   	    android:layout_width="wrap_content"
+			   	    android:layout_height="wrap_content"
+			   	    android:text="Quantity"
+			   	    android:textSize="16sp"
+			   	    android:gravity="left"
+			   	    android:textStyle="bold"
+			   	    android:textColor="@color/dark_blue"
+	    			android:background="@color/transparent"/>
+		</LinearLayout>
+    </LinearLayout>
+    <!-- End Contents Bar -->
+
+	<!-- Divider Bar -->
+    <LinearLayout
+        android:id="@+id/checkout_divider_bar"
+        android:layout_below="@id/checkout_header_bar"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="5dp"
+        android:layout_marginTop="0dp"
+   	    android:layout_marginBottom="0dp"
+    	android:background="@color/light_blue"
+    	android:orientation="horizontal">
+    </LinearLayout>
+    <!-- End Divider Bar -->
+    
+    <!-- No Products Message -->
+    <RelativeLayout
+   	    android:id="@+id/checkout_no_items_rl"
+        android:layout_below="@id/checkout_divider_bar"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="wrap_content"
+  		android:background="@color/transparent">
+   	<TextView
+   	    android:id="@+id/checkout_no_items_tv"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+	   	android:gravity="center"
+        android:layout_centerHorizontal="true"
+   		android:layout_marginTop="4dp"
+   		android:layout_marginBottom="4dp"
+   	    android:textSize="24sp"
+   	    android:textStyle="bold"
+   	    android:text="No Items in Cart"
+   	    android:textColor="@color/white"
+  		android:background="@color/transparent"
+        android:visibility="invisible"/>
+   	</RelativeLayout>
+    <!-- End No Products Message -->
+            
+    <LinearLayout
+        android:layout_below="@id/checkout_no_items_rl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    <!-- List of Products -->
+    <ListView
+        android:id="@+id/checkout_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="#b5b5b5"
+        android:dividerHeight="1dp"
+        android:listSelector="@drawable/products_bg_selector"
+    />
+    <!-- End List of Products -->
+    
+    <!-- Proceed to Checkout Button -->
+    <LinearLayout
+        android:id="@+id/checkout_button_layout"
+        android:layout_alignParentBottom="true"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+   	    android:layout_marginBottom="1dp"
+    	android:background="@color/transparent"
+    	android:orientation="horizontal"
+	   	android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:weightSum="1.0">
+   	    <!-- android:layout_below="@id/checkout_list" -->
+	    <Button
+	   	    android:id="@+id/proceed_to_checkout_button"
+	   	    android:background="@drawable/button_selector_yellow"
+	   	    android:layout_width="wrap_content"
+	   	    android:layout_height="30dp"
+	   	    android:gravity="center"
+	   	    android:paddingLeft="10dp"
+	   	    android:paddingRight="10dp"
+	   	    android:onClick="doProceedToShippingButtonClick"
+	   	    android:text="@string/proceed_to_shipping"
+	   	    android:textColor="@color/white"/>
+	</LinearLayout>
+	</LinearLayout>
+    <!-- End Proceed to Checkout Button -->
+
+    <ProgressBar
+   	    android:id="@+id/checkout_progress_bar"
+   	    style="?android:attr/progressBarStyleLarge"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_centerHorizontal="true"
+   	    android:layout_centerVertical="true"
+        android:visibility="invisible"
+   	/> 
+</RelativeLayout>
+
+<!-- Navigation Drawer -->
+
+<ListView
+    android:id="@+id/checkout_left_drawer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#111"
+    android:choiceMode="singleChoice"
+    android:divider="@android:color/transparent"
+    android:dividerHeight="0dp"
+    android:listSelector="@drawable/drawer_bg_selector" />
+
+</android.support.v4.widget.DrawerLayout>

@@ -2,49 +2,75 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/login_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".JactLoginActivity">
-    
+    android:onClick="doLoginScreenClick"                
+    android:clickable="true"
+    tools:context=".JactLoginActivity"
+    android:background="@drawable/glossy"
+    android:shadowDx="1"
+    android:shadowDy="1">
     <LinearLayout
    	    android:id="@+id/login_icon_and_name"
    	    android:layout_width="wrap_content"
    	    android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="32dp"
-   	    android:layout_marginBottom="48dp"
+        android:layout_marginTop="10dp"
+   	    android:layout_marginBottom="1dp"
+    	android:onClick="doLoginScreenClick"                
+    	android:clickable="true"
+    	android:background="@color/transparent"
         android:layout_centerHorizontal="true">
 		    <ImageView
 		        android:id="@+id/jact_icon"
         		android:layout_marginTop="5dp"
 		        android:layout_width="48dp"
 		        android:layout_height="48dp"
-		        android:src="@drawable/ic_launcher"
-		    />
+    			android:onClick="doLoginScreenClick"                
+    			android:clickable="true"
+    			android:background="@color/transparent"
+		        android:src="@drawable/ic_launcher"/>
 		   	<TextView
 		   	    android:id="@+id/jact_motto_textview"
 		   	    android:layout_width="wrap_content"
 		   	    android:layout_height="wrap_content"
 		   	    android:text="@string/jact_simple_name"
+    			android:onClick="doLoginScreenClick"                
+    			android:clickable="true"
 		   	    android:textSize="44sp"
 		   	    android:textStyle="bold"
-		   	/>
+    			android:background="@color/transparent"/>
 	</LinearLayout>
-	
+   	<ProgressBar
+   	    android:id="@+id/login_progress_bar"
+   	    style="?android:attr/progressBarStyleLarge"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_below="@+id/login_icon_and_name"
+   	    android:layout_centerHorizontal="true"
+   	    android:layout_marginTop="4dp"
+   	    android:layout_marginBottom="14dp"
+    	android:onClick="doLoginScreenClick"                
+    	android:clickable="true"
+        android:visibility="invisible"
+    	android:background="@color/transparent"
+   	/>	
    	<EditText
    	    android:id="@+id/username_edittext"
    	    android:layout_width="wrap_content"
-   	    android:layout_below="@+id/login_icon_and_name"
+   	    android:layout_height="wrap_content"
+   	    android:layout_below="@+id/login_progress_bar"
         android:layout_centerHorizontal="true"
+   	    android:layout_marginTop="1dp"
    	    android:ems="10"
-   	    android:hint="@string/jact_username"    
-   	/>
-
+    	android:onClick="doLoginScreenClick"                
+    	android:clickable="true"
+    	android:imeOptions="actionDone"
+   	    android:hint="@string/jact_username"/>
    	<requestFocus
    	    android:layout_alignTop="@+id/username_edittext"
-   	    android:layout_alignParentLeft="true"
-   	/>
-
+   	    android:layout_alignParentLeft="true"/>
    	<TextView
    	    android:id="@+id/login_error_textview"
    	    android:layout_width="wrap_content"
@@ -52,11 +78,12 @@
    	    android:layout_alignLeft="@+id/username_edittext"
    	    android:layout_above="@+id/username_edittext"
    	    android:textSize="14dp" 
-        android:textColor="#ff0000"
+        android:textColor="@color/red"
         android:visibility="invisible"
-   	    android:text="Wrong username or password"
-   	/>
-
+    	android:onClick="doLoginScreenClick"                
+    	android:clickable="true"
+    	android:background="@color/transparent"    
+   	    android:text="Wrong username or password"/>
    	<EditText
    	    android:id="@+id/jact_password"
    	    android:layout_width="wrap_content"
@@ -65,9 +92,11 @@
    	    android:layout_alignLeft="@+id/username_edittext"
    	    android:layout_alignRight="@+id/username_edittext"
    	    android:ems="10"
+    	android:onClick="doLoginScreenClick"                
+    	android:clickable="true"
+    	android:imeOptions="actionDone"
    	    android:hint="@string/jact_password"
-   	    android:inputType="textPassword"
-   	/>
+   	    android:inputType="textPassword"/>
 	<TextView
         android:id="@+id/forgot_password_textview"
         android:layout_width="wrap_content"
@@ -76,12 +105,12 @@
         android:layout_below="@+id/jact_password"
         android:text="Forgot Username/Password"
         android:textSize="12sp"
-        android:textColor="#FF8800"
-        android:onClick="doForgotPassword"                
-        android:clickable="true" />
-	
+        android:textColor="@color/orange"
+        android:onClick="doForgotPassword"
+    	android:background="@color/transparent"                
+        android:clickable="true"/>
    	<Button
-   	    style="@style/BlueButton"
+   	    android:background="@drawable/button_selector_blue"
    	    android:id="@+id/jact_login_button"
    	    android:layout_width="wrap_content"
    	    android:layout_height="40dp"
@@ -91,10 +120,10 @@
    	    android:layout_marginTop="15dp"
    	    android:onClick="doLoginButtonClick"
    	    android:text="@string/jact_login"
+   	    android:textColor="@color/black"
    	/>
-   	   	
    	<Button
-   	    style="@style/GreenButton"
+   	    android:background="@drawable/button_selector_green"
    	    android:id="@+id/jact_register_button"
    	    android:layout_width="wrap_content"
    	    android:layout_height="40dp"
@@ -104,5 +133,5 @@
    	    android:layout_marginTop="5dp"
    	    android:onClick="doRegisterButtonClick"
    	    android:text="@string/jact_register"
-   	/>
+   	    android:textColor="@color/black"/>
 </RelativeLayout>

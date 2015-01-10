@@ -1,146 +1,262 @@
 package com.example.jactfirstdemo;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import android.os.Build;
 import android.os.Bundle;
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.view.View;
-import android.os.AsyncTask;
-import android.support.v7.appcompat.*;
-//import android.support.v4.app.NavUtils;
-import android.text.TextUtils;
+import android.view.animation.AlphaAnimation;
+import android.support.v4.app.FragmentActivity;
 import android.widget.EditText;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import com.example.jactfirstdemo.JactLoggedInHomeActivity;
 import com.example.jactfirstdemo.R;
 
-public class JactLoginActivity extends Activity implements ProcessUrlResponseCallback {
-  static final String COOKIES_HEADER = "Set-Cookie";
+public class JactLoginActivity extends FragmentActivity implements ProcessUrlResponseCallback {
+  private static final String COOKIES_HEADER = "Set-Cookie";
+  private static final String login_url_ = "https://us7.jact.com:3081/rest/user/login";
+  private String username_;
+  private String password_;
+  private boolean logging_in_;
+  private boolean requires_user_input_;
+  private JactDialogFragment dialog_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.jact_welcome_screen);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu; this adds items to the action bar if it is present.
-    getMenuInflater().inflate(R.menu.jact_login, menu);
-    return true;
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-      case android.R.id.home:
-        // This ID represents the Home or Up button. In the case of this
-        // activity, the Up button is shown. Use NavUtils to allow users
-        // to navigate up one level in the application structure. For
-        // more details, see the Navigation pattern on Android Design:
-        // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-        //PHB NavUtils.navigateUpFromSameTask(this);
-        return true;
-    }
-    return super.onOptionsItemSelected(item);
-  }
-
-  /**
-  * Set up the {@link android.app.ActionBar}, if the API is available.
-  */
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-  private void setupActionBar() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-      getActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-  }
-
-  public void doLoginButtonClick(View view) {
-	String url = "http://us7.jact.com:3080/rest/user/login";
-	EditText username = (EditText) findViewById(R.id.username_edittext);
-    EditText password = (EditText) findViewById(R.id.jact_password);
-    JSONObject json = new JSONObject();
-    String json_str = "";
-    try {
-      json.put("username", username.getText().toString().trim());
-      json.put("password", password.getText().toString().trim());
-      json_str = json.toString();
-    } catch (JSONException e) {
-      Log.e("PHB", "Error: " + e.getMessage());
-      // TODO(PHB): Implement this.
-    }
-    new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(url, "POST", "", json_str);
   }
   
   @Override
-  public void ProcessUrlResponse(String webpage, String cookies) {
+  protected void onResume() {
+	// Re-enable parent activity before transitioning to the next activity.
+	// This ensures e.g. that when user hits 'back' button, the screen
+	// is 'active' (not faded) when the user returns.
+	//PHB fadeAllViews(num_server_tasks_ != 0);
+	super.onResume();
+	
+	// Check to see if 'logged_off' was passed in; if so, log-off (delete
+	// login credentials from SharedPreferences).
+    SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+    String is_logged_off = getIntent().getStringExtra(getString(R.string.logged_off_key));
+    if (is_logged_off != null && is_logged_off.equalsIgnoreCase("true")) {
+      SharedPreferences.Editor editor = user_info.edit();
+      editor.remove(getString(R.string.ui_username));
+      editor.remove(getString(R.string.ui_password));
+      editor.remove(getString(R.string.ui_user_points));
+      editor.remove(getString(R.string.ui_user_icon_url));
+      editor.commit();
+    }
+    
+    // Check to see if user is already logged in. If so, go to home screen.
+    // Otherwise, go to login screen.
+    username_ = user_info.getString(getString(R.string.ui_username), "");
+    password_ = user_info.getString(getString(R.string.ui_password), "");
+    logging_in_ = false;
+    if (username_ == null || username_.isEmpty() || password_ == null || password_.isEmpty()) {
+      requires_user_input_ = true;
+      setContentView(R.layout.jact_welcome_screen);
+    } else {
+      requires_user_input_ = false;
+      setContentView(R.layout.jact_empty_welcome_screen);
+      Login(username_, password_);
+    }
+  }
+  
+  private void SetLoggingInState(boolean logging_in) {
+    logging_in_ = logging_in;
+    // Only time SetLoggingInState is called when requires_user_input_
+    // is false is when there was an error logging in using the
+    // stored user credentials, e.g. if there is a network issue.
+    // In this case, set the login screen, populated with the stored
+    // username and password.
+    if (!requires_user_input_) {
+      requires_user_input_ = true;
+      setContentView(R.layout.jact_welcome_screen);
+      EditText username_box = (EditText) findViewById(R.id.username_edittext);
+      username_box.setText(username_);
+      EditText password_box = (EditText) findViewById(R.id.jact_password);
+      password_box.setText(password_);
+    }
+    Button login_button = (Button) findViewById(R.id.jact_login_button);
+    login_button.setEnabled(!logging_in_);
+    Button register_button = (Button) findViewById(R.id.jact_register_button);
+    register_button.setEnabled(!logging_in_);
+    TextView forgot_password = (TextView) findViewById(R.id.forgot_password_textview);
+    forgot_password.setEnabled(!logging_in_);
+    EditText username_box = (EditText) findViewById(R.id.username_edittext);
+    username_box.setEnabled(!logging_in_);
+    EditText password_box = (EditText) findViewById(R.id.jact_password);
+    password_box.setEnabled(!logging_in_);
+    ProgressBar spinner = (ProgressBar) findViewById(R.id.login_progress_bar);
+    AlphaAnimation alpha;
+    if (logging_in_) {
+      spinner.setVisibility(View.VISIBLE);
+      alpha = new AlphaAnimation(0.5F, 0.5F);
+    } else {
+      spinner.setVisibility(View.INVISIBLE);
+      alpha = new AlphaAnimation(1.0F, 1.0F);
+    }
+    alpha.setDuration(0); // Make animation instant
+    alpha.setFillAfter(true); // Tell it to persist after the animation ends
+    RelativeLayout layout = (RelativeLayout) findViewById(R.id.login_layout);
+    layout.startAnimation(alpha); // Add animation to the layout.
+  }
+  
+  private void Login(String username, String password) {
+	logging_in_ = true;
+    if (requires_user_input_) SetLoggingInState(true);
+    JSONObject json = new JSONObject();
+    String json_str = "";
+    try {
+      json.put("username", username);
+      json.put("password", password);
+      json_str = json.toString();
+    } catch (JSONException e) {
+      Log.e("PHB ERROR", "JactLoginActivity::Login. Error logging in:\n" + e.getMessage());
+      // TODO(PHB): Implement this.
+    }
+    new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(login_url_, "POST", "", json_str);
+  }
+
+  public void doForgotPassword (View view) {
+	  dialog_ = new JactDialogFragment("'Forgot Password' not yet implemented");
+	  dialog_.show(getSupportFragmentManager(), "Forgot_password_not_yet_ready");
+  }
+  
+  public void doRegisterButtonClick (View view) {
+	  dialog_ = new JactDialogFragment("Sign Up Not Yet Handled");
+	  dialog_.show(getSupportFragmentManager(), "Register_button_not_yet_ready");
+  }
+  
+  public void doDialogOkClick(View view) {
+	  // Close Dialog window.
+	  dialog_.dismiss();
+  }
+  
+  public void doLoginButtonClick(View view) {
+	EditText username = (EditText) findViewById(R.id.username_edittext);
+    EditText password = (EditText) findViewById(R.id.jact_password);
+    Login(username.getText().toString().trim(), password.getText().toString().trim());
+  }
+  
+  public void doLoginScreenClick(View view) {
+    SetLoggingInState(false);
+  }
+  
+  private void StoreUserInfo(SharedPreferences.Editor editor, String user_info) {
+    try {
+      JSONObject response_json = new JSONObject(user_info);
+      editor.putString(getString(R.string.logged_off_key), "true");
+      editor.putString(getString(R.string.ui_session_name), response_json.getString("session_name"));
+      editor.putString(getString(R.string.ui_session_id), response_json.getString("sessid"));
+      editor.putString(getString(R.string.ui_token), response_json.getString("token"));
+      JSONObject user_json = new JSONObject(response_json.getString("user"));
+      editor.putString(getString(R.string.ui_user_id), user_json.getString("uid"));
+      editor.putString(getString(R.string.ui_user_name), user_json.getString("name"));
+      editor.putString(getString(R.string.ui_user_email), user_json.getString("mail"));
+      editor.putString(getString(R.string.ui_signature), user_json.getString("signature"));
+      // Some profiles don't have a picture (field is set to null).
+      if (!user_json.has("picture") || user_json.isNull("picture")) {
+    	editor.putString(getString(R.string.ui_user_icon_url), getString(R.string.null_str));
+      } else {
+        JSONObject picture_info = new JSONObject(user_json.getString("picture"));
+        if (picture_info == null || !picture_info.has("url")) {
+    	    editor.putString(getString(R.string.ui_user_icon_url), getString(R.string.null_str));
+        } else {
+          editor.putString(getString(R.string.ui_user_icon_url), picture_info.getString("url"));
+        }
+      }
+    } catch (JSONException e) {
+    	Log.e("PHB ERROR", "JactLoginActivity::StoreUserInfo. Unable to parse Login JSON:\n" + user_info);
+      // TODO(PHB): Handle exception gracefully.
+    }
+  }
+  
+  @Override
+  public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
+    // First make sure 'state' of activity is 'logging in'. Otherwise, user
+	// interacted with the app before info from server could be fetched. In this case,
+    // do nothing.
+    if (!logging_in_) {
+      return;
+    }
     if (webpage == "") {
       // Handle failed POST
+      SetLoggingInState(false);
+      Log.e("PHB ERROR", "JactLoginActivity.ProcessUrlResponse: Empty webpage.");
       TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
       tv.setVisibility(View.VISIBLE);
     } else {
-      TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
-      tv.setVisibility(View.INVISIBLE);
+      // Log username and password to Private file (only visible to Jact App).
+      // Fetch username/password from the EditText fields, if they were not
+      // already retrieved from Preferences file.
+      if (username_ == null || username_.isEmpty()) {
+    	EditText username_from_edit = (EditText) findViewById(R.id.username_edittext);
+        username_ = username_from_edit.getText().toString().trim();
+      }
+      if (password_ == null || password_.isEmpty()) {
+        EditText password_from_edit = (EditText) findViewById(R.id.jact_password);
+        password_ = password_from_edit.getText().toString().trim();
+      }
+      SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+      SharedPreferences.Editor editor = user_info.edit();
+      editor.putString(getString(R.string.ui_username), username_);
+      editor.putString(getString(R.string.ui_password), password_);
+      editor.putString(getString(R.string.ui_session_cookies), cookies);
+      // Process response for user info, and store to file.
+      StoreUserInfo(editor, webpage);
+      editor.commit();
+      
+      // Go to main logged-in (home) activity.
       Intent logged_in_intent =
         new Intent(JactLoginActivity.this, JactLoggedInHomeActivity.class);
-      logged_in_intent.putExtra("server_login_response", webpage);
-      logged_in_intent.putExtra("session_cookies", cookies);
       startActivity(logged_in_intent);
     }
   }
-/*
-  public void doLoginButtonClick(View view) {
-	String url = "http://us7.jact.com:3080/rest/views/jact_prize_drawings.json";
-    new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(url, "GET");
-  }
 
   @Override
-  public void ProcessUrlResponse(String webpage, String cookies) {
-    if (webpage == "") {
-      // Handle failed POST
-      TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
-      tv.setVisibility(View.VISIBLE);
-    } else {
-      TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
-      tv.setVisibility(View.INVISIBLE);
-      Intent products_activity =
-              new Intent(JactLoginActivity.this, ProductsActivity.class);
-          products_activity.putExtra("server_response", webpage);
-          startActivity(products_activity);
+  public void ProcessUrlResponse(Bitmap pic, String cookies, String extra_params) {
+    // First make sure 'state' of activity is 'logging in'. Otherwise, user
+	// interacted with the app before info from server could be fetched. In this case,
+    // do nothing.
+    if (!logging_in_) {
+      return;
     }
-  }
-*/
-  @Override
-  public void ProcessUrlResponse(Bitmap pic, String cookies) {
-	// TODO Auto-generated method stub
+	SetLoggingInState(false);
   }
 
   @Override
-  public void ProcessFailedResponse(GetUrlTask.FetchStatus status) {
+  public void ProcessFailedResponse(GetUrlTask.FetchStatus status, String extra_params) {
+    // First make sure 'state' of activity is 'logging in'. Otherwise, user
+	// interacted with the app before info from server could be fetched. In this case,
+    // do nothing.
+    if (!logging_in_) {
+      return;
+    }
+	SetLoggingInState(false);
 	// TODO(PHB): Implement this.
-	Log.e("PHB ERROR", "Status: " + status);
+	Log.e("PHB ERROR", "JactLoginActivity.ProcessFailedResponse. Status: " + status);
     // Handle failed POST
     TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
+    tv.setVisibility(View.INVISIBLE);
     tv.setVisibility(View.VISIBLE);
+    if (status == GetUrlTask.FetchStatus.ERROR_403) {
+    	dialog_ = new JactDialogFragment("Wrong Username or Password");
+    	dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog_403");
+    } else {
+      dialog_ = new JactDialogFragment(
+          "Unable to Connect with Jact",
+          "Check internet connection, and try again.");
+      dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
+    }
   }
 }
