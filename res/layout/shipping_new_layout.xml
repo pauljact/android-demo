@@ -4,12 +4,14 @@
     android:id="@+id/shipping_new_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+<include layout="@layout/toolbar_layout"/>
 <!-- The main content view -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/shipping_new_content_frame"
     android:layout_width="wrap_content"
     android:layout_height="fill_parent"
+    android:layout_marginTop="40dp"
     android:background="@drawable/glossy">
     
     <!-- Step Navigation -->
@@ -71,10 +73,15 @@
 		   	    android:textColor="@color/translucent_gray"
     			android:background="@color/transparent"/>
     </LinearLayout>
+    <!-- END: Step Navigation -->
     
+    <!-- New Adress Page Contents -->
+    <ScrollView
+        android:layout_below="@id/shipping_new_navigation_steps"
+  		android:layout_height="match_parent"
+  		android:layout_width="match_parent">
 	<LinearLayout
 	    android:id="@+id/shipping_new_layout"
-        android:layout_below="@id/shipping_new_navigation_steps"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:layout_marginTop="5dp"
@@ -189,13 +196,15 @@
 		    <LinearLayout
 		   	    android:layout_width="0dp"
 		   	    android:layout_weight=".25"
-	   	    	android:layout_height="wrap_content"
+	   	    	android:layout_height="match_parent"
 	    		android:background="@color/transparent"
 	    		android:orientation="horizontal">
 		    <Spinner
     			android:id="@+id/shipping_new_state_spinner"
     			android:dropDownWidth="match_parent"
-		   	    android:layout_marginTop="1dp"
+		   	    android:layout_height="match_parent"
+		   	    android:layout_marginTop="4dp"
+		   	    android:layout_marginBottom="2dp"
 	   	    	android:layout_marginLeft="2dp"
 	   	    	android:layout_marginRight="3dp"
 	   	    	android:popupBackground="@color/white"
@@ -231,6 +240,7 @@
 		   	    android:layout_weight=".40"
 		   	    android:layout_height="40dp"
 		   	    android:layout_marginTop="5dp"
+		   	    android:layout_marginBottom="5dp"
 		   	    android:layout_marginLeft="5dp"
 			   	android:paddingLeft="10dp"
 			   	android:paddingRight="10dp"
@@ -254,6 +264,7 @@
 		   	    android:layout_weight=".40"
 		   	    android:layout_height="40dp"
 		   	    android:layout_marginTop="5dp"
+		   	    android:layout_marginBottom="5dp"
 		   	    android:layout_marginRight="5dp"
 			   	android:paddingLeft="10dp"
 			   	android:paddingRight="10dp"
@@ -264,6 +275,7 @@
 		   	    android:textColor="@color/black"/>
 		</LinearLayout>
 	</LinearLayout>
+	</ScrollView>
 </RelativeLayout>
 
 <!-- Navigation Drawer -->
@@ -273,7 +285,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="#111"
+    android:background="#CC111111"
     android:choiceMode="singleChoice"
     android:divider="@android:color/transparent"
     android:dividerHeight="0dp"

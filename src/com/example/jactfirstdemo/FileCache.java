@@ -33,7 +33,7 @@ public class FileCache {
 			Log.e("PHB ERROR", "FileCache::getFile: UnsupportedEncodingException:\n" +
 			                   e.toString());
 		}
-		if (filename == "PHB_foo") {
+		if (filename.equals("PHB_foo")) {
 		  Log.e("PHB ERROR", "FileCache::getFile: Never reset file name.");
 		}
         File f = new File(cache_dir_, filename);

@@ -1,10 +1,12 @@
 package com.example.jactfirstdemo;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Locale;
 
-import com.example.jactfirstdemo.ShoppingCartActivity.CartItem;
+import com.example.jactfirstdemo.ShoppingUtils.Amount;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,9 +22,9 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public class CheckoutAdapter extends ArrayAdapter<CartItem> implements OnItemSelectedListener {
-	private Activity parent_activity_;
-	private ArrayList<CartItem> items_;
+public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implements OnItemSelectedListener {
+	private ShoppingCartActivity parent_activity_;
+	private ArrayList<ShoppingUtils.LineItem> items_;
 	private static LayoutInflater inflater_;
 	// The relative position (child num) of the PID TextView within its parent LinearLayout.
 	private static final int REL_POS_OF_PID = 4;
@@ -38,7 +40,7 @@ public class CheckoutAdapter extends ArrayAdapter<CartItem> implements OnItemSel
 		  public ImageView img_;
 	}
 	
-	public CheckoutAdapter(Activity a, int resource, ArrayList<CartItem> items) {
+	public CheckoutAdapter(ShoppingCartActivity a, int resource, ArrayList<ShoppingUtils.LineItem> items) {
 		super(a, resource, items);
 		parent_activity_ = a;
 		items_ = items;
@@ -51,7 +53,7 @@ public class CheckoutAdapter extends ArrayAdapter<CartItem> implements OnItemSel
 	}
 
 	@Override
-	public CartItem getItem(int position) {
+	public ShoppingUtils.LineItem getItem(int position) {
 		return items_.get(position);
 	}
 
@@ -75,7 +77,7 @@ public class CheckoutAdapter extends ArrayAdapter<CartItem> implements OnItemSel
             viewHolder.points_ = (TextView) vi.findViewById(R.id.checkout_item_price_two);
             viewHolder.pid_ = (TextView) vi.findViewById(R.id.checkout_item_pid);
             viewHolder.img_ = (ImageView) vi.findViewById(R.id.checkout_image);
-            // Setup Quanity Spinner DropDown.
+            // Setup Quantity Spinner DropDown.
             viewHolder.quantity_ = (Spinner) vi.findViewById(R.id.cart_quantity_spinner);
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
             		parent_activity_, R.array.quantities, R.layout.jact_spinner_item);
@@ -90,38 +92,67 @@ public class CheckoutAdapter extends ArrayAdapter<CartItem> implements OnItemSel
         }
  
         // Sets Text and image fields of this product.
-        CartItem item = items_.get(position);
         CheckoutViewHolder holder = (CheckoutViewHolder) vi.getTag();
+        ShoppingUtils.LineItem item = items_.get(position);
         
         // Sets Product Title.
-        holder.title_.setText(item.product_title_);
+        holder.title_.setText(item.title_);
         
         // Sets Product Price.
-        if (!item.usd_.isEmpty()) {
-        	holder.bux_.setText("$" + item.usd_ + " USD");
-        	holder.price_and_.setVisibility(View.GONE);
-        	holder.points_.setVisibility(View.GONE);
-        } else if (!item.bux_.isEmpty()) {
-        	if (!item.points_.isEmpty()) {
-            	holder.bux_.setText("J" + item.bux_ + " BUX");
-            	holder.price_and_.setVisibility(View.VISIBLE);
-            	holder.points_.setVisibility(View.VISIBLE);
-            	holder.points_.setText(item.points_ + " Points");
-        	} else {
-            	holder.bux_.setText("J" + item.bux_ + " BUX");
-            	holder.price_and_.setVisibility(View.GONE);
-            	holder.points_.setVisibility(View.GONE);
-        	}
-        } else if (!item.points_.isEmpty()) {
-        	holder.bux_.setText(item.points_ + " Points");
-        	holder.price_and_.setVisibility(View.GONE);
-        	holder.points_.setVisibility(View.GONE);
+        if (item.cost_ == null || item.cost_.isEmpty() || item.cost_.size() > 2) {
+          int amount;
+          if (item.cost_ == null || item.cost_.isEmpty()) {
+            amount = 0;
+          } else {
+            amount = item.cost_.size();
+          }
+          Log.e("PHB ERROR", "CheckoutAdapter::getView. Product " + item.title_ +
+        		             " has " + amount + " prices associated it it.");
+          return null;
+        }
+        Iterator<Amount> cost_itr = item.cost_.iterator();
+  	    double bux = -1;
+  	    double points = -1;
+  	    double usd = -1;
+  	    while (cost_itr.hasNext()) {
+  	      Amount amount = cost_itr.next();
+  	      if (amount.type_ == ShoppingUtils.CurrencyCode.BUX) {
+  	        bux = amount.price_;
+  	      } else if (amount.type_ == ShoppingUtils.CurrencyCode.POINTS) {
+    	    points = amount.price_;
+  	      } else if (amount.type_ == ShoppingUtils.CurrencyCode.USD) {
+    	    usd = amount.price_ / 100.0;
+  	      }
+  	    }
+  	    // There are two currency types associated to this view; one of them
+  	    // should be POINTS, the other may be BUX or USD.
+  	    if (item.cost_.size() == 2) {
+          holder.price_and_.setVisibility(View.VISIBLE);
+          holder.points_.setVisibility(View.VISIBLE);
+          holder.points_.setText(NumberFormat.getNumberInstance(Locale.US).format(points) + " Points");
+      	  if (bux >= 0) {
+          	holder.bux_.setText("J" + NumberFormat.getNumberInstance(Locale.US).format(bux) + " BUX");
+    	  } else {
+          	holder.bux_.setText("$" + NumberFormat.getNumberInstance(Locale.US).format(usd) + " USD");
+    	  }
+  	    } else if (usd >= 0) {
+          holder.bux_.setText("$" + NumberFormat.getNumberInstance(Locale.US).format(usd) + " USD");
+          holder.price_and_.setVisibility(View.GONE);
+          holder.points_.setVisibility(View.GONE);
+        } else if (bux >= 0) {
+          holder.bux_.setText("J" + NumberFormat.getNumberInstance(Locale.US).format(bux) + " BUX");
+          holder.price_and_.setVisibility(View.GONE);
+          holder.points_.setVisibility(View.GONE);
+        } else if (points >= 0) {
+          holder.bux_.setText(NumberFormat.getNumberInstance(Locale.US).format(points) + " Points");
+          holder.price_and_.setVisibility(View.GONE);
+          holder.points_.setVisibility(View.GONE);
         } else {
-        	Log.e("PHB ERROR", "CheckoutAdapter::getView. Unable to parse price for item:\n" + item.toString());
+          Log.e("PHB ERROR", "CheckoutAdapter::getView. Unable to parse price for item:\n" + item.toString());
         }
         
         // Sets PID (invisible as a view, used to find product in the Cart).
-        holder.pid_.setText(item.product_id_);
+        holder.pid_.setText(Integer.toString(item.pid_));
         
         // Sets Product Image.
         holder.img_.setImageBitmap(item.product_icon_);
@@ -145,23 +176,61 @@ public class CheckoutAdapter extends ArrayAdapter<CartItem> implements OnItemSel
 		if (parent.getId() == R.id.cart_quantity_spinner) {
 		  LinearLayout holder_ll = (LinearLayout) parent.getParent().getParent();
 		  TextView pid_tv = (TextView) holder_ll.getChildAt(REL_POS_OF_PID);
-		  CartItem item = ShoppingCartActivity.GetCartItem(pid_tv.getText().toString());
+		  ShoppingUtils.LineItem item = ShoppingCartActivity.GetCartItem(pid_tv.getText().toString());
+		  
+		  // Check if the selected position matches the current quantity for this item.
+		  if (item.quantity_ == position) {
+		    Log.i("PHB", "CheckoutAdapter::onItemSelected. Nothing to do, as position selected (" +
+		                 position + ") matches the current quantity for this item: " +
+		    		     ShoppingUtils.PrintLineItemHumanReadable(item));
+		    return;
+		  }
+		  
+		  if (item.quantity_ == 0) {
+		    // This item had been set to quantity zero, which set it for removal from cart,
+		    // but it hadn't be officially removed yet (so that item quantity could still be
+		    // adjusted on Cart page). Now, we need to indicate that it shouldn't be removed,
+		    // since user has now adjusted quantity to non-zero.
+		    ShoppingCartActivity.RemoveItemFromToRemoveList(pid_tv.getText().toString());
+		    // Manually update cart icon, since technically the item has not yet been removed from
+		    // the cart yet.
+		    int current_icon_index = parent_activity_.GetCartIconPos();
+		    Log.e("PHB TEMP", "CheckoutAdapter::onItemSelected. current_icon_index: " + current_icon_index);
+		    if (current_icon_index >= 0) {
+		      ShoppingCartActivity.SetCartIcon(parent_activity_.menu_bar_, current_icon_index + 1);
+		    }
+		    parent_activity_.EnableProceedToCheckoutButton();
+		  }
+		  
 		  item.quantity_ = position;
 		  
 		  // If quantity is zero, tell Shopping Cart to Remove item once it is no longer top activity.
 		  if (position == 0) {
-			  ShoppingCartActivity.AddItemToRemove(pid_tv.getText().toString());
+			ShoppingCartActivity.AddItemToRemove(pid_tv.getText().toString());
+			// Manually update cart icon, since technically the item has not yet been re-added to
+			// the cart yet.
+			int current_icon_index = parent_activity_.GetCartIconPos();
+		    Log.e("PHB TEMP", "CheckoutAdapter::onItemSelected. current_icon_index: " + current_icon_index);
+			if (current_icon_index > 0) {
+			  ShoppingCartActivity.SetCartIcon(parent_activity_.menu_bar_, current_icon_index - 1);
+			}
+			// Disable the "Proceed to checkout button" if setting this quantity to zero resulted in
+			// an empty cart.
+			if (current_icon_index == 1) {
+			  parent_activity_.DisableProceedToCheckoutButton();
+			}
 		  }
 		  
 		  // Set product fading, depending on whether quantity is zero or not.
 		  AlphaAnimation alpha = position == 0 ?
 		      new AlphaAnimation(0.5F, 0.5F) : new AlphaAnimation(1.0F, 1.0F);
-		  // The AlphaAnimation will make the whole content frame transparent
-		  // (so that none of the views show).
+		  // The AlphaAnimation will make the line item transparent/faded.
 		  alpha.setDuration(0); // Make animation instant.
 		  alpha.setFillAfter(true); // Tell it to persist after the animation ends.
 		  RelativeLayout layout = (RelativeLayout) holder_ll.getParent();
 		  layout.startAnimation(alpha); // Add animation to the layout.
+		  
+		  parent_activity_.UpdateLineItem(item);
 		}
 	}
 

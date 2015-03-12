@@ -1,8 +1,16 @@
 package com.example.jactfirstdemo;
 
+import java.net.HttpCookie;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.http.cookie.Cookie;
+
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -12,70 +20,73 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class FaqActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
+public class CheckoutActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   private JactNavigationDrawer navigation_drawer_;
-  private static String url_;
-  private static String title_;
-  
-  public static synchronized void SetUrlAndTitle(String url, String title) {
-    url_ = url;
-    title_ = title;
-  }
+  public static Cookie cookie_ = null;
+  private static int order_id_;
+  private static final String checkout_url_ = "https://us7.jact.com:3081/checkout/";
+  //private static final String checkout_url_ = "http://us7.jact.com:3080/checkout/";
 
+  public static synchronized void SetOrderId(int order_id) {
+    order_id_ = order_id;
+  }
+  
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
     super.onCreate(savedInstanceState);
     num_server_tasks_ = 0;
-    setContentView(R.layout.faq_layout);
+    setContentView(R.layout.checkout_mobile_layout);
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
     TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(R.string.faq_label);
+    ab_title.setText(R.string.checkout_label);
     setSupportActionBar(toolbar);
     getSupportActionBar().setHomeButtonEnabled(true);
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    
-    // Initialize url_ and title_ to dummy values if necessary (they should get re-written
-    // to valid values before they are actually used).
-    if (url_ == null || url_.isEmpty()) {
-      url_ = "https://us7.jact.com:3081/faq-page";
-    }
-    if (title_ == null || title_.isEmpty()) {
-      title_ = "FAQ";
-    }
 
     // Set Navigation Drawer.
     navigation_drawer_ =
         new JactNavigationDrawer(this,
-        		                 findViewById(R.id.faq_drawer_layout),
-        		                 findViewById(R.id.faq_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.FAQ);
+        		                 findViewById(R.id.checkout_mobile_drawer_layout),
+        		                 findViewById(R.id.checkout_mobile_left_drawer),
+        		                 JactNavigationDrawer.ActivityIndex.CHECKOUT_VIA_MOBILE_SITE);
   }
     
   @Override
   protected void onResume() {
 	super.onResume();
-    if (title_.equalsIgnoreCase(getString(R.string.menu_about_jact))) {
-      navigation_drawer_.setActivityIndex(ActivityIndex.ABOUT_JACT);
-    } else if (title_.equalsIgnoreCase(getString(R.string.menu_faq))) {
-      navigation_drawer_.setActivityIndex(ActivityIndex.FAQ);
-    } else if (title_.equalsIgnoreCase(getString(R.string.menu_privacy_policy))) {
-        navigation_drawer_.setActivityIndex(ActivityIndex.PRIVACY_POLICY);
-    } else if (title_.equalsIgnoreCase(getString(R.string.menu_user_agreement))) {
-        navigation_drawer_.setActivityIndex(ActivityIndex.USER_AGREEMENT);
-    } else {
-      Log.e("PHB ERROR", "FaqActivity::onResume. Unrecognized activity: " + title_);
-    }
+    navigation_drawer_.setActivityIndex(ActivityIndex.CHECKOUT_VIA_MOBILE_SITE);
     
-    // Get url, and set webview from it.
-    WebView web_view = (WebView) findViewById(R.id.faq_webview);
-    web_view.loadUrl(url_);
+
+    // Set cookies for WebView.
+	SharedPreferences user_info = getSharedPreferences(
+        getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+    String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+    List<String> cookie_headers = Arrays.asList(cookies.split(GetUrlTask.COOKIES_SEPERATOR));
+    java.net.CookieManager cookie_manager = new java.net.CookieManager();
+    //java.net.CookieManager cookie_manager = java.net.CookieManager.getInstance();
+    for (String cookie : cookie_headers) {
+      cookie_manager.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
+    }
+    //CookieSyncManager.createInstance(this);
+    //CookieManager cookieManager = CookieManager.getInstance();
+    //Cookie session_cookie = cookie_;
+    //if (session_cookie != null) {
+    //	cookieManager.removeSessionCookie();
+    //}
+    // http://stackoverflow.com/questions/1652850/android-webview-cookie-problem
+    // Set webview from checkout_url_.
+    // TODO(PHB): Handle case order_id_ hasn't yet been initialized and/or is '0'.
+    WebView web_view = (WebView) findViewById(R.id.checkout_mobile_webview);
+    web_view.loadUrl(checkout_url_ + Integer.toString(order_id_));
     web_view.setWebViewClient(new WebViewClient() {
     	@Override
     	public void onPageFinished(WebView view, String url) {
@@ -124,7 +135,7 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
 
   @Override
   public void fadeAllViews(boolean should_fade) {
-    ProgressBar spinner = (ProgressBar) findViewById(R.id.faq_progress_bar);
+    ProgressBar spinner = (ProgressBar) findViewById(R.id.checkout_mobile_progress_bar);
     AlphaAnimation alpha;
     if (should_fade) {
       spinner.setVisibility(View.VISIBLE);
@@ -137,13 +148,13 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
     // (so that none of the views show).
     alpha.setDuration(0); // Make animation instant
     alpha.setFillAfter(true); // Tell it to persist after the animation ends
-    RelativeLayout layout = (RelativeLayout) findViewById(R.id.faq_content_frame);
+    RelativeLayout layout = (RelativeLayout) findViewById(R.id.checkout_mobile_content_frame);
     layout.startAnimation(alpha); // Add animation to the layout.
   }
-  
+
   @Override
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
-	ProcessCartResponse(webpage, cookies, extra_params);
+    ProcessCartResponse(webpage, cookies, extra_params);
   }
 
   @Override

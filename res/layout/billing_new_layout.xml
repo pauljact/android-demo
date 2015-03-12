@@ -10,6 +10,7 @@
     android:id="@+id/billing_new_content_frame"
     android:layout_width="wrap_content"
     android:layout_height="fill_parent"
+    android:layout_marginTop="40dp"
     android:background="@drawable/glossy">
     
     <!-- Step Navigation -->
@@ -146,7 +147,7 @@
 	   	    android:layout_centerHorizontal="true"
 	   	    android:layout_marginTop="4dp"
 	   	    android:layout_marginBottom="14dp"
-	        android:visibility="invisible"
+	        android:visibility="gone"
 	    	android:background="@color/transparent"
 	   	/>
 	    <TextView
@@ -274,7 +275,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="#111"
+    android:background="#CC111111"
     android:choiceMode="singleChoice"
     android:divider="@android:color/transparent"
     android:dividerHeight="0dp"

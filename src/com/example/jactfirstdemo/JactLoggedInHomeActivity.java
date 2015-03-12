@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,23 +32,25 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
   static final String BUX_LOGO = "bux_logo";
   static final String USER_POINTS = "user_points";
   
-  //PHB private List<String> cookie_headers_;
   private static String jact_website_ = "https://us7.jact.com:3081/";
+  //private static String jact_website_ = "http://us7.jact.com:3080/";
   private String jact_user_name_;
   private String jact_user_id_;
   private String jact_profile_pic_url_;
   private String jact_user_points_;
-  private int num_server_tasks_;
+  private boolean init_once_;
   
   private JactNavigationDrawer navigation_drawer_;
-  private Menu menu_bar_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     num_server_tasks_ = 0;
+    init_once_ = false;
     // Set layout.
     super.onCreate(savedInstanceState);
     setContentView(R.layout.jact_logged_in_home_screen);
+    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
+    setSupportActionBar(toolbar);
     getSupportActionBar().setHomeButtonEnabled(true);
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -57,11 +60,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
         		                 findViewById(R.id.profile_drawer_layout),
         		                 findViewById(R.id.profile_left_drawer),
         		                 JactNavigationDrawer.ActivityIndex.PROFILE);
-    
-    // Get session cookies.
-    //PHBIntent intent = getIntent();
-    //PHBString cookies_headers_string = intent.getStringExtra("session_cookies");
-    //PHBcookie_headers_ = Arrays.asList(cookies_headers_string.split("_|_"));
   }
   
   @Override
@@ -70,8 +68,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
     SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
     String is_logged_off = user_info.getString(getString(R.string.logged_off_key), "");
     // Logged-In State is not ready. Fetch requisite items.
-    if (num_server_tasks_ != 0 || !is_logged_off.equalsIgnoreCase("false")) {
+    if (!init_once_ || num_server_tasks_ != 0 || !is_logged_off.equalsIgnoreCase("false")) {
       num_server_tasks_ = 0;
+      init_once_ = true;
       
       // Retrieve information that was retrieved from Jact Server on inital login.
       jact_user_name_ = user_info.getString(getString(R.string.ui_user_name), "");
@@ -90,13 +89,14 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
       // Get User Avatar from Jact Server.
       GetAvatar();
     }
-        
-	// Re-enable parent activity before transitioning to the next activity.
-	// This ensures e.g. that when user hits 'back' button, the screen
-	// is 'active' (not faded) when the user returns.
-    fadeAllViews(num_server_tasks_ != 0);
+    
     // Set Cart Icon.
-	ShoppingCartActivity.SetCartIcon(menu_bar_);
+	SetCartIcon(this);
+    
+    // Re-enable parent activity before transitioning to the next activity.
+    // This ensures e.g. that when user hits 'back' button, the screen
+    // is 'active' (not faded) when the user returns.
+    fadeAllViews(num_server_tasks_ != 0);
 	super.onResume();
   }
 
@@ -117,7 +117,12 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
   public boolean onCreateOptionsMenu(Menu menu) {
     // Inflate the menu items for use in the action bar.
     getMenuInflater().inflate(R.menu.action_bar, menu);
+    boolean set_cart_icon = false;
+    if (menu_bar_ == null) set_cart_icon = true;
     menu_bar_ = menu;
+    if (set_cart_icon) {
+      SetCartIcon(this);
+    }
 	ShoppingCartActivity.SetCartIcon(menu_bar_);
     return super.onCreateOptionsMenu(menu);
   }
@@ -234,13 +239,24 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
     		             "must specify desired action via extra_params");
     } else if (extra_params.equalsIgnoreCase(USER_POINTS)) {
     	SetUserPoints(webpage);
-    } else {
+    } else if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK) == 0) {
+  	  SaveCookies(cookies);
+  	  GetCart();
+  	} else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
+  	  if (!ShoppingCartActivity.SetShoppingCartFromGetCartStatic(webpage)) {
+  		// TODO(PHB): Handle this gracefully (popup a dialog).
+  		Log.e("PHB ERROR", "JactActionBarActivity::ProcessCartResponse. Unable to parse cart response:\n" + webpage);
+  	  }
+  	} else {
       Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: Unrecognized extra params: " + extra_params);
     }
     num_server_tasks_--;
 	if (num_server_tasks_ == 0) {
-		SetLoginTrue();
-		fadeAllViews(false);
+	  SetLoginTrue();
+	  SetCartIcon(this);
+	  if (num_server_tasks_ == 0) {
+	    fadeAllViews(false);
+	  }
 	}
   }
   
@@ -254,13 +270,16 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
     	SetUserPointsPic(pic);
     } else if (extra_params == PROFILE_PIC) {
     	SetProfilePic(pic);
-    } else {
+  	} else {
         Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: Unrecognized extra params: " + extra_params);
     }
     num_server_tasks_--;
 	if (num_server_tasks_ == 0) {
-	  fadeAllViews(false);
 	  SetLoginTrue();
+	  SetCartIcon(this);
+	  if (num_server_tasks_ == 0) {
+	    fadeAllViews(false);
+	  }
 	}
   }
 
@@ -268,6 +287,10 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
 	// TODO(PHB): Implement this.
 	Log.e("PHB ERROR", "JLIHA::ProcessFailedResponse. Status: " + status);
+    if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
+  	  GetCookiesThenGetCart();
+  	  return;
+    }
 	num_server_tasks_--;
 	if (num_server_tasks_ == 0) {
 	  fadeAllViews(false);

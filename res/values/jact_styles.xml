@@ -1,7 +1,8 @@
 <resources>
     <style name="EmptyStyle"> </style>
     
-    <style name="JactBaseTheme" parent="@style/Theme.AppCompat.Light">
+    <!-- <style name="JactBaseTheme" parent="@style/Theme.AppCompat.Light"> -->
+    <style name="JactBaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <!-- Support library compatibility elements appear below the originals,
              with the 'android:' prefix removed (necessary for AppCompat themes) -->
         <!-- <item name="android:accountPreferences">jact_preferences.xml</item> -->
@@ -21,7 +22,7 @@
         
         <!-- Action Bar Settings -->
 		<!-- <item name="android:actionBarStyle">@style/JactActionBar</item> -->
-		<!-- <item name="actionBarStyle">@style/JactActionBar</item> -->
+		<!--<item name="actionBarStyle">@style/JactActionBar</item>-->
         <!-- <item name="actionBarItemBackground">@drawable/selectable_background_example</item>
 		<item name="popupMenuStyle">@style/PopupMenu.Example</item>
 		<item name="dropDownListViewStyle">@style/DropDownListView.Example</item>
@@ -35,8 +36,8 @@
     
 	<style name="JactActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">  
         <!-- <item name="background">@color/light_blue</item>-->
-        <!-- <item name="background">@color/orange</item> -->
-        <item name="background">@drawable/ab_solid_example</item> 
+        <item name="background">@color/orange</item>
+        <!-- <item name="background">@drawable/ab_solid_example</item> --> 
     </style>
     
     <style name="JactPopupMenu" parent="@style/Widget.AppCompat.PopupMenu">

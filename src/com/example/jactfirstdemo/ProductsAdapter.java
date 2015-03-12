@@ -2,11 +2,9 @@ package com.example.jactfirstdemo;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
  
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
  
@@ -148,15 +145,20 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         if (!usd.isEmpty()) {
         	// Only products that sell for USD should be Jact BUX, and these should
         	// NOT have a combined price in BUX nor Points.
-        	if (!bux.isEmpty() || !points.isEmpty()) {
+        	if (!bux.isEmpty()) {
         		Log.e("PHB ERROR", "ProductsAdapter::getView. Product has both USD and BUX:\n" + product.toString());
+        	} else if (!points.isEmpty()) {
+        		// Product has a combination of Points and USD.
+        		holder.bux_.setText("$" + NumberFormat.getNumberInstance(Locale.US).format(Double.parseDouble(usd)) + " USD");
+        		holder.points_.setText(NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(points)) + " Points");
+        		holder.points_.setVisibility(View.VISIBLE);
+        		holder.price_and_.setVisibility(View.VISIBLE);
         	} else {
-        		holder.bux_.setText("$" + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(usd)) + " USD");
+        		holder.bux_.setText("$" + NumberFormat.getNumberInstance(Locale.US).format(Double.parseDouble(usd)) + " USD");
         		holder.points_.setVisibility(View.INVISIBLE);
         		holder.price_and_.setVisibility(View.INVISIBLE);
         	}
-        }
-        if (!bux.isEmpty()) {
+        } else if (!bux.isEmpty()) {
         	if (!points.isEmpty()) {
         		// Product has a combination of Points and BUX.
         		holder.bux_.setText("J" + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(bux)) + " BUX");

@@ -1,7 +1,6 @@
 package com.example.jactfirstdemo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,7 +26,19 @@ public class ProductsPageParser {
     public String usd_;
     public String points_;
     public ArrayList<String> types_;
-  }  
+    
+    public String toString() {
+    	String types = "";
+    	for (String type : types_) {
+    		types += type + ", ";
+    	}
+    	return "NID: " + nid_ + ", title: " + title_ + ", pid: " + pid_ + ", node_type: " +
+               node_type_ + ", date: " + date_ + ", sku: " + sku_ + ", image_url_: " +
+    		   img_url_ + ", drawing url: " + drawing_url_ + ", bux: " + bux_ +
+    		   ", usd: " + usd_ + ", points: " + points_ + ", types: " + types;
+    }
+  }
+  
   // Website node keys.
   static final String WEBSITE_NID = "nid";
   static final String WEBSITE_TITLE = "node_title";
@@ -116,22 +127,11 @@ public class ProductsPageParser {
 	  return;
 	}
 	try {
-	  /* Currently, when Promote tag is present, it is a JSONObject; but when it is absent,
-	     it is an empty JSONArray. Contrast this to e.g. Points Price, which is a JSONObject
-	     whether or not it is empty. The below code parses the empty Promote Tag case, but
-	     throws an exception (... JSONObject cannot be converted to JSONArray...) when
-	     Promote Tag is non-empty. Instead, we comment out this code, and handle the case
-	     when promote tag is non-empty, which throws the opposite exception when it is
-	     empty; which is fine, since we don't want to do anything in this case anyway.
-	     But should update server code to make empty Promote Tag still be a JSONObject,
-	     e.g. just as PointsPrice is.
-	  JSONArray promote = new JSONArray(node.getString(WEBSITE_PROMOTE));
-	  if (promote.length() == 0) {
-	    map.put(PRODUCT_PROMOTE_KEY, "false");
-	    Log.e("PHB", "ProductsPageParse::ParseRewardsPromote. Empty Promote tag:\n" + promote.toString());
-	    return;
-	  }
-	  */
+	  // When Promote tag is present, it is a JSONObject; but when it is absent,
+	  // it is an empty JSONArray. This is true of most other fields as well, which
+	  // makes handling them annoying...I should probably templatize the try/catch,
+	  // when I have time for refactoring...
+	  // TODO(PHB): Refactor the try/catch to a generic function.
 	  JSONObject promote = new JSONObject(node.getString(WEBSITE_PROMOTE));
 	  if (promote == null || promote.length() == 0) {
 		  item.promote_ = false;
@@ -146,15 +146,44 @@ public class ProductsPageParser {
 		  item.promote_ = true;
 	  } else {
 		  item.promote_ = false;
-        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Unrecognize Promote->Value tag: " + value);
+          Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Unrecognize Promote->Value tag: " + value);
 	  }
 	} catch (JSONException e) {
-		  item.promote_ = false;
-	  Log.w("PHB WARNING", "ProductsPageParse::ParseRewardsPromote. JSONException for Promote tag\n" +
-	                       node.toString() + "\nException: " + e.getMessage());
-      // TODO(PHB): Handle exception gracefully.
+	  try {
+		JSONArray promote_array = new JSONArray(node.getString(WEBSITE_PROMOTE));
+		if (promote_array.length() == 1) {
+		  JSONObject promote_ob = promote_array.getJSONObject(0);
+		  String promote_value = promote_ob.getString(WEBSITE_VALUE);
+		  if (!promote_value.isEmpty()) {
+		    if (promote_value.isEmpty()) {
+			  item.promote_ = false;
+		    } else if (promote_value.equalsIgnoreCase("0")) {
+			  item.promote_ = false;
+		    } else if (promote_value.equalsIgnoreCase("1")) {
+			  item.promote_ = true;
+		    } else {
+			  item.promote_ = false;
+	          Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Unrecognize Promote->Value tag: " +
+	        		             promote_value);
+		    }
+		  } else {
+	        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Empty Promote->Value tag");
+		  }
+		} else if (promote_array.length() == 0) {
+		  // Nothing to do; no promote tag present.
+		} else {
+		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Promote array " +
+				             "should have size at most one, but found: " + promote_array.length()); 
+		}
+	  } catch (JSONException ex) {
+		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Failed to parse " +
+	                         "Drawing_Ends tag as both a JSONObject and JSONArray.\n" +
+                             node.toString() + "\nException: " + ex.getMessage());
+        // TODO(PHB): Handle exception gracefully.
+	  }
     }
   }
+  
   static private void ParseRewardsDrawingDate(JSONObject node, ProductItem item) {
     if (!node.has(WEBSITE_DRAWING_DATE) || node.isNull(WEBSITE_DRAWING_DATE)) {
 	  return;
@@ -168,9 +197,28 @@ public class ProductsPageParser {
         Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Empty Drawing Date->Value tag");
 	  }
 	} catch (JSONException e) {
-	  Log.w("PHB WARNING", "ProductsPageParse::ParseRewardsDrawingDate. JSONException for Drawing_Ends tag\n" +
-	                       node.toString() + "\nException: " + e.getMessage());
-      // TODO(PHB): Handle exception gracefully.
+	  try {
+		JSONArray date_array = new JSONArray(node.getString(WEBSITE_DRAWING_DATE));
+		if (date_array.length() == 1) {
+		  JSONObject date_ob = date_array.getJSONObject(0);
+		  String date_value = date_ob.getString(WEBSITE_VALUE);
+		  if (!date_value.isEmpty()) {
+		    item.date_ = date_value;
+		  } else {
+	        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Empty Drawing Date->Value tag");
+		  }
+		} else if (date_array.length() == 0) {
+		  // Nothing to do; no drawing_date present.
+		} else {
+		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Drawing Date array " +
+				             "should have size at most one, but found: " + date_array.length()); 
+		}
+	  } catch (JSONException ex) {
+		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Failed to parse " +
+	                         "Drawing_Ends tag as both a JSONObject and JSONArray.\n" +
+                             node.toString() + "\nException: " + ex.getMessage());
+        // TODO(PHB): Handle exception gracefully.
+	  }
     }
   }
   
@@ -195,7 +243,7 @@ public class ProductsPageParser {
         return;
 	  }
 	  String image_url = value.substring(9);  // 9 is the length of prefix "public://" that should be removed.
-	  item.img_url_ = jact_icons_website_ + image_url;
+	  item.img_url_ = jact_icons_website_ + image_url.replace(" ", "%20");  // Replace whitespace in url with %20.
 	} catch (JSONException e) {
       Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsImage. Unable to parse Image tag:\n" + node.toString());
       // TODO(PHB): Handle exception gracefully.
@@ -232,12 +280,7 @@ public class ProductsPageParser {
 	      item.bux_ = amount;
 	    }
 	  } else if (currency.equalsIgnoreCase("USD")) {
-	    if (amount.substring(amount.length() - 2).equalsIgnoreCase("00")) {
-	      item.usd_ = amount.substring(0, amount.length() - 2);
-	    } else {
-	      Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsPrice. USD should be divisible by 100: " + amount);
-	      item.usd_ = amount;
-	    }
+	    item.usd_ = amount.substring(0, amount.length() - 2) + "." + amount.substring(amount.length() - 2);
 	  } else {
 	    item.points_ = amount;
 	  }
@@ -249,7 +292,7 @@ public class ProductsPageParser {
   
   static private void ParseRewardsPointPrice(JSONObject node, ProductItem item) {
 	if (!node.has(WEBSITE_POINT_PRICE) || node.isNull(WEBSITE_POINT_PRICE)) {
-		Log.e("PHB", "ProductsPageParse::ParseRewardsPointPrice. No Point Price found");
+		Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointPrice. No Point Price found");
 	  return;
 	}
 	try {
@@ -265,8 +308,28 @@ public class ProductsPageParser {
 		}
 	  }
 	} catch (JSONException e) {
-      Log.w("PHB WARNING", "ProductsPageParse::ParseRewardsPointPrice. Unable to parse Point Price tag:\n" + node.toString());
-      // TODO(PHB): Handle exception gracefully.
+	  try {
+		JSONArray promote_array = new JSONArray(node.getString(WEBSITE_POINT_PRICE));
+		if (promote_array.length() == 1) {
+		  JSONObject promote_ob = promote_array.getJSONObject(0);
+		  String promote_value = promote_ob.getString(WEBSITE_VALUE);
+		  if (!promote_value.isEmpty()) {
+		   item.points_ = promote_value;
+		  } else {
+		   Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointPrice. Empty Drawing Date->Value tag");
+		  }
+		} else if (promote_array.length() == 0) {
+		  // Nothing to do; no drawing_date present.
+		} else {
+		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointsPrice. Points Price array " +
+				             "should have size at most one, but found: " + promote_array.length());
+		}
+	  } catch (JSONException ex) {
+		Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Failed to parse " +
+                           "Drawing_Ends tag as both a JSONObject and JSONArray.\n" +
+                           node.toString() + "\nException: " + ex.getMessage());
+        // TODO(PHB): Handle exception gracefully.
+	  }
     }
   }
   

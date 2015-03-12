@@ -42,7 +42,7 @@ public class JactComparators {
 	  String am_pm = "";
 	  if (length > 10) {
 		  am_pm = date.substring(length - 2, length);
-		  if (am_pm != "am" && am_pm != "pm") {
+		  if (!am_pm.equals("am") && !am_pm.equals("pm")) {
 			  Log.e("PHB", "JactComparators::ParseDate. Unknown trailing two characters in :" + date);
 			  return false;
 		  }
@@ -58,7 +58,7 @@ public class JactComparators {
 		  holder.month_ = Integer.parseInt(month_str);
 		  holder.year_ = Integer.parseInt(year_str);
 		  if (!am_pm.isEmpty()) {
-			  holder.am_ = am_pm == "am";
+			  holder.am_ = am_pm.equals("am");
 			  holder.hour_ = Integer.parseInt(hour_str);
 			  holder.min_ = Integer.parseInt(min_str);
 		  }

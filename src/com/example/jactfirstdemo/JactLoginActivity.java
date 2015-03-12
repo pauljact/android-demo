@@ -1,5 +1,7 @@
 package com.example.jactfirstdemo;
 
+import java.util.ArrayList;
+
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,6 +26,7 @@ import com.example.jactfirstdemo.R;
 public class JactLoginActivity extends FragmentActivity implements ProcessUrlResponseCallback {
   private static final String COOKIES_HEADER = "Set-Cookie";
   private static final String login_url_ = "https://us7.jact.com:3081/rest/user/login";
+  //private static final String login_url_ = "http://us7.jact.com:3080/rest/user/login";
   private String username_;
   private String password_;
   private boolean logging_in_;
@@ -114,27 +117,25 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   private void Login(String username, String password) {
 	logging_in_ = true;
     if (requires_user_input_) SetLoggingInState(true);
-    JSONObject json = new JSONObject();
-    String json_str = "";
-    try {
-      json.put("username", username);
-      json.put("password", password);
-      json_str = json.toString();
-    } catch (JSONException e) {
-      Log.e("PHB ERROR", "JactLoginActivity::Login. Error logging in:\n" + e.getMessage());
-      // TODO(PHB): Implement this.
-    }
-    new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(login_url_, "POST", "", json_str);
+    GetUrlTask task = new GetUrlTask(this, GetUrlTask.TargetType.JSON);
+	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
+	params.url_ = login_url_;
+	params.connection_type_ = "POST";
+  	ArrayList<String> header_info = new ArrayList<String>();
+    header_info.add(GetUrlTask.CreateHeaderInfo("Content-Type", "application/json"));
+    ArrayList<String> form_info = new ArrayList<String>();
+	form_info.add(GetUrlTask.CreateFormInfo("username", username));
+	form_info.add(GetUrlTask.CreateFormInfo("password", password));
+  	params.post_string_ = GetUrlTask.CreatePostString(header_info, form_info);
+	task.execute(params);
   }
 
   public void doForgotPassword (View view) {
-	  dialog_ = new JactDialogFragment("'Forgot Password' not yet implemented");
-	  dialog_.show(getSupportFragmentManager(), "Forgot_password_not_yet_ready");
+	  startActivity(new Intent(this, ForgotPasswordActivity.class));
   }
   
   public void doRegisterButtonClick (View view) {
-	  dialog_ = new JactDialogFragment("Sign Up Not Yet Handled");
-	  dialog_.show(getSupportFragmentManager(), "Register_button_not_yet_ready");
+	  startActivity(new Intent(this, NewUserActivity.class));
   }
   
   public void doDialogOkClick(View view) {
@@ -189,7 +190,7 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     if (!logging_in_) {
       return;
     }
-    if (webpage == "") {
+    if (webpage.equals("")) {
       // Handle failed POST
       SetLoggingInState(false);
       Log.e("PHB ERROR", "JactLoginActivity.ProcessUrlResponse: Empty webpage.");
@@ -243,18 +244,17 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       return;
     }
 	SetLoggingInState(false);
-	// TODO(PHB): Implement this.
 	Log.e("PHB ERROR", "JactLoginActivity.ProcessFailedResponse. Status: " + status);
     // Handle failed POST
-    TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
-    tv.setVisibility(View.INVISIBLE);
-    tv.setVisibility(View.VISIBLE);
     if (status == GetUrlTask.FetchStatus.ERROR_403) {
     	dialog_ = new JactDialogFragment("Wrong Username or Password");
     	dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog_403");
+        TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
+        tv.setVisibility(View.INVISIBLE);
+        tv.setVisibility(View.VISIBLE);
     } else {
       dialog_ = new JactDialogFragment(
-          "Unable to Connect with Jact",
+          "Unable to Reach Jact",
           "Check internet connection, and try again.");
       dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
     }

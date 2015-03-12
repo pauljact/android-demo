@@ -4,12 +4,14 @@
     android:id="@+id/credit_card_new_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+<include layout="@layout/toolbar_layout"/>
 <!-- The main content view -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/credit_card_new_content_frame"
     android:layout_width="wrap_content"
     android:layout_height="fill_parent"
+    android:layout_marginTop="40dp"
     android:background="@drawable/glossy">
     
     <!-- Step Navigation -->
@@ -72,9 +74,12 @@
     			android:background="@color/transparent"/>
     </LinearLayout>
     
+    <ScrollView
+        android:layout_below="@id/credit_card_new_navigation_steps"
+  		android:layout_height="match_parent"
+  		android:layout_width="match_parent">
 	<LinearLayout
 	    android:id="@+id/credit_card_new_layout"
-        android:layout_below="@id/credit_card_new_navigation_steps"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:layout_marginTop="5dp"
@@ -143,10 +148,9 @@
 	   	    style="?android:attr/progressBarStyleLarge"
 	   	    android:layout_width="wrap_content"
 	   	    android:layout_height="wrap_content"
-	   	    android:layout_centerHorizontal="true"
 	   	    android:layout_marginTop="4dp"
 	   	    android:layout_marginBottom="14dp"
-	        android:visibility="invisible"
+	        android:visibility="gone"
 	    	android:background="@color/transparent"
 	   	/>
 	    <TextView
@@ -160,7 +164,7 @@
 	   	    android:textStyle="bold"
 	  		android:background="@color/transparent"/>
 	    <LinearLayout
-	   	    android:layout_width="match_parent"
+	   	    android:layout_width="wrap_content"
    	    	android:layout_height="wrap_content"
     		android:background="@color/transparent"
     		android:orientation="horizontal">
@@ -256,6 +260,16 @@
 	   	    android:textSize="16sp"
 	   	    android:textStyle="bold"
 	  		android:background="@color/transparent"/>
+	    <!-- Same Address as Shipping Checkbox -->
+		<CheckBox
+		    android:id="@+id/credit_card_use_same_as_shipping_cb"
+	   	    android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:gravity="left"
+		    android:layout_marginRight="2dp"
+		    android:onClick="onSameAsShippingAddrCheckboxClicked"
+		    android:paddingTop="5dp"	    
+	        android:text="@string/billing_use_same_addr_str"/>
 	    <EditText
 	   	    android:id="@+id/credit_card_new_street_et"
 	   	    android:layout_width="match_parent"
@@ -360,6 +374,7 @@
 		   	    android:textColor="@color/black"/>
 		</LinearLayout>
 	</LinearLayout>
+	</ScrollView>
 </RelativeLayout>
 
 <!-- Navigation Drawer -->
@@ -369,7 +384,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="#111"
+    android:background="#CC111111"
     android:choiceMode="singleChoice"
     android:divider="@android:color/transparent"
     android:dividerHeight="0dp"

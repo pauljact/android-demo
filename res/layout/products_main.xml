@@ -4,11 +4,13 @@
     android:id="@+id/products_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+<include layout="@layout/toolbar_layout"/>
 <!-- The main content view -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/products_content_frame"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:layout_marginTop="50dp"
     android:orientation="vertical">
     
     <!-- Filter Bar (e.g. by Product Category, Product Type) -->
@@ -252,13 +254,13 @@
 <!-- Navigation Drawer -->
 <ListView
     android:id="@+id/products_left_drawer"
-    android:layout_width="240dp"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:choiceMode="singleChoice"
     android:divider="@android:color/transparent"
     android:dividerHeight="0dp"
-    android:background="#111"
+    android:background="#CC111111"
     android:listSelector="@drawable/drawer_bg_selector"
 />
 </android.support.v4.widget.DrawerLayout>

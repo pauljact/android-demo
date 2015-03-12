@@ -6,7 +6,12 @@
     <string name="shipping_label">Checkout: Shipping</string>
     <string name="review_label">Checkout: Review</string>
     <string name="faq_label">FAQ</string>
+    <string name="earn_label">Earn</string>
     <string name="games_label">Games</string>
+    <string name="community_label">Community</string>
+    <string name="forgot_password_label">Send Password</string>
+    <string name="new_user_label">Registration</string>
+    <string name="checkout_label">Checkout</string>
     <string name="rewards_label">Rewards</string>
     <string name="jact_logged_in_home_activity_label">Jact - Play With Purpose</string>
     <!-- EnD Activity Labels -->
@@ -16,6 +21,10 @@
     <string name="webview_url_key">webview_url_key</string>
     <string name="webview_title_key">webview_title_key</string>
     <!-- End SharedPreferences Keys -->
+    
+    <!-- XML Keys -->
+    <string name="nav_drawer_width">320dp</string>
+    <!-- END XML Keys -->
     
     <!-- Menu Options -->
     <string name="menu_games">Games</string>
@@ -37,6 +46,7 @@
     <string name="ui_username">username</string>
     <string name="ui_password">password</string>
     <string name="ui_session_cookies">session_cookies</string>
+    <string name="ui_csrf_token">csrf_token</string>
     <string name="ui_session_name">session_name</string>
     <string name="ui_session_id">session_id</string>
     <string name="ui_token">token</string>
@@ -61,14 +71,14 @@
     <string name="next_str">Next</string>
     <string name="prev_str">Previous</string>
     <string name="proceed_to_billing">Proceed to Billing</string>
-    <string name="proceed_to_shipping">Proceed to Shipping</string>
+    <string name="proceed_to_shipping">Proceed to Checkout</string>
     <string name="proceed_to_final_review">Review and Submit</string>
     <!-- End Checkout -->
     
     <!-- Address and Billing Terms -->
-    <string name="addr_title_str">Select From a Saved Address:</string>
-    <string name="cc_title_str">Select From a Saved Credit Card:</string>
-    <string name="billing_use_same_addr_str">Use Same Address as Shipping:</string>
+    <string name="addr_title_str">Or Select From a Saved Address:</string>
+    <string name="cc_title_str">Or Select From a Saved Credit Card:</string>
+    <string name="billing_use_same_addr_str">Use Same Address as Shipping</string>
     <string name="new_addr_shipping_str">Add New Shipping Address</string>
     <string name="new_addr_billing_str">Add New Billing Address</string>
     <string name="new_cc_str">Add New Credit Card</string>
@@ -123,9 +133,53 @@
 	</string-array>
 	<!-- End Quantity 0-10 -->
 	
+	<!-- Credit Card Types -->
+	<string-array name="cc_types_array">
+	    <item>Card Type</item>
+	    <item>Visa</item>
+	    <item>MasterCard</item>
+	    <item>AmEx</item>
+	</string-array>
+	<!-- END: Credit Card Types -->
+	
+	<!-- Months -->
+	<string-array name="months_array">
+	    <item>Month</item>
+	    <item>01</item>
+	    <item>02</item>
+	    <item>03</item>
+	    <item>04</item>
+	    <item>05</item>
+	    <item>06</item>
+	    <item>07</item>
+	    <item>08</item>
+	    <item>09</item>
+	    <item>10</item>
+	    <item>11</item>
+	    <item>12</item>
+	</string-array>
+	<!-- END: Months -->
+	
+	<!-- Years -->
+	<string-array name="years_array">
+	    <item>Year</item>
+	    <item>2015</item>
+	    <item>2016</item>
+	    <item>2017</item>
+	    <item>2018</item>
+	    <item>2019</item>
+	    <item>2020</item>
+	    <item>2021</item>
+	    <item>2022</item>
+	    <item>2023</item>
+	    <item>2024</item>
+	    <item>2025</item>
+	</string-array>
+	<!-- END: Years -->
+	
     <!-- States -->
     <string-array name="states">
-      <item>--</item>
+      <item>State</item>
 	  <item>AK</item>
 	  <item>AL</item>
 	  <item>AR</item>

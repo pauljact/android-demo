@@ -3,30 +3,48 @@ package com.example.jactfirstdemo;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
-import com.example.jactfirstdemo.ShoppingCartActivity.CartItem;
-import com.example.jactfirstdemo.ShoppingCartActivity.JactAddress;
+import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.widget.CheckBox;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-public class ShippingActivity extends JactActionBarActivity {
+public class ShippingActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   private JactNavigationDrawer navigation_drawer_;
+  private ListView list_;
+  private ArrayList<ShoppingCartActivity.JactAddress> addresses_;
+  private AddressAdapter adapter_;
+  private JactDialogFragment dialog_;
+  private int num_checked_addresses_;
+  private int selected_address_position_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
     super.onCreate(savedInstanceState);
+    num_server_tasks_ = 0;
     setContentView(R.layout.shipping_layout);
+    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
+    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
+    ab_title.setText(R.string.shipping_label);
+    setSupportActionBar(toolbar);
     getSupportActionBar().setHomeButtonEnabled(true);
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    
+    addresses_ = new ArrayList<ShoppingCartActivity.JactAddress>();
+    list_ = (ListView) findViewById(R.id.shipping_list);
 
     // Set Navigation Drawer.
     navigation_drawer_ =
@@ -38,6 +56,13 @@ public class ShippingActivity extends JactActionBarActivity {
     
   @Override
   protected void onResume() {
+	num_checked_addresses_ = 0;
+	selected_address_position_ = -1;
+    addresses_ = GetAddresses();
+	adapter_ = new AddressAdapter(this, R.layout.address_item, addresses_);
+	list_.setAdapter(adapter_);
+	SetCartIcon(this);
+	fadeAllViews(num_server_tasks_ > 0);
 	super.onResume();
   }
   
@@ -58,6 +83,12 @@ public class ShippingActivity extends JactActionBarActivity {
   public boolean onCreateOptionsMenu(Menu menu) {
     // Inflate the menu items for use in the action bar.
     getMenuInflater().inflate(R.menu.action_bar, menu);
+    boolean set_cart_icon = false;
+    if (menu_bar_ == null) set_cart_icon = true;
+    menu_bar_ = menu;
+    if (set_cart_icon) {
+      SetCartIcon(this);
+    }
 	ShoppingCartActivity.SetCartIcon(menu);
     return super.onCreateOptionsMenu(menu);
   }
@@ -78,7 +109,7 @@ public class ShippingActivity extends JactActionBarActivity {
       spinner.setVisibility(View.VISIBLE);
       alpha = new AlphaAnimation(0.5F, 0.5F);
     } else {
-      spinner.setVisibility(View.INVISIBLE);
+      spinner.setVisibility(View.GONE);
       alpha = new AlphaAnimation(1.0F, 1.0F);
     }
     // The AlphaAnimation will make the whole content frame transparent
@@ -87,6 +118,66 @@ public class ShippingActivity extends JactActionBarActivity {
     alpha.setFillAfter(true); // Tell it to persist after the animation ends
     RelativeLayout layout = (RelativeLayout) findViewById(R.id.shipping_content_frame);
     layout.startAnimation(alpha); // Add animation to the layout.
+  }
+  
+  public void doDialogOkClick(View view) {
+	// Close Dialog window.
+	dialog_.dismiss();
+  }
+  
+  public void doShippingAddNewAddressButtonClick(View view) {
+    fadeAllViews(true);
+	startActivity(new Intent(this, ShippingNewActivity.class));
+  }
+  
+  public void doShippingPrevButtonClick(View view) {
+    fadeAllViews(true);
+	startActivity(new Intent(this, ShoppingCartActivity.class));
+  }
+  
+  public void doShippingNextButtonClick(View view) {
+    if (num_checked_addresses_ == 1 && selected_address_position_ >= 0 &&
+    	addresses_.size() > selected_address_position_) {
+      fadeAllViews(true);
+      ShoppingCartActivity.SetShippingAddress(addresses_.get(selected_address_position_));
+	  if (BillingActivity.GetNumBillingAddresses() > 0) {
+	    startActivity(new Intent(this, BillingActivity.class));
+	  } else {
+	    startActivity(new Intent(this, BillingNewActivity.class));
+	  }
+    } else if (num_checked_addresses_ == 0 ){
+	  dialog_ = new JactDialogFragment("Missing Shipping Address", "Select an Address From the List, or Add a New One");
+	  dialog_.show(getSupportFragmentManager(), "no_shipping_addr_selected");
+    } else if (num_checked_addresses_ > 1) {
+  	  dialog_ = new JactDialogFragment("Too Many Shipping Addresses", "Select At Most One From the List, or Add a New One");
+  	  dialog_.show(getSupportFragmentManager(), "too_many_shipping_addr_selected");
+    } else {
+      Log.e("PHB ERROR", "ShippingActivity::doShippingNextButtonClick. Unexpected value for num_checked_addresses_: " +
+                         num_checked_addresses_ + ", selected_address_position_: " + selected_address_position_);
+    }
+  }
+  
+  public void onAddressItemCheckboxClicked(View view) {
+    if (view.getTag() != null) {
+      try {
+        CheckBox cb = (CheckBox) view;
+        AddressAdapter.CheckBoxPosition pos = (AddressAdapter.CheckBoxPosition) cb.getTag();
+        selected_address_position_ = pos.position_;
+        if (cb.isChecked()) {
+          num_checked_addresses_++;
+        } else {
+          num_checked_addresses_--;
+        }
+      } catch (ClassCastException e) {
+        Log.e("PHB ERROR", "ShippingActivity::onAddressItemCheckboxClicked. Unexpected click on view:\n" + view.toString());
+      }
+    }
+  }
+  
+  public void doAddressItemDeleteAddressClick(View view) {
+    // TODO(PHB): Implement this.
+	dialog_ = new JactDialogFragment("Remove Address Not Implemented Yet");
+	dialog_.show(getSupportFragmentManager(), "remove_addr_not_yet_implemented");
   }
   
   public static void WriteAddresses(ArrayList<ShoppingCartActivity.JactAddress> addresses) {
@@ -98,5 +189,43 @@ public class ShippingActivity extends JactActionBarActivity {
   }
   
   public static void WriteAddress(ShoppingCartActivity.JactAddress address) {
+  }
+  
+  public static ArrayList<ShoppingCartActivity.JactAddress> GetAddresses() {
+	  // TODO(PHB): Get addresses from website, then write them to file and return them here.
+	  ArrayList<ShoppingCartActivity.JactAddress> addresses = new ArrayList<ShoppingCartActivity.JactAddress>();
+	  ShoppingCartActivity.JactAddress address = new ShoppingCartActivity.JactAddress();
+	  address.city_ = "los angeles";
+	  address.state_ = "CA";
+	  address.first_name_ = "Paul";
+	  address.last_name_ = "Bunn";
+	  address.street_addr_ = "1234 Main Street";
+	  address.zip_ = "90025";
+	  addresses.add(address);
+	  
+	  ShoppingCartActivity.JactAddress address2 = new ShoppingCartActivity.JactAddress();
+	  address2.first_name_ = "Paul";
+	  address2.last_name_ = "Bunn";
+	  address2.street_addr_ = "007 Baker Street";
+	  address2.city_ = "Washington";
+	  address2.state_ = "DC";
+	  address2.zip_ = "00001";
+	  addresses.add(address2);
+	  return addresses;
+  }
+  
+  @Override
+  public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
+	ProcessCartResponse(webpage, cookies, extra_params);
+  }
+
+  @Override
+  public void ProcessUrlResponse(Bitmap pic, String cookies, String extra_params) {
+	// TODO Auto-generated method stub
+  }
+
+  @Override
+  public void ProcessFailedResponse(FetchStatus status, String extra_params) {
+	ProcessFailedCartResponse(status, extra_params);
   }
 }

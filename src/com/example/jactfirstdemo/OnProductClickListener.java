@@ -1,8 +1,14 @@
 package com.example.jactfirstdemo;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Locale;
+
 import com.example.jactfirstdemo.ProductsAdapter.ProductViewHolder;
+import com.example.jactfirstdemo.ShoppingUtils.Amount;
 
 import android.graphics.Bitmap;
+import android.net.ParseException;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -148,65 +154,92 @@ public class OnProductClickListener implements OnItemClickListener {
 		product_popup_.showAsDropDown(parent, 0, y_offset);
 	}
 	
-	public ShoppingCartActivity.ItemStatus GetProductDetails(ShoppingCartActivity.CartItem details) {
+	public ShoppingCartActivity.ItemStatus GetProductDetails(ShoppingUtils.LineItem item) {
 		// Fetch Image from the Popup.
 		view_holder_.img_.setDrawingCacheEnabled(true);
-		details.product_icon_ = Bitmap.createBitmap(view_holder_.img_.getDrawingCache());
+		item.product_icon_ = Bitmap.createBitmap(view_holder_.img_.getDrawingCache());
 		view_holder_.img_.setDrawingCacheEnabled(false);
 		
-		// Fetch PID from the Popup.
-		details.product_id_ = view_holder_.pid_.getText().toString();
-		if (details.product_id_.isEmpty()) {
-			return ShoppingCartActivity.ItemStatus.NO_PID;
-		}
-		
 		// Fetch from the Popup whether this product is a drawing or not.
-		details.is_drawing_ = view_holder_.drawing_.isShown();
+		item.is_drawing_ = view_holder_.drawing_.isShown();
 		
 		// Fetch Product Title from the Popup.
-		details.product_title_ = view_holder_.title_.getText().toString();
-		if (details.product_title_.isEmpty()) {
+		item.title_ = view_holder_.title_.getText().toString();
+		if (item.title_.isEmpty()) {
 			return ShoppingCartActivity.ItemStatus.NO_TITLE;
 		}
+
+		String err_msg = "";
+		try {
+  		  // Fetch PID from the Popup.
+		  item.pid_ = Integer.parseInt(view_holder_.pid_.getText().toString());
+		  if (item.pid_ == 0) {
+			return ShoppingCartActivity.ItemStatus.NO_PID;
+		  }
 		
-		// Price is either in BUX, POINTS, or USD; determine which it is by trying to parse
-		// into one of the three acceptable formats: "JXXX BUX", "XXX Points", or "$XXX USD".
-		String price = view_holder_.bux_.getText().toString();
-		if (price.isEmpty()) {
+	  	  // Price is either in BUX, POINTS, or USD; determine which it is by trying to parse
+		  // into one of the three acceptable formats: "JXXX BUX", "XXX Points", or "$XXX USD".
+		  String price = view_holder_.bux_.getText().toString();
+		  if (price.isEmpty()) {
 			Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. Unable to parse price: " + price);
 			return ShoppingCartActivity.ItemStatus.NO_PRICE;
-		}
-		if (price.substring(0, 1).equalsIgnoreCase("J")) {
-		  int bux_index = price.indexOf(" BUX");
-		  if (bux_index < 0) {
+		  }
+		  item.cost_ = new ArrayList<Amount>();
+		  if (price.substring(0, 1).equalsIgnoreCase("J")) {
+		    int bux_index = price.indexOf(" BUX");
+		    if (bux_index < 0) {
+			  Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. Unable to parse price: " + price);
+			  return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
+		    }
+		    Amount amount = new Amount();
+		    err_msg = "bux";
+		    try {
+		      amount.price_ = NumberFormat.getNumberInstance(Locale.US).parse(price.substring(1, bux_index)).doubleValue();
+			} catch (java.text.ParseException e) {
+				Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. ParseException. Item:\n" +
+	                    ShoppingUtils.PrintLineItem(item));
+	 	        return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
+			}
+		    amount.type_ = ShoppingUtils.CurrencyCode.BUX;
+		    item.cost_.add(amount);
+		  } else if (price.substring(0, 1).equalsIgnoreCase("$")) {
+		    int usd_index = price.indexOf(" USD");
+		    if (usd_index < 0) {
+			  Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. Unable to parse price: " + price);
+			  return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
+		    }
+		    Amount amount = new Amount();
+		    try {
+		      amount.price_ = NumberFormat.getNumberInstance(Locale.US).parse(price.substring(1, usd_index)).doubleValue();
+			} catch (java.text.ParseException e) {
+				Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. ParseException. Item:\n" +
+	                    ShoppingUtils.PrintLineItem(item));
+	 	        return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
+			}
+		    amount.type_ = ShoppingUtils.CurrencyCode.USD;
+		    item.cost_.add(amount);
+		  } else if (price.substring(price.length() - 7).equalsIgnoreCase(" Points")) {
+		    Amount amount = new Amount();
+		    err_msg = "points";
+		    try {
+				amount.price_ = NumberFormat.getNumberInstance(Locale.US).parse(
+						price.substring(0, price.length() - 7)).doubleValue();
+			} catch (java.text.ParseException e) {
+				Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. ParseException. Item:\n" +
+	                    ShoppingUtils.PrintLineItem(item));
+	 	        return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
+			}
+		    amount.type_ = ShoppingUtils.CurrencyCode.POINTS;
+		    item.cost_.add(amount);
+		  } else {
 			Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. Unable to parse price: " + price);
 			return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 		  }
-		  details.bux_ = price.substring(1, bux_index);
-		  details.usd_ = "";
-		  details.points_ = "";
-		} else if (price.substring(0, 1).equalsIgnoreCase("$")) {
-		  int usd_index = price.indexOf(" USD");
-		  if (usd_index < 0) {
-			Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. Unable to parse price: " + price);
-			return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
-		  }
-		  details.usd_ = price.substring(1, usd_index);
-		  details.bux_ = "";
-		  details.points_ = "";
-		} else if (price.substring(price.length() - 7).equalsIgnoreCase(" Points")) {
-		  details.points_ = price.substring(0, price.length() - 7);
-		  details.bux_ = "";
-		  details.usd_ = "";
-		} else {
-			Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. Unable to parse price: " + price);
-			return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
-		}
 		
-		// There can be a second price line, for products that have combined price in
-		// Points and Bux. Check visibility of 2nd price line in Popup, and if present,
-		// populate details.points_ with it (when present, 2nd line always represents Points).
-		if (view_holder_.points_.isShown()) {
+		  // There can be a second price line, for products that have combined price in
+		  // Points and USD or Points and BUX. Check visibility of 2nd price line in Popup, and if present,
+		  // populate details.points_ with it (when present, 2nd line always represents Points).
+		  if (view_holder_.points_.isShown()) {
 			String points_and_plus = view_holder_.points_.getText().toString();
 			if (!(points_and_plus.substring(0, 2).equalsIgnoreCase("+ "))) {
 				Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. Unable to parse price: " +
@@ -214,15 +247,30 @@ public class OnProductClickListener implements OnItemClickListener {
 				return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 			}
 			String points = points_and_plus.substring(2);
-			if (details.points_.isEmpty() && points.substring(points.length() - 7).equalsIgnoreCase(" Points")) {
-			  details.points_ = points.substring(0, points.length() - 7);
+			if (points.substring(points.length() - 7).equalsIgnoreCase(" Points")) {
+			    Amount amount = new Amount();
+			    err_msg = "|" + points.substring(0, points.length() - 7) + "|" + points.substring(0, points.length() - 7).trim() + "|";
+			    try {
+					amount.price_ = NumberFormat.getNumberInstance(Locale.US).parse(
+							points.substring(0, points.length() - 7)).doubleValue();
+				} catch (java.text.ParseException e) {
+					Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. ParseException. Item:\n" +
+		                    ShoppingUtils.PrintLineItem(item));
+		 	        return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
+				}
+			    amount.type_ = ShoppingUtils.CurrencyCode.POINTS;
+			    item.cost_.add(amount);
 			} else {
 				Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. Unable to parse price: " +
 			                       price + " with points: " + points);
 				return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 			}
-		} 
-		
+		  } 
+		} catch (NumberFormatException e) {
+			Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. NumberFormatException. " +
+		                       "Error Msg: " + err_msg + ", Item:\n" + ShoppingUtils.PrintLineItem(item));
+			return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
+		}
 		return ShoppingCartActivity.ItemStatus.VALID;
 	}
 	

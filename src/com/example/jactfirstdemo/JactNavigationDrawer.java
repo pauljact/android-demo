@@ -4,7 +4,6 @@ import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -20,15 +19,15 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-//public class JactNavigationDrawer extends ActionBarActivity {
 public class JactNavigationDrawer implements ProcessUrlResponseCallback {
-  private static final String games_url_ = "https://us7.jact.com:3081/games";
-  //PHBprivate static final String purchase_bux_url_ = "https://us7.jact.com:3081/cart";
-  private static final String purchase_bux_url_ = "https://us7.jact.com:3081/checkout/95";
-  private static final String community_url_ = "";
-  private static final String earn_url_ = "";
+  /*private static final String rewards_url_ = "http://us7.jact.com:3080/rest/rewards.json";
+  private static final String faq_url_ = "http://us7.jact.com:3080/faq-page";
+  private static final String privacy_policy_url_ = "http://us7.jact.com:3080/privacy-policy";
+  private static final String user_agreement_url_ = "http://us7.jact.com:3080/user-agreement";
+  private static final String about_jact_url_ = "http://us7.jact.com:3080/about-jact";*/
   private static final String rewards_url_ = "https://us7.jact.com:3081/rest/rewards.json";
   private static final String faq_url_ = "https://us7.jact.com:3081/faq-page";
+  private static final String contact_us_url_ = "https://us7.jact.com:3081/contact";
   private static final String privacy_policy_url_ = "https://us7.jact.com:3081/privacy-policy";
   private static final String user_agreement_url_ = "https://us7.jact.com:3081/user-agreement";
   private static final String about_jact_url_ = "https://us7.jact.com:3081/about-jact";
@@ -40,15 +39,20 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     LOGIN,
     PRIVACY_POLICY,
     FAQ,
+    CONTACT_US,
     USER_AGREEMENT,
+    CHECKOUT_VIA_MOBILE_SITE,
     CHECKOUT_MAIN,
     SHIPPING,
     SHIPPING_NEW,
     BILLING,
     BILLING_NEW,
+    REVIEW_ORDER,
     EARN,
     BUX,
-    ABOUT_JACT
+    ABOUT_JACT,
+    FORGOT_PASSWORD,
+    REGISTER,
   }
 
   private ActivityIndex parent_activity_index_;
@@ -87,7 +91,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     IconAndText menu_data[] = new IconAndText[] {
         new IconAndText(R.drawable.profile_transparent, "My Profile"),
         new IconAndText(R.drawable.trophy_transparent, "Rewards"),
-        new IconAndText(R.drawable.jact_transparent, "Purchase BUX"),
+        //PHB_BUXnew IconAndText(R.drawable.jact_transparent, "Purchase BUX"),
         new IconAndText(R.drawable.earn_transparent, "Earn"),
         new IconAndText(R.drawable.games_transparent, "Games"),
         new IconAndText(R.drawable.community2_transparent, "Community"),
@@ -116,16 +120,16 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
       return 0;
     case REWARDS:
       return 1;
-    case BUX:
-      return 2;
+    //PHB_BUXcase BUX:
+    //PHB_BUX  return 2;
     case EARN:
-      return 3;
+      return 2;
     case GAMES:
-      return 4;
+      return 3;
     case COMMUNITY:
-      return 5;
+      return 4;
     case CHECKOUT_MAIN:
-      return 6;
+      return 5;
     default:
       return -1;
     }
@@ -188,9 +192,13 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
        	startWebViewActivity(about_jact_url_, parent_activity_.getString(R.string.menu_about_jact));
         break;
       case R.id.menu_contact_us:
-        // TODO(PHB): Implement this.
-       	//Log.e("PHB", "JactNavigationDrawer.onOptionsItemSelected: Clicked on 'Contact Us'");
-        break;
+	    if (parent_activity_index_ == ActivityIndex.CONTACT_US) {
+  	      // Nothing to do: User clicked on 'Contact Us', which is the current activity.
+  	      break;
+  	    }
+       	parent_activity_.fadeAllViews(true);
+       	startWebViewActivity(contact_us_url_, parent_activity_.getString(R.string.menu_contact_us));
+       	break;
       case R.id.menu_faq:
   	    if (parent_activity_index_ == ActivityIndex.FAQ) {
   	      // Nothing to do: User clicked on 'FAQ', which is the current activity.
@@ -239,10 +247,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   }
   
   private void startWebViewActivity(String url, String title) {
-    Intent web_view_intent = new Intent(parent_activity_, FaqActivity.class);
-    web_view_intent.putExtra(parent_activity_.getString(R.string.webview_url_key), url);
-    web_view_intent.putExtra(parent_activity_.getString(R.string.webview_title_key), title);
-    parent_activity_.startActivity(web_view_intent);
+    FaqActivity.SetUrlAndTitle(url, title);
+    parent_activity_.startActivity(new Intent(parent_activity_, FaqActivity.class));
   }
   
   private void startLogoffActivity() {
@@ -260,9 +266,21 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     parent_activity_.startActivity(new Intent(parent_activity_, ShoppingCartActivity.class));
   }
   
+  private void startEarnActivity() {
+    parent_activity_.startActivity(new Intent(parent_activity_, EarnActivity.class));
+  }
+  
+  private void startGamesActivity() {
+    parent_activity_.startActivity(new Intent(parent_activity_, GamesActivity.class));
+  }
+  
+  private void startCommunityActivity() {
+    parent_activity_.startActivity(new Intent(parent_activity_, CommunityActivity.class));
+  }
+  
   public void ProcessDrawerClickResponse(String webpage, String cookies) {
     // Only should have empty webpage if click was on 'My Profile'.
-    if (webpage == "" && drawer_click_pos_ != 0) {
+    if (webpage.equals("") && drawer_click_pos_ != 0) {
       // TODO(PHB): Handle failed GET.
       Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawClickResponse. Empty webpage.");
     } else if (drawer_click_pos_ == ActivityToDrawerIndex(parent_activity_index_)) {
@@ -276,34 +294,26 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
           new Intent(parent_activity_, ProductsActivity.class);
       products_activity.putExtra("server_response", webpage);
       parent_activity_.startActivity(products_activity);
+    //PHB_BUX} else if (drawer_click_pos_ == 2) {
+    //PHB_BUX  // Start 'PurchaseBuxActivity' (for Purchase BUX).
     } else if (drawer_click_pos_ == 2) {
-      // PHB Temp.
-      Log.e("PHB", "Cart webpage response:\n" + webpage);
-      parent_activity_.fadeAllViews(false);
-      // END PHB Temp.
-      // Start 'PurchaseBuxActivity' (for Purchase BUX).
-      //PHBIntent products_activity =
-      //PHB    new Intent(parent_activity_, PurchaseBuxActivity.class);
-      //PHBproducts_activity.putExtra("server_response", webpage);
-      //PHBparent_activity_.startActivity(products_activity);
+      // Position 2 corresponds to 'Earn'. We should never be here, as a click on this
+      // drawer position should not have sent a request to the server here (rather,
+      // EarnActivity should have been started directly).
+      // TODO(PHB): Handle the error of being here.
+      Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Earn'.");
     } else if (drawer_click_pos_ == 3) {
-      // Start 'EarnActivity' (for Earn).
-      //PHBIntent products_activity =
-      //PHB    new Intent(parent_activity_, EarnActivity.class);
-      //PHBproducts_activity.putExtra("server_response", webpage);
-      //PHBparent_activity_.startActivity(products_activity);
+      // Position 3 corresponds to 'Games'. We should never be here, as a click on this
+      // drawer position should not have sent a request to the server here (rather,
+      // GamesActivity should have been started directly).
+      // TODO(PHB): Handle the error of being here.
+      Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Games'.");
     } else if (drawer_click_pos_ == 4) {
-      // Start 'GamesActivity' (for list of user's Games).
-      //PHBIntent games_activity =
-      //PHB    new Intent(parent_activity_, GamesActivity.class);
-      //PHBgames_activity.putExtra("server_response", webpage);
-      //PHBparent_activity_.startActivity(games_activity);
-    } else if (drawer_click_pos_ == 5) {
-      // Start 'CommunityActivity' (for Community).
-      //PHBIntent products_activity =
-      //PHB    new Intent(parent_activity_, CommunityActivity.class);
-      //PHBproducts_activity.putExtra("server_response", webpage);
-      //PHBparent_activity_.startActivity(products_activity);
+      // Position 4 corresponds to 'Community'. We should never be here, as a click on this
+      // drawer position should not have sent a request to the server here (rather,
+      // CommunityActivity should have been started directly).
+      // TODO(PHB): Handle the error of being here.
+      Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Community'.");
     } else {
       Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawClickResponse. Unexpected drawer pos: " + drawer_click_pos_);
     }
@@ -380,32 +390,22 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	    	new GetUrlTask((ProcessUrlResponseCallback) parent_class_, GetUrlTask.TargetType.JSON).execute(
 	        		rewards_url_, "GET");
 	    	parent_class_.parent_activity_.fadeAllViews(true);
+	      //PHB_BUX} else if (position == 2) {
+	    	//PHB_BUX// Position '2' is for Purchase BUX. Start that activity.
 	      } else if (position == 2) {
-	        // Position '2' is for Purchase BUX. Start that activity.
-	    	// PHB Temp.
-	    	new GetUrlTask((ProcessUrlResponseCallback) parent_class_, GetUrlTask.TargetType.JSON).execute(
-	    		purchase_bux_url_, "GET");
+            // Position '2' is for Earn. Start that activity.
 	    	parent_class_.parent_activity_.fadeAllViews(true);
-	    	//PHBnew GetUrlTask((ProcessUrlResponseCallback) parent_class_, GetUrlTask.TargetType.JSON).execute(
-	    	//PHB	purchase_bux_url_, "GET");
-	    	//PHBparent_class_.parent_activity_.fadeAllViews(true);
+	    	parent_class_.startEarnActivity();
 	      } else if (position == 3) {
-            // Position '3' is for Earn. Start that activity.
-	    	//PHBnew GetUrlTask((ProcessUrlResponseCallback) parent_class_, GetUrlTask.TargetType.JSON).execute(
-	    	//PHB		earn_url_, "GET");
-	    	//PHBparent_class_.parent_activity_.fadeAllViews(true);
+	        // Position '3' is for Games. Start that activity.
+		    parent_class_.parent_activity_.fadeAllViews(true);
+		    parent_class_.startGamesActivity();
 	      } else if (position == 4) {
-	        // Position '4' is for Games. Start that activity.
-	    	//PHBnew GetUrlTask((ProcessUrlResponseCallback) parent_class_, GetUrlTask.TargetType.JSON).execute(
-	    	//PHB	games_url_, "GET");
-	    	//PHBparent_class_.parent_activity_.fadeAllViews(true);
+	        // Position '4' is for Community. Start that activity.
+		    parent_class_.parent_activity_.fadeAllViews(true);
+		    parent_class_.startCommunityActivity();
 	      } else if (position == 5) {
-	        // Position '3' is for Community. Start that activity.
-		    // TODO(PHB): Implement this.
-	    	//PHBnew GetUrlTask((ProcessUrlResponseCallback) parent_class_, GetUrlTask.TargetType.JSON).execute(
-	        //PHB		community_url_, "GET");
-	    	//PHBparent_class_.parent_activity_.fadeAllViews(true);
-	      } else if (position == 6) {
+	    	// Position '5' is for Shopping Cart. Start that activity.
 	        parent_class_.startCheckoutActivity();
 	    	parent_class_.parent_activity_.fadeAllViews(true);
 	      } else {
@@ -430,6 +430,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	@Override
 	public void ProcessFailedResponse(FetchStatus status, String extra_params) {
 	  Log.e("PHB ERROR", "JactNavigationDrawer.ProcessUrlResponse: " +
-                         "Failed to fetch URL.");
+                         "Failed to fetch URL. Status: " + status);
+	  parent_activity_.fadeAllViews(false);
 	}
 }

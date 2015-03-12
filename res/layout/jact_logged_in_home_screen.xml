@@ -5,11 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/glossy">
+<include layout="@layout/toolbar_layout"/>
 <!-- The main content view -->
 <RelativeLayout
     android:id="@+id/my_profile_content_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="40dp"
     android:background="#00FFFFFF">
     
     <ImageView
@@ -66,13 +68,13 @@
 </RelativeLayout>
 <!-- The navigation drawer -->
 <ListView android:id="@+id/profile_left_drawer"
-        android:layout_width="240dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
-    	android:background="#00FFFFFF"
+    	android:background="#CC111111"
         android:listSelector="@drawable/drawer_bg_selector"
 />
 </android.support.v4.widget.DrawerLayout>
