@@ -115,6 +115,7 @@
     <string name="jact_username">USERNAME</string>
     <string name="jact_password">PASSWORD</string>
     <string name="jact_login">LOG IN</string>
+    <string name="youtube_id">youtube_id</string>
     <!-- End Miscellaneous -->
     
     <!-- Quantity 0-10 -->

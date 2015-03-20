@@ -138,6 +138,17 @@
         </activity>
         
         <activity
+            android:name="com.example.jactfirstdemo.YouTubePlayerActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/empty_string"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.EarnActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.EarnActivity" />
+        </activity>
+        
+        <activity
             android:name="com.example.jactfirstdemo.CheckoutActivity"
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"

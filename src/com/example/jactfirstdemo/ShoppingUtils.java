@@ -108,6 +108,7 @@ public class ShoppingUtils {
 	public int id_;
 	public int order_id_;
 	public int quantity_;
+	public int max_quantity_;
 	public int pid_;
 	public int entity_id_;
 	public boolean is_drawing_;
@@ -115,12 +116,14 @@ public class ShoppingUtils {
 	public String label_;
 	public String title_;
 	public Bitmap product_icon_;
+	public String img_url_;
 	public ArrayList<Amount> cost_;
   }
   
   public enum CheckoutStatus {
     EMPTY,
 	CREATE,
+	CHECKOUT,
 	REVIEW,
     PENDING,
     COMPLETE
@@ -466,8 +469,10 @@ public class ShoppingUtils {
             cart.status_ = CheckoutStatus.REVIEW;
           } else if (status.equals("PHB foo")) {
             cart.status_ = CheckoutStatus.PENDING;
+          } else if (status.equals("checkout_checkout")) {
+            cart.status_ = CheckoutStatus.CHECKOUT;
           } else if (status.equals("PHB foo")) {
-            cart.status_ = CheckoutStatus.COMPLETE;
+              cart.status_ = CheckoutStatus.COMPLETE;
           } else {
             return PrintErrorAndAbort("Unable to parse status: " + status);
           }

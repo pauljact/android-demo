@@ -2,6 +2,7 @@ package com.example.jactfirstdemo;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -25,6 +26,8 @@ import android.widget.TextView;
 public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implements OnItemSelectedListener {
 	private ShoppingCartActivity parent_activity_;
 	private ArrayList<ShoppingUtils.LineItem> items_;
+	private boolean[] unfinished_list_elements_;
+	public ProductsImageLoader image_loader_;
 	private static LayoutInflater inflater_;
 	// The relative position (child num) of the PID TextView within its parent LinearLayout.
 	private static final int REL_POS_OF_PID = 4;
@@ -45,6 +48,31 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implem
 		parent_activity_ = a;
 		items_ = items;
 		inflater_ = (LayoutInflater) parent_activity_.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		unfinished_list_elements_ = new boolean[100];
+        image_loader_ = new ProductsImageLoader(
+        	parent_activity_.getApplicationContext(), this, "ShoppingCartActivity");
+	}
+	
+	public void alertPositionsReady (HashSet<Integer> positions) {
+	  if (positions == null) {
+		Log.e("PHB ERROR", "ProductsAdapter::alertPositionsReady. Null positions");
+		return;
+	  }
+	  if (positions.isEmpty()) {
+		Log.e("PHB ERROR", "ProductsAdapter::alertPositionsReady. Empty positions");
+		return;
+	  }
+	  boolean should_alert_state_change = false;
+	  for (Integer i : positions) {
+		int position = i.intValue();
+		if (unfinished_list_elements_[position]) {
+		  unfinished_list_elements_[position] = false;
+		  should_alert_state_change = true;
+		}
+	  }
+	  if (should_alert_state_change) {
+		super.notifyDataSetChanged();
+	  }
 	}
 	
 	@Override
@@ -155,7 +183,12 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implem
         holder.pid_.setText(Integer.toString(item.pid_));
         
         // Sets Product Image.
-        holder.img_.setImageBitmap(item.product_icon_);
+        if (item.product_icon_ != null) {
+          holder.img_.setImageBitmap(item.product_icon_);
+        } else if (item.img_url_ != null &&
+                   !image_loader_.DisplayImage(item.img_url_, holder.img_, position)) {
+          unfinished_list_elements_[position] = true;
+        }
         
         // Sets Product Quantity.
         holder.quantity_.setSelection(item.quantity_);
@@ -184,6 +217,25 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implem
 		                 position + ") matches the current quantity for this item: " +
 		    		     ShoppingUtils.PrintLineItemHumanReadable(item));
 		    return;
+		  }
+		  
+		  ShoppingCartActivity.ItemToAddStatus item_status =
+			  ShoppingCartActivity.EnforceCartRules(item.pid_, position, item.type_); 
+		  if (item_status != ShoppingCartActivity.ItemToAddStatus.OK) {
+			if (item_status == ShoppingCartActivity.ItemToAddStatus.INCOMPATIBLE_TYPE) {
+			  parent_activity_.DisplayPopup("Unable to add item: Cart already contains items of different type.",
+					                        "Clear cart or complete checkout with existing items, then try again.");
+			} else if (item_status == ShoppingCartActivity.ItemToAddStatus.CART_NOT_READY) {
+			  parent_activity_.DisplayPopup("Unable to adjust quantity: still fetching Cart Information from Jact.");
+			} else if (item_status == ShoppingCartActivity.ItemToAddStatus.REWARDS_NOT_FETCHED) {
+			  parent_activity_.DisplayPopup("Unable to adjust quantity; still fetching Product Information from Jact.");
+			} else if (item_status == ShoppingCartActivity.ItemToAddStatus.MAX_QUANTITY_EXCEEDED) {
+			  parent_activity_.DisplayPopup("Unable to adjust quantity",
+					                        "Max quantity for this item is: " + ProductsActivity.GetMaxQuantity(item.pid_));
+			} else {
+			  Log.e("PHB ERROR", "CheckoutAdapter::onItemSelected. Unrecognized ItemToAddStatus: " + item_status);
+			}
+			return;
 		  }
 		  
 		  if (item.quantity_ == 0) {

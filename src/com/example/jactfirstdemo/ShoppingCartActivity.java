@@ -128,15 +128,20 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		NO_TITLE,
 		NO_PID,
 		NO_PRICE,
-		INVALID_PRICE,
+		INVALID_PRICE
 	}
 	
 	public enum ItemToAddStatus {
 		NEW,
 		INCREMENTED,
+		OK,
 		CART_FULL,
 		ITEM_MAX,
-		NO_PID
+		NO_PID,
+		CART_NOT_READY,
+		REWARDS_NOT_FETCHED,
+		INCOMPATIBLE_TYPE,
+		MAX_QUANTITY_EXCEEDED
 	}
 	
 	private static final Map<Integer, Integer> cart_icon_map_;
@@ -151,6 +156,22 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
         temp.put(6, R.drawable.cart_five_plus_yellow);
         cart_icon_map_ = Collections.unmodifiableMap(temp);
     }
+    
+  public static synchronized ItemToAddStatus EnforceCartRules(int pid, int quantity, String type) {
+	 if (shopping_cart_ == null) return ItemToAddStatus.CART_NOT_READY;
+	 int max_quantity = ProductsActivity.GetMaxQuantity(pid);
+	 if (max_quantity == -2) {
+	   return ItemToAddStatus.REWARDS_NOT_FETCHED;
+	 } else if (max_quantity > 0 && max_quantity < quantity) {
+	   return ItemToAddStatus.MAX_QUANTITY_EXCEEDED;
+	 }
+	 for (ShoppingUtils.LineItem item : shopping_cart_.line_items_) {
+	   if (item.type_ != type) {
+	     return ItemToAddStatus.INCOMPATIBLE_TYPE;
+	   }
+	 }
+	 return ItemToAddStatus.OK;
+  }
   
   public synchronized void GetInitialShoppingCart() {
 	// Need cookies and csrf_token to update server's cart.
@@ -616,6 +637,34 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		return GetCartItemToAddStatus(item);
 	}
 	
+	private static synchronized void FillExtraProductDetailsFromRewardsPage() {
+		FillExtraProductDetailsFromRewardsPage(shopping_cart_);
+		FillExtraProductDetailsFromRewardsPage(quantity_positive_shopping_cart_);
+	}
+	
+	private static synchronized void FillExtraProductDetailsFromRewardsPage(ShoppingUtils.LineItem item) {
+		FillExtraProductDetailsFromRewardsPage(shopping_cart_, item);
+		FillExtraProductDetailsFromRewardsPage(quantity_positive_shopping_cart_, item);
+	}
+	
+	private static synchronized void FillExtraProductDetailsFromRewardsPage(ShoppingUtils.ShoppingCartInfo cart_info) {
+	  if (cart_info == null) return;
+	  for (ShoppingUtils.LineItem item : shopping_cart_.line_items_) {
+		ProductsActivity.FillItemDetails(item);
+	  }
+	}
+	
+	private static synchronized void FillExtraProductDetailsFromRewardsPage(
+	    ShoppingUtils.ShoppingCartInfo cart_info, ShoppingUtils.LineItem item) {
+	  if (cart_info == null || item == null ) return;
+	  for (ShoppingUtils.LineItem cart_item : shopping_cart_.line_items_) {
+		if (cart_item.pid_ == item.pid_) {
+		  ProductsActivity.FillItemDetails(cart_item);
+		  break;
+		}
+	  }
+	}
+	
 	// Adds a item to the cart (or updates the item, in case it's already present in the cart).
 	public static synchronized ItemToAddStatus GetCartItemToAddStatus(ShoppingUtils.LineItem item) {
 		if (item == null) {
@@ -636,7 +685,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		if (GetNumberCartItems() >= MAX_CART_ITEMS) {
 			return ItemToAddStatus.CART_FULL;
 		}
-		return ItemToAddStatus.NEW;
+		return EnforceCartRules(item.pid_, 1 + item.quantity_, item.type_);
 	}
 	
 	public static JactAddress GetShippingAddress() {
@@ -653,6 +702,16 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	
 	public static void SetBillingAddress(JactAddress address) {
 		billing_address_ = address;
+	}
+	
+	public void DisplayPopup(String title) {
+	  dialog_ = new JactDialogFragment(title);
+	  dialog_.show(getSupportFragmentManager(), title);
+	}
+	
+	public void DisplayPopup(String title, String message) {
+	  dialog_ = new JactDialogFragment(title, message);
+	  dialog_.show(getSupportFragmentManager(), title);
 	}
 	
 	public void doProceedToShippingButtonClick(View view) {
@@ -776,6 +835,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     	    break;
     	  } else {
 	        item = line_item;
+			FillExtraProductDetailsFromRewardsPage(item);
 	        break;
     	  }
 	    }
@@ -788,6 +848,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  for (ShoppingUtils.LineItem item : shopping_cart_.line_items_) {
 	    if (item.pid_ == line_item.pid_) {
 	      item = line_item;
+		  FillExtraProductDetailsFromRewardsPage(item);
 	      return true;
 	    }
 	  }
@@ -805,6 +866,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	    shopping_cart_ = temp_shopping_cart_;
 	    quantity_positive_shopping_cart_ = temp_shopping_cart_;
 	    RemoveQuantityZeroItems();
+	    FillExtraProductDetailsFromRewardsPage();
 	    return;
 	  }
 
@@ -814,6 +876,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	    shopping_cart_ = temp_shopping_cart_;
 	    quantity_positive_shopping_cart_ = temp_shopping_cart_;
 	    RemoveQuantityZeroItems();
+	    FillExtraProductDetailsFromRewardsPage();
 	    return;
 	  }
 	  // App's version of cart is more up-to-date. Update server's cart.
@@ -963,6 +1026,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  num_server_tasks_--;
 	  if (extra_params.equalsIgnoreCase(GET_REWARDS_PAGE_TASK)) {
 	    ProductsActivity.SetProductsList(webpage);
+	    FillExtraProductDetailsFromRewardsPage();
 	  } else if (extra_params.equalsIgnoreCase(GET_SHIPPING_INFO_TASK)) {
 		ProcessShippingInfoResponse(webpage, cookies);
 	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CART_TASK)) {

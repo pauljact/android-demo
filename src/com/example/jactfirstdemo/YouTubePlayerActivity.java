@@ -1,31 +1,48 @@
 package com.example.jactfirstdemo;
 
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
-import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
 
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class FaqActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
+import com.google.android.youtube.player.YouTubeBaseActivity;
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayer.OnInitializedListener;
+import com.google.android.youtube.player.YouTubePlayer.Provider;
+import com.google.android.youtube.player.YouTubePlayerFragment;
+import com.google.android.youtube.player.YouTubePlayer.OnFullscreenListener;
+import com.google.android.youtube.player.YouTubePlayerSupportFragment;
+
+public class YouTubePlayerActivity extends JactActionBarActivity
+                                   implements ProcessUrlResponseCallback {
   private JactNavigationDrawer navigation_drawer_;
-  private static String url_;
-  private static String title_;
+  private YouTubePlayer youtube_player_;
+  private String youtube_id_;
+  public static final String DEVELOPER_KEY = "AIzaSyBoJypQxKePzlnt_4kVbRbAez64hbULcqI";
   
-  public static synchronized void SetUrlAndTitle(String url, String title) {
-    url_ = url;
-    title_ = title;
+  private void LoadYoutubePlayer() {
+	if (youtube_player_ == null || youtube_id_ == null || youtube_id_.isEmpty()) {
+	  // TODO(PHB): Handle this.
+	  Log.e("PHB ERROR", "YouTubePlayerActivity::LoadYoutubePlayer. Null parameters.");
+	  return;
+	}
+    youtube_player_.setFullscreen(true);
+    //youtube_player_.loadVideo("2zNSgSzhBfM");  // From StackOverflow.
+    //youtube_player_.loadVideo("VN2FU1F4m3A");  // First YT video on Jact Earn.
+    youtube_player_.loadVideo(youtube_id_);
+    youtube_player_.play();
   }
 
   @Override
@@ -33,59 +50,50 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
     // Set layout.
     super.onCreate(savedInstanceState);
     num_server_tasks_ = 0;
-    setContentView(R.layout.faq_layout);
+    setContentView(R.layout.youtube_layout);
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
     TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(R.string.faq_label);
+    ab_title.setText(R.string.earn_label);
     setSupportActionBar(toolbar);
     getSupportActionBar().setHomeButtonEnabled(true);
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    
-    // Initialize url_ and title_ to dummy values if necessary (they should get re-written
-    // to valid values before they are actually used).
-    if (url_ == null || url_.isEmpty()) {
-      url_ = "https://us7.jact.com:3081/faq-page";
-    }
-    if (title_ == null || title_.isEmpty()) {
-      title_ = "FAQ";
-    }
 
     // Set Navigation Drawer.
     navigation_drawer_ =
         new JactNavigationDrawer(this,
-        		                 findViewById(R.id.faq_drawer_layout),
-        		                 findViewById(R.id.faq_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.FAQ);
+        		                 findViewById(R.id.youtube_drawer_layout),
+        		                 findViewById(R.id.youtube_left_drawer),
+        		                 JactNavigationDrawer.ActivityIndex.EARN);
   }
     
   @Override
   protected void onResume() {
 	super.onResume();
-    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(title_);
-    if (title_.equalsIgnoreCase(getString(R.string.menu_about_jact))) {
-      navigation_drawer_.setActivityIndex(ActivityIndex.ABOUT_JACT);
-    } else if (title_.equalsIgnoreCase(getString(R.string.menu_contact_us))) {
-        navigation_drawer_.setActivityIndex(ActivityIndex.CONTACT_US);
-    } else if (title_.equalsIgnoreCase(getString(R.string.menu_faq))) {
-      navigation_drawer_.setActivityIndex(ActivityIndex.FAQ);
-    } else if (title_.equalsIgnoreCase(getString(R.string.menu_user_agreement))) {
-        navigation_drawer_.setActivityIndex(ActivityIndex.USER_AGREEMENT);
-    } else if (title_.equalsIgnoreCase(getString(R.string.menu_privacy_policy))) {
-        navigation_drawer_.setActivityIndex(ActivityIndex.PRIVACY_POLICY);
-    } else {
-      Log.e("PHB ERROR", "FaqActivity::onResume. Unrecognized activity: " + title_);
-    }
-    
-    // Get url, and set webview from it.
-    WebView web_view = (WebView) findViewById(R.id.faq_webview);
-    web_view.loadUrl(url_);
-    web_view.setWebViewClient(new WebViewClient() {
-    	@Override
-    	public void onPageFinished(WebView view, String url) {
-    		fadeAllViews(false);
-    	}
+	// Get Youtube ID to load.
+    youtube_id_ = getIntent().getStringExtra(getString(R.string.youtube_id));
+    // Setup youtube player fragment.
+    YouTubePlayerFragment youTubePlayerFragment =
+        (YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtube_fragment);
+  //YouTubePlayerSupportFragment youTubePlayerFragment = YouTubePlayerSupportFragment.newInstance();
+    youTubePlayerFragment.initialize(DEVELOPER_KEY, new OnInitializedListener() {
+        @Override
+        public void onInitializationSuccess(
+        	YouTubePlayer.Provider provider, YouTubePlayer player, boolean wasRestored) {
+          Log.e("PHB TEMP", "YouTubePlayerActivity::onInitializationSucess. wasRestored: " + wasRestored);
+          if (!wasRestored) {
+            youtube_player_ = player;
+        	LoadYoutubePlayer();
+          }
+        }
+        
+        @Override
+        public void onInitializationFailure(Provider arg0, YouTubeInitializationResult arg1) {
+            // PHB Copied.
+        }
     });
+    //FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+    //transaction.add(R.id.youtube_fragment, youTubePlayerFragment).commit();
+    
     // Set spinner (and hide WebView) until page has finished loading.
     SetCartIcon(this);
     fadeAllViews(num_server_tasks_ > 0);
@@ -128,7 +136,7 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
 
   @Override
   public void fadeAllViews(boolean should_fade) {
-    ProgressBar spinner = (ProgressBar) findViewById(R.id.faq_progress_bar);
+    ProgressBar spinner = (ProgressBar) findViewById(R.id.youtube_progress_bar);
     AlphaAnimation alpha;
     if (should_fade) {
       spinner.setVisibility(View.VISIBLE);
@@ -141,7 +149,7 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
     // (so that none of the views show).
     alpha.setDuration(0); // Make animation instant
     alpha.setFillAfter(true); // Tell it to persist after the animation ends
-    RelativeLayout layout = (RelativeLayout) findViewById(R.id.faq_content_frame);
+    RelativeLayout layout = (RelativeLayout) findViewById(R.id.youtube_content_frame);
     layout.startAnimation(alpha); // Add animation to the layout.
   }
   

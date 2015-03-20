@@ -37,13 +37,8 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public class ProductsActivity extends JactActionBarActivity implements OnItemSelectedListener, ProcessUrlResponseCallback {
-	private enum SortState {
-	  NONE,
-	  ASC,
-	  DES
-	}
-	
+public class ProductsActivity extends JactActionBarActivity
+                              implements OnItemSelectedListener, ProcessUrlResponseCallback {	
 	// For Sorting.
 	private SortState title_sort_;
 	private SortState date_sort_;
@@ -76,6 +71,12 @@ public class ProductsActivity extends JactActionBarActivity implements OnItemSel
     private JactNavigationDrawer navigation_drawer_;
     private Menu menu_bar_;
     private JactDialogFragment dialog_;
+	
+    private enum SortState {
+		  NONE,
+		  ASC,
+		  DES
+		}
  
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -483,22 +484,40 @@ public class ProductsActivity extends JactActionBarActivity implements OnItemSel
       bux_arrow_.setVisibility(View.INVISIBLE);
     }
     
-    private boolean FillItemDetails(ShoppingUtils.LineItem line_item) {
-      if (line_item == null || line_item.pid_ <= 0) return false;
+    public static synchronized boolean FillItemDetails(ShoppingUtils.LineItem line_item) {
+      if (line_item == null || line_item.pid_ <= 0 || products_list_ == null) return false;
       for (ProductsPageParser.ProductItem item : products_list_) {
         if (item.pid_.equals(Integer.toString(line_item.pid_))) {
+          line_item.type_ = item.node_type_;
+          line_item.img_url_ = item.img_url_;
           try {
             line_item.entity_id_ = Integer.parseInt(item.nid_);
-            line_item.type_ = item.node_type_;
+            line_item.max_quantity_ = Integer.parseInt(item.max_quantity_);
           } catch (NumberFormatException e) {
-        	Log.e("PHB ERROR", "ProductsActivity::FillItemDetails. Unable to parse a String field as an int: " +
-                               item.nid_);
+        	Log.e("PHB ERROR", "ProductsActivity::FillItemDetails. Unable to parse a String field as an int. " +
+                               "nid: " + item.nid_ + ", max quantity: " + item.max_quantity_);
         	return false;
           }
           return true;
         }
       }
       return false;
+    }
+    
+    public static synchronized int GetMaxQuantity(int pid) {
+      if (products_list_ == null) return -2;
+      for (ProductsPageParser.ProductItem item : products_list_) {
+          if (item.pid_.equals(Integer.toString(pid))) {
+        	try {
+        	 return Integer.parseInt(item.max_quantity_);
+        	} catch (NumberFormatException e) {
+        	  Log.e("PHB ERROR", "ProductsActivity::GetMaxQuantity. Unable to parse " +
+        	                     "max quantity: " + item.max_quantity_ + " as an int.");
+        	  return -2;
+        	}
+          }
+      }
+      return -2;
     }
     
     // Implement this same way e.g. ShoppingCartActivity.CreateEmptyCart(): Do checks on cookies and
@@ -649,6 +668,7 @@ public class ProductsActivity extends JactActionBarActivity implements OnItemSel
     public void doAddToCartClick(View view) {
     	// Add item to cart.
     	ShoppingUtils.LineItem item = new ShoppingUtils.LineItem();
+    	// Get the product details that are available from the Product Popup View (pid, title, etc.).
     	ShoppingCartActivity.ItemStatus item_status = product_listener_.GetProductDetails(item);
     	Log.e("PHB TEMP", "ProductsActivity::doAddToCartClick. Item: " + ShoppingUtils.PrintLineItem(item));
     	if (item_status != ShoppingCartActivity.ItemStatus.VALID) {
@@ -673,7 +693,8 @@ public class ProductsActivity extends JactActionBarActivity implements OnItemSel
     	// Set quantity to '1'. Below, GetCartItem(item.pid_) will adjust this appropriately
     	// if item is already in cart (i.e., it will increment quantity by one).
     	item.quantity_ = 1;
-    	// Fill in Item details that are not available from the View (e.g. node_id and product_type).
+    	// Fill in Item details that are not available from the Product Popup View
+    	// (e.g. max_quantity, node_id and product_type).
     	if (!FillItemDetails(item)) {
     		// TODO(PHB): Handle this.
     		Log.e("PHB ERROR", "ProductsActivity::AddLineItem. Unable to FillItemDetails for line item: " +
@@ -699,12 +720,27 @@ public class ProductsActivity extends JactActionBarActivity implements OnItemSel
     		AddLineItem(line_item);
     		title = "Item Added to Cart";
     		message = "Item already existed in cart; increased quantity for this product by one";
-    	} else if (add_status == ItemToAddStatus.NEW) {
+    	} else if (add_status == ItemToAddStatus.CART_NOT_READY) {
+    	  title = "Unable to Add Item";
+    	  message = "Still communicating with Jact for Cart.";
+    	} else if (add_status == ItemToAddStatus.MAX_QUANTITY_EXCEEDED) {
+      	  title = "Unable to Add Item";
+      	  message = "Max quantity for this item is: " + GetMaxQuantity(item.pid_);
+    	} else if (add_status == ItemToAddStatus.INCOMPATIBLE_TYPE) {
+      	  title = "Unable to Add Item";
+      	  message = "Cart already contains items of different type. " +
+      	            "Clear cart or complete checkout with existing items.";
+    	} else if (add_status == ItemToAddStatus.REWARDS_NOT_FETCHED) {
+      	  title = "Unable to Add Item";
+      	  message = "Still communicating with Jact to get product details.";
+    	} else if (add_status == ItemToAddStatus.OK) {
     		//PHBShoppingUtils.LineItem line_item = ShoppingCartActivity.GetCartItem(item.pid_);
     		//PHBAddLineItem(line_item);
     		Log.e("PHB TEMP", "ProductsActivity::doAddToCartButton. Adding new item.");
     		AddLineItem(item);
     		title = "Item Added to Cart";
+    	} else {
+    	  Log.e("PHB ERROR", "ProductsActivity::doAddToCartClick. Unrecognized ItemToAddStatus: " + add_status);
     	}
     	
     	// Dismiss Product popup.

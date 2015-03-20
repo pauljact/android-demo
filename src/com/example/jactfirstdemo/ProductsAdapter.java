@@ -183,7 +183,7 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         // Set Image.
         if (product.img_url_ != null &&
             !image_loader_.DisplayImage(product.img_url_, holder.img_, position)) {
-        	unfinished_list_elements_[position] = true;
+          unfinished_list_elements_[position] = true;
         }
         
         // Set Different color background for prize drawings.

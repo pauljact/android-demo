@@ -8,7 +8,25 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-public class ProductsPageParser {
+public class ProductsPageParser {	  
+  // Website node keys.
+  static final String WEBSITE_NID = "nid";
+  static final String WEBSITE_TITLE = "node_title";
+  static final String WEBSITE_PID = "commerce_product_field_data_field_product_product_id";
+  static final String WEBSITE_NODE_TYPE = "node_type";
+  static final String WEBSITE_DATE = "drawing date";
+  static final String WEBSITE_DRAWING_DATE = "Drawing_Ends";
+  static final String WEBSITE_SKU = "commerce_product_field_data_field_product_sku";
+  static final String WEBSITE_PROMOTE = "Promote";
+  static final String WEBSITE_MAX_QUANTITY = "Max_order_quantity";
+  static final String WEBSITE_VALUE = "value";
+  static final String WEBSITE_IMAGE = "field_product_image";
+  static final String WEBSITE_IMAGE_URI = "uri";
+  static final String WEBSITE_PRICE = "Price";
+  static final String WEBSITE_PRICE_AMOUNT = "amount";
+  static final String WEBSITE_PRICE_CURRENCY = "currency_code";
+  static final String WEBSITE_POINT_PRICE = "Point_Price";
+  static final String WEBSITE_PRODUCT_TYPE = "Product_Type";
 	
   static final String jact_icons_website_ = "https://us7.jact.com:3081/sites/default/files/styles/medium/public/";
   
@@ -16,6 +34,7 @@ public class ProductsPageParser {
     public String nid_;
     public String title_;
     public String pid_;
+    public String max_quantity_;
     public String node_type_;
     public String date_;
     public String sku_;
@@ -28,35 +47,51 @@ public class ProductsPageParser {
     public ArrayList<String> types_;
     
     public String toString() {
-    	String types = "";
-    	for (String type : types_) {
-    		types += type + ", ";
-    	}
-    	return "NID: " + nid_ + ", title: " + title_ + ", pid: " + pid_ + ", node_type: " +
-               node_type_ + ", date: " + date_ + ", sku: " + sku_ + ", image_url_: " +
-    		   img_url_ + ", drawing url: " + drawing_url_ + ", bux: " + bux_ +
-    		   ", usd: " + usd_ + ", points: " + points_ + ", types: " + types;
+      String types = "";
+      for (String type : types_) {
+    	types += type + ", ";
+      }
+      return "NID: " + nid_ + ", title: " + title_ + ", pid: " + pid_ + ", node_type: " +
+             node_type_ + ", date: " + date_ + ", sku: " + sku_ + ", image_url_: " +
+    	     img_url_ + ", drawing url: " + drawing_url_ + ", bux: " + bux_ +
+    		 ", usd: " + usd_ + ", points: " + points_ + ", types: " + types;
     }
   }
+
+  static private String ParseNode(JSONObject node, String tag) {
+	if (!node.has(tag) || node.isNull(tag)) {
+	  return "";
+	}
+	try {
+	  // When tag is present, it is a JSONObject; but when it is absent, it is an empty JSONArray.
+	  // This makes handling them annoying.
+	  JSONObject block = new JSONObject(node.getString(tag));
+	  if (block == null || block.length() == 0) {
+	    return "";
+	  }
+	  return block.getString(WEBSITE_VALUE);
+	} catch (JSONException e) {
+	  try {
+		JSONArray block_array = new JSONArray(node.getString(tag));
+		if (block_array.length() == 0) {
+		  return "";
+		} else if (block_array.length() == 1) {
+		  JSONObject block_ob = block_array.getJSONObject(0);
+		  return block_ob.getString(WEBSITE_VALUE);
+		} else {
+		  Log.e("PHB ERROR", "ProductsPageParse::ParseNode. For tag: " + tag + ", Promote array " +
+				             "should have size at most one, but found: " + block_array.length()); 
+		}
+	  } catch (JSONException ex) {
+		  Log.e("PHB ERROR", "ProductsPageParse::ParseNode. For tag: " + tag + ", Failed to parse " +
+	                         "Drawing_Ends tag as both a JSONObject and JSONArray.\n" +
+                             node.toString() + "\nException: " + ex.getMessage());
+        // TODO(PHB): Handle exception gracefully.
+	  }
+	}
+    return "";
+  }
   
-  // Website node keys.
-  static final String WEBSITE_NID = "nid";
-  static final String WEBSITE_TITLE = "node_title";
-  static final String WEBSITE_PID = "commerce_product_field_data_field_product_product_id";
-  static final String WEBSITE_NODE_TYPE = "node_type";
-  static final String WEBSITE_DATE = "drawing date";
-  static final String WEBSITE_DRAWING_DATE = "Drawing_Ends";
-  static final String WEBSITE_SKU = "commerce_product_field_data_field_product_sku";
-  static final String WEBSITE_PROMOTE = "Promote";
-  static final String WEBSITE_VALUE = "value";
-  static final String WEBSITE_IMAGE = "field_product_image";
-  static final String WEBSITE_IMAGE_URI = "uri";
-  static final String WEBSITE_PRICE = "Price";
-  static final String WEBSITE_PRICE_AMOUNT = "amount";
-  static final String WEBSITE_PRICE_CURRENCY = "currency_code";
-  static final String WEBSITE_POINT_PRICE = "Point_Price";
-  static final String WEBSITE_PRODUCT_TYPE = "Product_Type";
-    
   static private void ParseRewardsNodeTitle(String node, ProductItem item) {
     if (!node.isEmpty()) {
       item.title_ = node;
@@ -120,106 +155,34 @@ public class ProductsPageParser {
       item.node_type_ = node;
     }
   }
-  
   static private void ParseRewardsPromote(JSONObject node, ProductItem item) {
-	if (!node.has(WEBSITE_PROMOTE) || node.isNull(WEBSITE_PROMOTE)) {
+	String value = ParseNode(node, WEBSITE_PROMOTE);
+	if (value.isEmpty()) {
 	  item.promote_ = false;
-	  return;
+	} else if (value.equalsIgnoreCase("0")) {
+	  item.promote_ = false;
+	} else if (value.equalsIgnoreCase("1")) {
+	  item.promote_ = true;
+	} else {
+	  item.promote_ = false;
+      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Unrecognize Promote->Value tag: " + value);
 	}
-	try {
-	  // When Promote tag is present, it is a JSONObject; but when it is absent,
-	  // it is an empty JSONArray. This is true of most other fields as well, which
-	  // makes handling them annoying...I should probably templatize the try/catch,
-	  // when I have time for refactoring...
-	  // TODO(PHB): Refactor the try/catch to a generic function.
-	  JSONObject promote = new JSONObject(node.getString(WEBSITE_PROMOTE));
-	  if (promote == null || promote.length() == 0) {
-		  item.promote_ = false;
-	    return;
-	  }
-	  String value = promote.getString(WEBSITE_VALUE);
-	  if (value.isEmpty()) {
-		  item.promote_ = false;
-	  } else if (value.equalsIgnoreCase("0")) {
-		  item.promote_ = false;
-	  } else if (value.equalsIgnoreCase("1")) {
-		  item.promote_ = true;
-	  } else {
-		  item.promote_ = false;
-          Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Unrecognize Promote->Value tag: " + value);
-	  }
-	} catch (JSONException e) {
-	  try {
-		JSONArray promote_array = new JSONArray(node.getString(WEBSITE_PROMOTE));
-		if (promote_array.length() == 1) {
-		  JSONObject promote_ob = promote_array.getJSONObject(0);
-		  String promote_value = promote_ob.getString(WEBSITE_VALUE);
-		  if (!promote_value.isEmpty()) {
-		    if (promote_value.isEmpty()) {
-			  item.promote_ = false;
-		    } else if (promote_value.equalsIgnoreCase("0")) {
-			  item.promote_ = false;
-		    } else if (promote_value.equalsIgnoreCase("1")) {
-			  item.promote_ = true;
-		    } else {
-			  item.promote_ = false;
-	          Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Unrecognize Promote->Value tag: " +
-	        		             promote_value);
-		    }
-		  } else {
-	        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Empty Promote->Value tag");
-		  }
-		} else if (promote_array.length() == 0) {
-		  // Nothing to do; no promote tag present.
-		} else {
-		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Promote array " +
-				             "should have size at most one, but found: " + promote_array.length()); 
-		}
-	  } catch (JSONException ex) {
-		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Failed to parse " +
-	                         "Drawing_Ends tag as both a JSONObject and JSONArray.\n" +
-                             node.toString() + "\nException: " + ex.getMessage());
-        // TODO(PHB): Handle exception gracefully.
-	  }
-    }
+  }
+
+  static private void ParseRewardsMaxQuantity(JSONObject node, ProductItem item) {
+	String value = ParseNode(node, WEBSITE_MAX_QUANTITY);
+	if (value.isEmpty() || value.equals("-1") || value.equals("0")) {
+	  item.max_quantity_ = "-1";
+	} else {
+	  item.max_quantity_ = value;
+	}
   }
   
   static private void ParseRewardsDrawingDate(JSONObject node, ProductItem item) {
-    if (!node.has(WEBSITE_DRAWING_DATE) || node.isNull(WEBSITE_DRAWING_DATE)) {
-	  return;
+    String value = ParseNode(node, WEBSITE_DRAWING_DATE);
+	if (!value.isEmpty()) {
+	  item.date_ = value;
 	}
-	try {
-	  JSONObject date = new JSONObject(node.getString(WEBSITE_DRAWING_DATE));
-	  String value = date.getString(WEBSITE_VALUE);
-	  if (!value.isEmpty()) {
-	    item.date_ = value;
-	  } else {
-        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Empty Drawing Date->Value tag");
-	  }
-	} catch (JSONException e) {
-	  try {
-		JSONArray date_array = new JSONArray(node.getString(WEBSITE_DRAWING_DATE));
-		if (date_array.length() == 1) {
-		  JSONObject date_ob = date_array.getJSONObject(0);
-		  String date_value = date_ob.getString(WEBSITE_VALUE);
-		  if (!date_value.isEmpty()) {
-		    item.date_ = date_value;
-		  } else {
-	        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Empty Drawing Date->Value tag");
-		  }
-		} else if (date_array.length() == 0) {
-		  // Nothing to do; no drawing_date present.
-		} else {
-		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Drawing Date array " +
-				             "should have size at most one, but found: " + date_array.length()); 
-		}
-	  } catch (JSONException ex) {
-		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Failed to parse " +
-	                         "Drawing_Ends tag as both a JSONObject and JSONArray.\n" +
-                             node.toString() + "\nException: " + ex.getMessage());
-        // TODO(PHB): Handle exception gracefully.
-	  }
-    }
   }
   
   static private void ParseRewardsImage(JSONObject node, ProductItem item) {
@@ -291,46 +254,14 @@ public class ProductsPageParser {
   }
   
   static private void ParseRewardsPointPrice(JSONObject node, ProductItem item) {
-	if (!node.has(WEBSITE_POINT_PRICE) || node.isNull(WEBSITE_POINT_PRICE)) {
-		Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointPrice. No Point Price found");
-	  return;
+	String value = ParseNode(node, WEBSITE_POINT_PRICE);
+	if (!value.isEmpty()) {
+	  if (item.points_ != null && !item.points_.isEmpty()) {
+		Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointPrice. Duplicate entries for Price in points:\n" + node.toString());	
+	  } else {
+	    item.points_ = value;
+	  }
 	}
-	try {
-	  // See comment in 'ParseRewardsPromote()' above; the same JSONArray/JSONObject issue
-	  // is present here as well.
-	  JSONObject promote = new JSONObject(node.getString(WEBSITE_POINT_PRICE));
-	  String value = promote.getString(WEBSITE_VALUE);
-	  if (!value.isEmpty()) {
-		if (item.points_ != null && !item.points_.isEmpty()) {
-		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointPrice. Duplicate entries for Price in points:\n" + node.toString());	
-		} else {
-	      item.points_ = value;
-		}
-	  }
-	} catch (JSONException e) {
-	  try {
-		JSONArray promote_array = new JSONArray(node.getString(WEBSITE_POINT_PRICE));
-		if (promote_array.length() == 1) {
-		  JSONObject promote_ob = promote_array.getJSONObject(0);
-		  String promote_value = promote_ob.getString(WEBSITE_VALUE);
-		  if (!promote_value.isEmpty()) {
-		   item.points_ = promote_value;
-		  } else {
-		   Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointPrice. Empty Drawing Date->Value tag");
-		  }
-		} else if (promote_array.length() == 0) {
-		  // Nothing to do; no drawing_date present.
-		} else {
-		  Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointsPrice. Points Price array " +
-				             "should have size at most one, but found: " + promote_array.length());
-		}
-	  } catch (JSONException ex) {
-		Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsDrawingDate. Failed to parse " +
-                           "Drawing_Ends tag as both a JSONObject and JSONArray.\n" +
-                           node.toString() + "\nException: " + ex.getMessage());
-        // TODO(PHB): Handle exception gracefully.
-	  }
-    }
   }
   
   static private void ParseRewardsProductType(JSONObject node, ProductItem item) {
@@ -350,8 +281,7 @@ public class ProductsPageParser {
     }
   }
   
-  static public void ParseRewardsPage(String response,
-          ArrayList<ProductItem> products_list) {
+  static public void ParseRewardsPage(String response, ArrayList<ProductItem> products_list) {
     try {
       JSONArray products = new JSONArray(response);
       for (int i = 0; i < products.length(); i++) {
@@ -375,6 +305,9 @@ public class ProductsPageParser {
         
         // Parse Promote.
         ParseRewardsPromote(product, item);
+        
+        // Parse Max Quantity.
+        ParseRewardsMaxQuantity(product, item);
         
         // Parse Image.
         ParseRewardsImage(product, item);
