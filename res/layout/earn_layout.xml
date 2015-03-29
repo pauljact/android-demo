@@ -12,10 +12,18 @@
     android:layout_height="match_parent"
     android:layout_marginTop="50dp"
     android:background="@drawable/glossy">
-    <WebView
-        android:id="@+id/earn_webview"
+        
+    <!-- List of Earn Items -->
+    <ListView
+        android:id="@+id/earn_list"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"/>
+        android:layout_height="wrap_content"
+        android:divider="@color/transparent"
+        android:dividerHeight="1dp"
+        android:listSelector="@drawable/products_bg_selector"
+    />
+    <!-- End List of Earn Items -->
+    
     <ProgressBar
    	    android:id="@+id/earn_progress_bar"
    	    style="?android:attr/progressBarStyleLarge"
@@ -24,7 +32,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="40dp"
    	    android:layout_centerHorizontal="true"
-    	android:background="#00FFFFFF"
+    	android:background="@color/transparent"
         android:visibility="invisible"
    	/>	
 </RelativeLayout>

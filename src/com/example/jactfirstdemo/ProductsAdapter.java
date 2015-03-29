@@ -120,16 +120,19 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
  
         // Set Product Info in the view.
         ProductViewHolder holder = (ProductViewHolder) vi.getTag();
+        
         // Set Title.
         if (product.title_ != null) {
           holder.title_.setText(product.title_);
         }
-        // Set Date.
-        if (product.date_ == null || product.date_.isEmpty()) {
-        	holder.date_.setText("N/A");
+        
+        if (product.date_ != null && !product.date_.isEmpty()) {
+          holder.date_.setVisibility(View.VISIBLE);
+          holder.date_.setText(product.date_);
         } else {
-        	holder.date_.setText(product.date_);
+          holder.date_.setVisibility(View.GONE);
         }
+        
         // Set PID.
         if (product.pid_ != null) {
           holder.pid_.setText(product.pid_);

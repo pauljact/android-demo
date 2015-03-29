@@ -43,10 +43,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -54,10 +54,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -65,10 +65,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -76,10 +76,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -87,10 +87,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -98,10 +98,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -109,10 +109,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -120,10 +120,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -131,10 +131,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -149,14 +149,25 @@
         </activity>
         
         <activity
+            android:name="com.example.jactfirstdemo.EarnRedeemActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/empty_string"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.EarnActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.EarnActivity" />
+        </activity>
+        
+        <activity
             android:name="com.example.jactfirstdemo.CheckoutActivity"
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -186,10 +197,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
         
         <activity
@@ -197,10 +208,10 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
-            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
         </activity>
     </application>
 </manifest>

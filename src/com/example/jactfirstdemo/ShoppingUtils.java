@@ -112,6 +112,7 @@ public class ShoppingUtils {
 	public int pid_;
 	public int entity_id_;
 	public boolean is_drawing_;
+	public String drawing_date_;
 	public String type_;
 	public String label_;
 	public String title_;
@@ -142,6 +143,23 @@ public class ShoppingUtils {
 	  order_id_ = 0;
 	  revision_id_ = 0;
 	  timestamp_ = 0;
+	}
+	
+	public ShoppingCartInfo(ShoppingCartInfo other) {
+	  if (other == null) return;
+	  order_id_ = other.order_id_;
+	  revision_id_ = other.revision_id_;
+	  timestamp_ = other.timestamp_;
+	  status_ = other.status_;
+	  if (other.line_items_ != null) {
+	    line_items_ = (ArrayList<LineItem>) other.line_items_.clone();
+	  }
+	  if (other.shipping_addresses_ != null) {
+		shipping_addresses_ = (ArrayList<ShoppingCartActivity.JactAddress>) other.shipping_addresses_.clone();
+	  }
+	  if (other.billing_addresses_ != null) {
+		billing_addresses_ = (ArrayList<ShoppingCartActivity.JactAddress>) other.billing_addresses_.clone();
+	  }
 	}
 	
 	public String toString() {
@@ -246,9 +264,10 @@ public class ShoppingUtils {
 	params.extra_info_ = extra_info;
   	params.cookies_ = cookies;
   	ArrayList<String> header_info = new ArrayList<String>();
-    header_info.add(GetUrlTask.CreateHeaderInfo("Content-Type", "application/json"));
+    //PHBheader_info.add(GetUrlTask.CreateHeaderInfo("Content-Type", "application/json"));
     header_info.add(GetUrlTask.CreateHeaderInfo("X-CSRF-Token", csrf_token));
   	params.post_string_ = GetUrlTask.CreatePostString(header_info, null);
+  	Log.e("PHB TEMP", "ShoppingUtils::CreateCart. post string: " + params.post_string_);
 	task.execute(params);
 	return true;
   }
@@ -312,7 +331,7 @@ public class ShoppingUtils {
   	if (point_price > 0) {
   	  form_info.add(GetUrlTask.CreateFormInfo("field_point_price", Integer.toString(point_price)));
   	}
-  	if (quantity > 0 || (quantity == 0 && line_item >0)) {
+  	if (quantity > 0 || (quantity == 0 && line_item > 0)) {
   	  form_info.add(GetUrlTask.CreateFormInfo("quantity", Integer.toString(quantity)));
   	}
   	params.post_string_ = GetUrlTask.CreatePostString(header_info, form_info);
@@ -354,88 +373,6 @@ public class ShoppingUtils {
 			              line_item.id_, line_item.order_id_, line_item.pid_, line_item.type_,
 			              line_item.entity_id_, GetExtraPointPrice(line_item.cost_), line_item.quantity_);
   }
-
-  // Updates server's cart (represented by old_cart) to reflect the changes in new_cart.
-  // Note that since this method is only called when timestamp on new_cart is more recent
-  // than on old_cart, this method should only be called when the App wants to update the
-  // cart, by changing quantity of an item (i.e. there should only be one difference between
-  // the old_cart and the new_cart).
-  public static boolean UpdateServerCart(
-	  ProcessUrlResponseCallback parent_class, String cookies, String csrf_token,
-	  ShoppingCartInfo old_cart, ShoppingCartInfo new_cart) {
-    if (old_cart == null || new_cart == null) {
-      Log.e("PHB ERROR", "ShoppingUtils::UpdateServerCart. Null parameters.");
-      return false;
-    }
-    
-    // Check if there is an existing cart.
-    if (old_cart.order_id_ == 0) {
-      if (new_cart == null || new_cart.line_items_ == null || new_cart.line_items_.isEmpty()) {
-        return CreateServerCart(parent_class, cookies, csrf_token, null);
-      } else if (new_cart.line_items_.size() == 1) {
-        return CreateServerCart(parent_class, cookies, csrf_token, new_cart.line_items_.get(0));
-      } else {
-    	// New cart should differ from the old cart by at most one line item. Log error and abort.
-    	Log.e("PHB ERROR", "ShoppingUtils::UpdateServerCart. Expected at most one line item, but found " +
-    	                   new_cart.line_items_.size() + ". Cart:\n" + new_cart.toString());
-    	return false;
-      }
-    }
-    
-    // There is an existing cart. Verify order_id's match.
-    if (old_cart.order_id_ != new_cart.order_id_) {
-      Log.e("PHB ERROR", "ShoppingUtils::UpdateServerCart. Old order id (" + old_cart.order_id_ +
-    		             ") does not match new order id: " + new_cart.order_id_);
-      return false;
-    }
-    
-    // Go through new_cart's line items. They should exactly match the old_cart's line items,
-    // except possibly for one line item that needs to be updated.
-    int line_item_to_update = -1;
-    int updated_quantity = -1;
-    Iterator<LineItem> new_items_itr = new_cart.line_items_.iterator();
-  	while (new_items_itr.hasNext()) {
-      LineItem new_item = new_items_itr.next();
-      updated_quantity = -1;
-      boolean found_match = false;
-      Iterator<LineItem> old_items_itr = old_cart.line_items_.iterator();
-      while (!found_match && old_items_itr.hasNext()) {
-        LineItem old_item = old_items_itr.next();
-        if (new_item.id_ == old_item.id_) {
-          // Sanity check line item is consistent with PID, Entity ID, and order_id.
-          if (new_item.order_id_ != old_item.order_id_ || new_item.pid_ != old_item.pid_ ||
-        	  new_item.entity_id_ != old_item.entity_id_) {
-            Log.e("PHB ERROR", "ShoppingUtils::UpdateServerCart. Mismatching line item " +
-        	                   new_item.id_ + ". New item: " + new_item.toString() +
-        	                   ". Old item: " + old_item.toString());
-            return false;
-          }
-          found_match = true;
-          if (new_item.quantity_ != old_item.quantity_) {
-            updated_quantity = new_item.quantity_;
-          }
-        }
-      }
-      // Check if we need to update this line item.
-      if (!found_match || updated_quantity != -1) {
-        // As mentioned above, we only allow a single update in this method.
-    	if (line_item_to_update != -1) {
-    	  Log.e("PHB ERROR", "ShoppingUtils::UpdateServerCart. Multiple line items to update: " +
-	                         line_item_to_update + " and " + new_item.id_);
-    	  return false;
-    	}
-    	line_item_to_update = new_item.id_;
-    	updated_quantity = new_item.quantity_;
-      }
-    }
-  	
-  	// Check if there were any mismatching items; return without additional work if not; otherwise
-  	// update server's cart.
-  	if (line_item_to_update != -1) {
-  	  return UpdateLineItem(parent_class, cookies, csrf_token, line_item_to_update, updated_quantity);
-  	}
-    return true;
-  }
   
   //////////////////////////////////////////////////////////////////////////////
   /////////////////////////// Webpage Parsers //////////////////////////////////
@@ -461,20 +398,21 @@ public class ShoppingUtils {
           // Get Status.
           // TODO(PHB): Implement these based on all possible statuses.
           String status = item.getString(key);
-          if (status.equals("cart")) {
+          if (status.equals("PHB foo")) {
             cart.status_ = CheckoutStatus.EMPTY;
           } else if (status.equals("PHB foo")) {
             cart.status_ = CheckoutStatus.CREATE;
-          } else if (status.equals("checkout_reveiw")) {
+          } else if (status.equals("checkout_review")) {
             cart.status_ = CheckoutStatus.REVIEW;
-          } else if (status.equals("PHB foo")) {
+          } else if (status.equals("cart")) {
             cart.status_ = CheckoutStatus.PENDING;
           } else if (status.equals("checkout_checkout")) {
             cart.status_ = CheckoutStatus.CHECKOUT;
           } else if (status.equals("PHB foo")) {
-              cart.status_ = CheckoutStatus.COMPLETE;
+            cart.status_ = CheckoutStatus.COMPLETE;
           } else {
-            return PrintErrorAndAbort("Unable to parse status: " + status);
+            Log.e("PHB ERROR", "ShoppingUtils::ParseCart. Unrecognized status: " + status);
+            //return PrintErrorAndAbort("Unable to parse status: " + status);
           }
 	    } else if (key.equals(LINE_ITEMS_BLOCK)) {
           // Get Line Items.
@@ -496,7 +434,7 @@ public class ShoppingUtils {
     }
   }
   
-  private static boolean ParseCartLineItemKey(JSONObject item, String key, int num_keys, ShoppingCartInfo cart) {
+  private static boolean ParseCartLineItemKey(JSONObject item, String key, ShoppingCartInfo cart) {
 	// Sometimes, the parse cart page response has JSONObjects for this key, sometimes it is just
 	// a string. Handle both cases here.
 	//PHBJSONObject cart_item = new JSONObject(item.getString(item_key));
@@ -511,28 +449,21 @@ public class ShoppingUtils {
     try {
 	  //JSONObject cart_item = (JSONObject) cart_item_value;
       JSONObject cart_item = (JSONObject) item.getJSONObject(key);
-      if (num_keys == 1) {
-	    return ParseLineItem(cart_item, cart); 
-	  } else {
-	    Log.w("PHB", "ShoppingUtils::ParseCartLineItemKey. Unexpected extra key: " + key +
-	    		     " for JSONObject item: " + item.toString());
-	    return false;
-	  }
+	  return ParseLineItem(cart_item, cart); 
     //} catch (ClassCastException cast_ex) {
     } catch (JSONException json_ex) {
 	  //String actual_cart_value = (String) cart_item_value;
       try {
         String actual_cart_value = item.getString(key);
-	    Log.w("PHB", "ShoppingUtils. ParseCartPage. JSON Exception: " + json_ex.getMessage() +
+	    Log.w("PHB", "ShoppingUtils::ParseCartLineItemKey. JSON Exception: " + json_ex.getMessage() +
 		  	         ", actual_cart_value: " + actual_cart_value);
 	    if (actual_cart_value.trim().isEmpty() || actual_cart_value.trim().equalsIgnoreCase("[]")) {
-	    	return true;
+	      return true;
 	    } else {
-	      return false;
+	      return PrintErrorAndAbort("ParseCartLineItemKey. actual cart value|" + actual_cart_value + "|");
 	    }
       } catch (JSONException second_json_ex) {
-  	    Log.w("PHB", "ShoppingUtils. ParseCartPage. 2nd JSON Exception: " + second_json_ex.getMessage());
-        return false;
+  	    return PrintErrorAndAbort("ParseCartLineItemKey. 2nd JSON Exception: " + second_json_ex.getMessage());
       }
     }
   }
@@ -543,7 +474,7 @@ public class ShoppingUtils {
   }
   
   public static boolean ParseCartFromGetCartPage(String webpage, ShoppingCartInfo cart) {
-    Log.w("PHB TEMP", "ShoppingUtils::ParseCartFromGetCartPage. Webpage: " + webpage);
+    Log.d("PHB TEMP", "ShoppingUtils::ParseCartFromGetCartPage. Webpage: " + webpage);
     if (webpage.trim().isEmpty() || webpage.trim().equalsIgnoreCase("[]")) return true;
     try {
       // Make sure webpage can be parsed as a list of cart items.
@@ -564,12 +495,11 @@ public class ShoppingUtils {
     	String keys_processed = "";
   	    while (item_itr.hasNext()) {
   	      String item_key = item_itr.next();
-  	      if (!ParseCartLineItemKey(item, item_key, 1, cart)) {
+  	      if (!ParseCartLineItemKey(item, item_key, cart)) {
   	    	return false;
   	      }
 	  	  keys_processed += item_key + ", ";
   	    }
-  	    Log.w("PHB TEMP", "ShoppingUtils::ParseCartPage. Processed keys: " + keys_processed);
     	return true;
       } catch (JSONException ex) {
           return PrintErrorAndAbort("Unable to parse cart response as JSON. |Exception: " +

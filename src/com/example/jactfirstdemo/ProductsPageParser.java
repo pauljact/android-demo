@@ -48,8 +48,10 @@ public class ProductsPageParser {
     
     public String toString() {
       String types = "";
-      for (String type : types_) {
-    	types += type + ", ";
+      if (types_ != null) {
+        for (String type : types_) {
+    	  types += type + ", ";
+        }
       }
       return "NID: " + nid_ + ", title: " + title_ + ", pid: " + pid_ + ", node_type: " +
              node_type_ + ", date: " + date_ + ", sku: " + sku_ + ", image_url_: " +
@@ -187,7 +189,7 @@ public class ProductsPageParser {
   
   static private void ParseRewardsImage(JSONObject node, ProductItem item) {
 	if (!node.has(WEBSITE_IMAGE) || node.isNull(WEBSITE_IMAGE)) {
-      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsImage. Unable to find Image tag:\n" + node.toString());
+      Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsImage. Unable to find Image tag:\n" + node.toString());
       // TODO(PHB): Handle missing image.
 	  return;
 	}
@@ -195,20 +197,20 @@ public class ProductsPageParser {
 	  JSONObject image = new JSONObject(node.getString(WEBSITE_IMAGE));
 	  String value = image.getString(WEBSITE_IMAGE_URI);
 	  if (value.isEmpty()) {
-        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsImage. Unable to find Image uri:\n" + node.toString());
+        Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsImage. Unable to find Image uri:\n" + node.toString());
         // TODO(PHB): Handle missing image.
         return;
 	  }
 	  int prefix_index = value.indexOf("public://");
 	  if (prefix_index != 0) {
-        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsImage. Unable to parse Image uri:\n" + node.toString());
+        Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsImage. Unable to parse Image uri:\n" + node.toString());
         // TODO(PHB): Handle missing image.
         return;
 	  }
 	  String image_url = value.substring(9);  // 9 is the length of prefix "public://" that should be removed.
 	  item.img_url_ = jact_icons_website_ + image_url.replace(" ", "%20");  // Replace whitespace in url with %20.
 	} catch (JSONException e) {
-      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsImage. Unable to parse Image tag:\n" + node.toString());
+      Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsImage. Unable to parse Image tag:\n" + node.toString());
       // TODO(PHB): Handle exception gracefully.
     }
   }

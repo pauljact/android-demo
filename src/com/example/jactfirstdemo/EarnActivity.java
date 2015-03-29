@@ -6,6 +6,8 @@ import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
 
 import android.app.Activity;
+import android.app.ActionBar.LayoutParams;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -13,12 +15,16 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,14 +41,23 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   }
   private JactNavigationDrawer navigation_drawer_;
   private ArrayList<EarnSiteAndYoutubeId> earn_activity_urls_;
+  private static boolean should_refresh_earn_items_;
+  private JactDialogFragment dialog_;
+  private ListView list_;
+  private EarnAdapter adapter_;
+  private static ArrayList<EarnPageParser.EarnItem> earn_list_;
+  
+  private static final String FETCH_EARN_PAGE_TASK = "fetch_earn_page_task";
   private static final String FETCH_YOUTUBE_URLS_TASK = "fetch_youtube_urls_task";
   private static final String GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK = "get_cookies_then_youtube_urls_task";
-  private static final String earn_url_ = "https://us7.jact.com:3081/earn";
+  private static final String earn_url_ = "https://us7.jact.com:3081/rest/earn";
+  //private static final String earn_url_ = "https://us7.jact.com:3081/earn";
   //private static final String earn_url_ = "http://us7.jact.com:3080/earn";
-  private static final String QUOTE = "\"";
-  private static final String HREF_MARKER = "<a href=" + QUOTE + "earn/";
-  private static final String YOUTUBE_URL_IDENTIFIER =
-		      "https://us7.jact.com:3081/sites/default/files/styles/product_page/public/video_embed_field_thumbnails/youtube/";
+  // DEPRECATED. The following strings are no longer needed.
+  //private static final String QUOTE = "\"";
+  //private static final String HREF_MARKER = "<a href=" + QUOTE + "earn/";
+  //private static final String YOUTUBE_URL_IDENTIFIER =
+  //		      "https://us7.jact.com:3081/sites/default/files/styles/product_page/public/video_embed_field_thumbnails/youtube/";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +71,15 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
     setSupportActionBar(toolbar);
     getSupportActionBar().setHomeButtonEnabled(true);
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    
+    should_refresh_earn_items_ = true;
+
+    /*BHP
+    SetHeaderBar();
+    SetFilterBar();
+    SetFilters();
+*/
     // Fetch all youtube urls on this page.
-    FetchYoutubeUrls();
+    // FetchYoutubeUrls();
 
     // Set Navigation Drawer.
     navigation_drawer_ =
@@ -68,66 +89,98 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
         		                 JactNavigationDrawer.ActivityIndex.EARN);
   }
   
-  private void FetchYoutubeUrls() {
-	SharedPreferences user_info = getSharedPreferences(
-          getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
-    String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
-    if (cookies.isEmpty()) {
-      String username = user_info.getString(getString(R.string.ui_username), "");
-      String password = user_info.getString(getString(R.string.ui_password), "");
-      num_server_tasks_++;
-      ShoppingUtils.RefreshCookies(
-          this, username, password, GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK);
-      return;
+  @Override
+  protected void onResume() {
+	super.onResume();
+    navigation_drawer_.setActivityIndex(ActivityIndex.EARN);
+    // Set spinner (and hide WebView) until page has finished loading.
+    SetCartIcon(this);
+    if (should_refresh_earn_items_) {
+      FetchEarnPage();
+      should_refresh_earn_items_ = false;
     }
-    
-  	num_server_tasks_++;
+    if (num_server_tasks_ == 0) {
+      fadeAllViews(false);
+    } else {
+      fadeAllViews(true);
+    }
+  }
+  
+  public static void SetShouldRefreshEarnItems(boolean value) {
+	should_refresh_earn_items_ = value;
+  }
+  
+  private void FetchEarnPage() {
+	num_server_tasks_++;
     GetUrlTask task = new GetUrlTask(this, GetUrlTask.TargetType.JSON);
 	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
 	params.url_ = earn_url_;
 	params.connection_type_ = "GET";
   	ArrayList<String> header_info = new ArrayList<String>();
     header_info.add(GetUrlTask.CreateHeaderInfo("Content-Type", "text/html"));
-  	params.cookies_ = cookies;
-  	params.extra_info_ = FETCH_YOUTUBE_URLS_TASK;
+  	params.extra_info_ = FETCH_EARN_PAGE_TASK;
 	task.execute(params);
   }
+
+  public synchronized void ParseYoutubeVideoList(String webpage) {
+    earn_list_ = new ArrayList<EarnPageParser.EarnItem>();
+    EarnPageParser.ParseEarnPage(webpage, earn_list_);
     
-  @Override
-  protected void onResume() {
-	super.onResume();
-    navigation_drawer_.setActivityIndex(ActivityIndex.EARN);
-    
-    // Set webview from earn_url_.
-    WebView web_view = (WebView) findViewById(R.id.earn_webview);
-    web_view.loadUrl(earn_url_);
-    web_view.setWebViewClient(new WebViewClient() {
-    	@Override
-    	public void onPageFinished(WebView view, String url) {
-    		fadeAllViews(false);
-    	}
-    	
-    	@Override
-    	public boolean shouldOverrideUrlLoading(WebView view, String url) {
-    	  Log.e("PHB TEMP", "EarnActivity::shouldOverrideUrlLoading. url: " + url);
-    	  String youtube_id = GetYoutubeId(url);
-    	  Log.e("PHB TEMP", "EarnActivity::shouldOverrideUrlLoading. youtube_id|" + youtube_id + "|");
-          if (!youtube_id.isEmpty()) {
-        	StartYoutubeActivity(youtube_id);
-            //MailTo mt = MailTo.parse(url);
-            //Intent i = newEmailIntent(MyActivity.this, mt.getTo(), mt.getSubject(), mt.getBody(), mt.getCc());
-            //startActivity(i);
-            //view.reload();
-            return true;
-          } else {
-            view.loadUrl(url);
-          }
-          return true;
-        }
-    });
-    // Set spinner (and hide WebView) until page has finished loading.
-    SetCartIcon(this);
-    fadeAllViews(num_server_tasks_ > 0);
+    list_ = (ListView) findViewById(R.id.earn_list);
+
+    // Getting adapter by passing xml data ArrayList.
+    adapter_ = new EarnAdapter(
+  	    this, R.layout.earn_item, earn_list_, "Earn_Activity");
+    list_.setAdapter(adapter_);
+  }
+  
+  private void StartYoutubeActivity(String youtube_id) {
+    Intent youtube_intent = new Intent(this, YouTubePlayerActivity.class);
+    youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
+    startActivity(youtube_intent);
+  }
+
+  private void Popup(String title, String message) {
+	dialog_ = new JactDialogFragment(title, message);
+	dialog_.show(getSupportFragmentManager(), title);
+  }
+  
+  public void doDialogOkClick(View view) {
+    // Close Dialog window.
+    dialog_.dismiss();
+  }
+  
+  private String GetYoutubeUrlViaNodeId(String nid_str) {
+	if (earn_list_ == null) {
+	  Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Null nid");
+	  return "";
+	}
+	int nid = -1;
+	try {
+	  nid = Integer.parseInt(nid_str);
+	} catch (NumberFormatException e) {
+	  Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to parse nid " + nid_str + ":" + e.getMessage());
+	  return "";
+	}
+	
+	// Look up nid.
+	for (EarnPageParser.EarnItem item : earn_list_) {
+	  if (item.nid_ == nid) {
+		return item.youtube_url_;
+	  }
+	}
+	Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to find nid " + Integer.toString(nid));
+	return "";
+  }
+  
+  public void doEarnNowClick(View view) {
+    TextView nid = (TextView) ((LinearLayout) view.getParent()).findViewById(R.id.earn_nid);
+    String youtube_url = GetYoutubeUrlViaNodeId(nid.getText().toString());
+    if (youtube_url.isEmpty()) {
+      Popup("Unable to find Video", "Try again later.");
+    } else {
+      StartYoutubeActivity(youtube_url);
+    }
   }
   
   @Override
@@ -184,6 +237,107 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
     layout.startAnimation(alpha); // Add animation to the layout.
   }
   
+  @Override
+  public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
+	if (extra_params.indexOf(FETCH_EARN_PAGE_TASK) == 0) {
+	  num_server_tasks_--;
+	  ParseYoutubeVideoList(webpage);
+  	  if (num_server_tasks_ == 0) {
+  		SetCartIcon(this);
+  		if (num_server_tasks_ == 0) {
+  		  fadeAllViews(false);
+  		}
+  	  }
+	// DEPRECATED. These values shouldn't ever be present anymore.
+	/*
+	} else if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK) ||
+               extra_params.equals(GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK)) {
+	  
+      if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK)) {
+        ParseYoutubeUrls(webpage);
+      } else {
+    	SaveCookies(cookies);
+    	FetchYoutubeUrls();
+      }
+      num_server_tasks_--;
+  	  if (num_server_tasks_ == 0) {
+  		SetCartIcon(this);
+  		if (num_server_tasks_ == 0) {
+  		  fadeAllViews(false);
+  		}
+  	  }*/
+    } else {
+	  ProcessCartResponse(this, webpage, cookies, extra_params);
+    }
+  }
+
+  @Override
+  public void ProcessUrlResponse(Bitmap pic, String cookies, String extra_params) {
+	// TODO Auto-generated method stub
+  }
+
+  @Override
+  public void ProcessFailedResponse(FetchStatus status, String extra_params) {
+	if (extra_params.indexOf(FETCH_EARN_PAGE_TASK) == 0) {
+      num_server_tasks_--;
+      Log.e("EarnActivity::ProcessFailedResponse", "Failed to fetch Earn Page.");
+      Popup("Unable to Reach Jact", "Check Internet Connection, and try again.");
+  	  if (num_server_tasks_ == 0) {
+  		SetCartIcon(this);
+  		if (num_server_tasks_ == 0) {
+  		  fadeAllViews(false);
+  		}
+  	  }
+  	// DEPRECATED.
+  	/*
+	} else if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK) ||
+    	extra_params.equals(GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK)) {
+      if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK)) {
+        Log.e("PHB ERROR", "EarnActivity::ProcessFailedResponse. Failed to get youtube urls. Status: " + status);
+      } else {
+        Log.e("PHB ERROR", "EarnActivity::ProcessFailedResponse. Failed to get cookies. Status: " + status);
+      }
+      num_server_tasks_--;
+  	  if (num_server_tasks_ == 0) {
+  		SetCartIcon(this);
+  		if (num_server_tasks_ == 0) {
+  		  fadeAllViews(false);
+  		}
+  	  }*/
+    } else {
+	  ProcessFailedCartResponse(this, status, extra_params);
+    }
+  }
+  
+  // DEPRECATED. The following methods were called when parsing html from jact .../earn page, to scrape the
+  // urls for the youtube videos. They are no longer needed, since we get these directly from
+  // the .../rest/earn page
+  /*
+  private void FetchYoutubeUrls() {
+	SharedPreferences user_info = getSharedPreferences(
+          getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+    String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+    if (cookies.isEmpty()) {
+      String username = user_info.getString(getString(R.string.ui_username), "");
+      String password = user_info.getString(getString(R.string.ui_password), "");
+      num_server_tasks_++;
+      ShoppingUtils.RefreshCookies(
+          this, username, password, GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK);
+      return;
+    }
+    
+  	num_server_tasks_++;
+    GetUrlTask task = new GetUrlTask(this, GetUrlTask.TargetType.JSON);
+	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
+	params.url_ = earn_url_;
+	params.connection_type_ = "GET";
+  	ArrayList<String> header_info = new ArrayList<String>();
+    header_info.add(GetUrlTask.CreateHeaderInfo("Content-Type", "text/html"));
+  	params.cookies_ = cookies;
+  	params.extra_info_ = FETCH_YOUTUBE_URLS_TASK;
+	task.execute(params);
+  }
+  
   private void ParseYoutubeUrls(String webpage) {
     earn_activity_urls_ = new ArrayList<EarnSiteAndYoutubeId>();
 	int youtube_marker = webpage.indexOf(YOUTUBE_URL_IDENTIFIER);
@@ -230,54 +384,6 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
 	}
   }
   
-  @Override
-  public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
-    if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK) ||
-        extra_params.equals(GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK)) {
-      if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK)) {
-        ParseYoutubeUrls(webpage);
-      } else {
-    	SaveCookies(cookies);
-    	FetchYoutubeUrls();
-      }
-      num_server_tasks_--;
-  	  if (num_server_tasks_ == 0) {
-  		SetCartIcon(this);
-  		if (num_server_tasks_ == 0) {
-  		  fadeAllViews(false);
-  		}
-  	  }
-    } else {
-	  ProcessCartResponse(webpage, cookies, extra_params);
-    }
-  }
-
-  @Override
-  public void ProcessUrlResponse(Bitmap pic, String cookies, String extra_params) {
-	// TODO Auto-generated method stub
-  }
-
-  @Override
-  public void ProcessFailedResponse(FetchStatus status, String extra_params) {
-    if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK) ||
-    	extra_params.equals(GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK)) {
-      if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK)) {
-        Log.e("PHB ERROR", "EarnActivity::ProcessFailedResponse. Failed to get youtube urls. Status: " + status);
-      } else {
-        Log.e("PHB ERROR", "EarnActivity::ProcessFailedResponse. Failed to get cookies. Status: " + status);
-      }
-      num_server_tasks_--;
-  	  if (num_server_tasks_ == 0) {
-  		SetCartIcon(this);
-  		if (num_server_tasks_ == 0) {
-  		  fadeAllViews(false);
-  		}
-  	  }
-    } else {
-	  ProcessFailedCartResponse(status, extra_params);
-    }
-  }
-  
   private String GetYoutubeId(String url) {
     if (earn_activity_urls_ == null) {
       // TODO(PHB): Handle this case.
@@ -301,10 +407,5 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
     }
     return "";
   }
-  
-  private void StartYoutubeActivity(String youtube_id) {
-    Intent youtube_intent = new Intent(this, YouTubePlayerActivity.class);
-    youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
-    startActivity(youtube_intent);
-  }
+  */
 }

@@ -1,9 +1,15 @@
 package com.example.jactfirstdemo;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 import org.json.JSONException;
@@ -16,6 +22,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+//import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +37,7 @@ import android.widget.TextView;
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import com.example.jactfirstdemo.ShoppingUtils.Amount;
 import com.example.jactfirstdemo.ShoppingUtils.LineItem;
+import com.example.jactfirstdemo.ShoppingUtils.ShoppingCartInfo;
 
 public class ShoppingCartActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
 	private static final int MAX_CART_ITEMS = 10;
@@ -40,12 +48,12 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	private static final String jact_shopping_cart_url_ = "https://us7.jact.com:3081/rest/cart.json";
 	private static final String GET_SHIPPING_INFO_TASK = "get_shipping_info_task";
 	private static final String GET_REWARDS_PAGE_TASK = "get_rewards_page_task";
+	private static final String DATE_PREFIX = "Drawing Date: ";
 	
 	public static JactAddress shipping_address_;
 	public static JactAddress billing_address_;
 	
 	private static ShoppingUtils.ShoppingCartInfo shopping_cart_;
-	private static ShoppingUtils.ShoppingCartInfo temp_shopping_cart_;
 	private static ShoppingUtils.ShoppingCartInfo quantity_positive_shopping_cart_;
 	private static boolean hay_active_cart_request_;
 	private static boolean view_has_been_loaded_;
@@ -62,6 +70,37 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		VISA,
 		MC,
 		AMEX
+	}
+	
+	public enum CartAccessType {
+	  PRINT_CART,
+	  GET_LINE_ITEM,
+	  INITIALIZE_CART,
+	  ITEM_TO_ADD_STATUS,
+	  ENFORCE_CART_RULES,
+	  GET_NUM_CART_ITEMS,
+	  GET_NUM_DISTINCT_CART_ITEMS,
+	  GET_TOTAL_CART_PRICE,
+	  GET_QUANTITY_POSITIVE_ITEMS,
+	  GET_ORDER_ID,
+	  ADD_INFO_FROM_REWARDS,
+	  SET_CART_FROM_WEBPAGE,
+	  UPDATE_LINE_ITEM,
+	  UPDATE_CART,
+	  REMOVE_QP_CART_ITEM,
+	}
+	
+	public static class CartAccessResponse {
+		ItemToAddStatus to_add_status_;
+		ItemStatus item_status_;
+		String printed_cart_;
+		int order_id_;
+		int num_cart_items_;
+		int num_distinct_cart_items_;
+		TotalCartPrice total_cart_price_;
+		LineItem line_item_;
+		ShoppingUtils.ShoppingCartInfo cart_;
+		ArrayList<LineItem> line_items_;
 	}
 	
 	public static class JactAddress {
@@ -141,7 +180,9 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		CART_NOT_READY,
 		REWARDS_NOT_FETCHED,
 		INCOMPATIBLE_TYPE,
-		MAX_QUANTITY_EXCEEDED
+		MAX_QUANTITY_EXCEEDED,
+		EXPIRED_DATE,
+		NO_DATE
 	}
 	
 	private static final Map<Integer, Integer> cart_icon_map_;
@@ -157,20 +198,120 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
         cart_icon_map_ = Collections.unmodifiableMap(temp);
     }
     
-  public static synchronized ItemToAddStatus EnforceCartRules(int pid, int quantity, String type) {
-	 if (shopping_cart_ == null) return ItemToAddStatus.CART_NOT_READY;
-	 int max_quantity = ProductsActivity.GetMaxQuantity(pid);
-	 if (max_quantity == -2) {
-	   return ItemToAddStatus.REWARDS_NOT_FETCHED;
-	 } else if (max_quantity > 0 && max_quantity < quantity) {
-	   return ItemToAddStatus.MAX_QUANTITY_EXCEEDED;
-	 }
-	 for (ShoppingUtils.LineItem item : shopping_cart_.line_items_) {
-	   if (item.type_ != type) {
-	     return ItemToAddStatus.INCOMPATIBLE_TYPE;
-	   }
-	 }
-	 return ItemToAddStatus.OK;
+  // A master accessor/modifier function that will serve as the entry point to
+  // all shopping_cart_ functions. This way, access to the cart is controlled
+  // via a single synchronized method, preventing various multi-threading/synchronization
+  // issues.
+  public static synchronized boolean AccessCart(
+	  CartAccessType type, int pid, int quantity, String product_type, String webpage,
+	  LineItem line_item, ShoppingUtils.ShoppingCartInfo cart,
+	  CartAccessResponse response) {
+	Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Type: " + type);
+	if (type == CartAccessType.INITIALIZE_CART) {
+	  boolean to_return = InitializeOnce(); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return to_return;
+	} else if (type == CartAccessType.ITEM_TO_ADD_STATUS) {
+	  response.to_add_status_ = GetCartItemToAddStatus(line_item); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+	} else if (type == CartAccessType.ENFORCE_CART_RULES) {
+      response.to_add_status_ = EnforceCartRules(pid, quantity, product_type); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+	} else if (type == CartAccessType.PRINT_CART) {
+	  response.printed_cart_ = PrintCart(); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+	} else if (type == CartAccessType.GET_NUM_DISTINCT_CART_ITEMS) {
+	  response.num_distinct_cart_items_ = GetNumberDistinctCartItems(); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+	} else if (type == CartAccessType.GET_NUM_CART_ITEMS) {
+	  response.num_cart_items_ = GetTotalCartQuantity(); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+	} else if (type == CartAccessType.GET_TOTAL_CART_PRICE) {
+	  if (response == null) { 
+		Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+		return false;
+	  }
+	  GetTotalCartPrice(response.total_cart_price_); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+	} else if (type == CartAccessType.GET_LINE_ITEM) {
+	  response.line_item_ = GetCartItem(pid); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+	} else if (type == CartAccessType.GET_ORDER_ID) {
+	  if (shopping_cart_ == null) return false;
+	  response.order_id_ = shopping_cart_.order_id_; 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+	} else if (type == CartAccessType.ADD_INFO_FROM_REWARDS) {
+	  FillExtraProductDetailsFromRewardsPage(); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+	} else if (type == CartAccessType.SET_CART_FROM_WEBPAGE) {
+	  boolean to_return = SetShoppingCartFromGetCartStatic(webpage); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return to_return;
+	} else if (type == CartAccessType.UPDATE_LINE_ITEM) {
+	  boolean to_return = UpdateLineItemStatic(line_item); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return to_return;
+	} else if (type == CartAccessType.UPDATE_CART) {
+	  boolean to_return = UpdateServerShoppingCart(cart, response); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return to_return;
+	} else if (type == CartAccessType.REMOVE_QP_CART_ITEM) {
+	  RemoveQuantityPositiveCartItem(pid); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return true;
+    } else if (type == CartAccessType.GET_QUANTITY_POSITIVE_ITEMS) {
+      boolean to_return = GetQuantityPositiveCartItems(response); 
+	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+	  return to_return;
+	} else {
+	  Log.e("PHB ERROR", "ShoppingCartActivity::AccessCart. Unexpected cart action: " + type);
+	  return false;
+	}
+  }
+  
+  // Various API for AccessCart.
+  public static synchronized boolean AccessCart(
+		  CartAccessType type, int pid, int quantity, String product_type, LineItem line_item,
+		  CartAccessResponse response) {
+    return AccessCart(type, pid, quantity, product_type, "", line_item, null, response);
+  }
+  public static synchronized boolean AccessCart(
+		  CartAccessType type, int pid, int quantity, String product_type,
+		  CartAccessResponse response) {
+    return AccessCart(type, pid, quantity, product_type, null, response);
+  }
+  public static synchronized boolean AccessCart(
+		  CartAccessType type, LineItem line_item,
+		  CartAccessResponse response) {
+    return AccessCart(type, -1, -1, "", line_item, response);
+  }
+  public static synchronized boolean AccessCart(CartAccessType type, CartAccessResponse response) {
+    return AccessCart(type, -1, -1, "", null, response);
+  }
+  public static synchronized boolean AccessCart(CartAccessType type, String webpage) {
+    return AccessCart(type, -1, -1, "", webpage, null, null, null);
+  }
+  public static synchronized boolean AccessCart(CartAccessType type, int pid) {
+    return AccessCart(type, pid, -1, "", "", null, null, null);
+  }
+  public static synchronized boolean AccessCart(CartAccessType type, LineItem item) {
+    return AccessCart(type, -1, -1, "", item, null);
+  }
+  public static synchronized boolean AccessCart(
+	  CartAccessType type, ShoppingUtils.ShoppingCartInfo cart, CartAccessResponse response) {
+    return AccessCart(type, -1, -1, "", "", null, cart, response);
+  }
+  public static synchronized boolean AccessCart(CartAccessType type) {
+    return AccessCart(type, -1, -1, "", null, null);
   }
   
   public synchronized void GetInitialShoppingCart() {
@@ -197,7 +338,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	task.execute(params);
   }
   
-  public static synchronized boolean InitializeOnce() {
+  private static synchronized boolean InitializeOnce() {
 	boolean shopping_cart_was_null = (shopping_cart_ == null);
     if (shopping_cart_ == null) {
 	  shopping_cart_ = new ShoppingUtils.ShoppingCartInfo();
@@ -214,11 +355,11 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
   
   private synchronized void LoadView() {
 	if (view_has_been_loaded_) return;
-	Log.e("PHB TEMP", "SCA::LoadView. Loading view.");
+	Log.i("PHB TEMP", "SCA::LoadView. Loading view.");
 	view_has_been_loaded_ = true;
-    CheckForEmptyCart();
-    SetCartItemsUI();
-    adapter_.notifyDataSetChanged();
+    if (!IsCartEmpty() && SetCartItemsUI()) {
+      adapter_.notifyDataSetChanged();
+    }
     fadeAllViews(false);
   }
 
@@ -242,12 +383,10 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
         		                 findViewById(R.id.checkout_left_drawer),
         		                 JactNavigationDrawer.ActivityIndex.CHECKOUT_MAIN);
 	hay_active_cart_request_ = false;
-	ResetNumCsrfRequests();
     if (InitializeOnce()) {
-    	GetInitialShoppingCart();
+      GetInitialShoppingCart();
     }
   }
-  
 
   @Override
   protected void onResume() {
@@ -255,9 +394,9 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  // This ensures e.g. that when user hits 'back' button, the screen
 	  // is 'active' (not faded) when the user returns.
 	  view_has_been_loaded_ = false;
-      InitializeCallback(this);
-	  GetCart();
-	  Log.e("PHB TEMP", "SCA::onResume. num_server_tasks_: " + num_server_tasks_);
+	  ResetNumCsrfRequests();
+	  GetCart(this);
+	  Log.i("PHB TEMP", "SCA::onResume. num_server_tasks_: " + num_server_tasks_);
 	  if (!ProductsActivity.IsProductsListInitialized()) {
     	new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(
         		rewards_url_, "GET", "", "", GET_REWARDS_PAGE_TASK);
@@ -268,7 +407,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  } else {
 		fadeAllViews(true);
 	  }
-	  Log.e("PHB TEMP", "SCA::onResume. num_server_tasks_: " + num_server_tasks_);
+	  Log.i("PHB TEMP", "SCA::onResume. num_server_tasks_: " + num_server_tasks_);
 	  super.onResume();
   }
 
@@ -307,7 +446,13 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     if (items_to_remove_ != null) {
       Iterator<String> itr = items_to_remove_.iterator();
       while (itr.hasNext()) {
-	    RemoveQuantityPositiveCartItem(itr.next());
+    	String pid_str = itr.next();
+    	try {
+    	  int pid = Integer.parseInt(pid_str);
+    	  AccessCart(CartAccessType.REMOVE_QP_CART_ITEM, pid);
+    	} catch (NumberFormatException e) {
+    	  Log.e("PHB ERROR", "ShoppingCartActivity::onPause. Unable to parse as pid: " + pid_str);
+    	}
       } 
     }
     super.onPause();
@@ -342,19 +487,23 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     layout.startAnimation(alpha); // Add animation to the layout.
   }
   
-  private void CheckForEmptyCart() {
+  private boolean IsCartEmpty() {
     if (GetNumberCartItems() == 0) {
       TextView empty_msg = (TextView) findViewById(R.id.checkout_no_items_tv);
       empty_msg.setVisibility(View.VISIBLE);
       Button proceed_button = (Button) findViewById(R.id.proceed_to_checkout_button);
       proceed_button.setEnabled(false);
       proceed_button.setTextColor(getResources().getColor(R.color.translucent_black));
+      Log.i("PHB TEMP", "SCA::IsCartEmpty. True.");
+      return true;
     } else {
       TextView empty_msg = (TextView) findViewById(R.id.checkout_no_items_tv);
       empty_msg.setVisibility(View.GONE);
       Button proceed_button = (Button) findViewById(R.id.proceed_to_checkout_button);
       proceed_button.setEnabled(true);
       proceed_button.setTextColor(getResources().getColor(R.color.white));
+      Log.i("PHB TEMP", "SCA::IsCartEmpty. False.");
+      return false;
     }
   }
   
@@ -382,13 +531,22 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	return num_csrf_requests_;
   }
   
-  public static synchronized String PrintCart() {
+  private static synchronized String PrintCart() {
     if (shopping_cart_ == null) return "";
 	return shopping_cart_.toString();
   }
+  
+  private static synchronized int GetNumberCartItems() {
+    CartAccessResponse response = new CartAccessResponse();
+    if (!AccessCart(CartAccessType.GET_NUM_DISTINCT_CART_ITEMS, response)) {
+      Log.e("PHB ERROR", "ShoppingCartActivity::GetNumberCartItems. Failed Cart Access.");
+      return 0;
+    }
+    return response.num_distinct_cart_items_;
+  }
 	
-  public static synchronized int GetNumberCartItems() {
-	if (shopping_cart_ == null || shopping_cart_.line_items_ == null) return -1;
+  private static synchronized int GetNumberDistinctCartItems() {
+	if (shopping_cart_ == null || shopping_cart_.line_items_ == null) return 0;
 	int num_items = 0;
   	Iterator<ShoppingUtils.LineItem> itr = shopping_cart_.line_items_.iterator();
     while (itr.hasNext()) {
@@ -441,12 +599,29 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     return count;
   }
   
-  private void SetCartItemsUI() {
-	  items_listview_ = (ListView) findViewById(R.id.checkout_list);
+  private boolean SetCartItemsUI() {
+	items_listview_ = (ListView) findViewById(R.id.checkout_list);
 
-      // Getting adapter by passing xml data ArrayList
-      adapter_ = new CheckoutAdapter(this, R.layout.checkout_item, quantity_positive_shopping_cart_.line_items_);
-      items_listview_.setAdapter(adapter_);
+    // Getting adapter by passing xml data ArrayList
+	CartAccessResponse response = new CartAccessResponse();
+	response.line_items_ = new ArrayList<ShoppingUtils.LineItem>();
+	if (!AccessCart(CartAccessType.GET_QUANTITY_POSITIVE_ITEMS, response)) {
+	  Log.e("PHB ERROR", "ShoppingCartActivity::SetCartItemsUI. Unable to get QP cart items.");
+	  return false;
+	}
+	if (response.line_items_ == null || response.line_items_.size() == 0) {
+	  // No items to display.
+	  return false;
+	}
+    adapter_ = new CheckoutAdapter(this, R.layout.checkout_item, response.line_items_);
+    items_listview_.setAdapter(adapter_);
+    return true;
+  }
+  
+  private static boolean GetQuantityPositiveCartItems(CartAccessResponse response) {
+	if (response == null || response.line_items_ == null) return false;
+	response.line_items_ = (ArrayList<LineItem>) quantity_positive_shopping_cart_.line_items_.clone();
+	return true;
   }
   
   public static int GetCartIconResource(int pos) {
@@ -488,32 +663,20 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     } 
   }
   
-  public static synchronized ShoppingUtils.LineItem GetCartItem(int product_id) {
+  private static synchronized ShoppingUtils.LineItem GetCartItem(int product_id) {
     if (shopping_cart_ == null || shopping_cart_.line_items_ == null) return null;
-    Log.e("PHB TEMP", "SCA::GetCartItem. Num line items: " + shopping_cart_.line_items_.size() +
+    Log.i("PHB TEMP", "SCA::GetCartItem. Num line items: " + shopping_cart_.line_items_.size() +
     		          ", shopping cart: " + shopping_cart_.toString());
     Iterator<ShoppingUtils.LineItem> itr = shopping_cart_.line_items_.iterator();
     while (itr.hasNext()) {
       ShoppingUtils.LineItem item = itr.next();
-      Log.e("PHB TEMP", "ShoppingCartActivity::GetCartItem. product_id: " + product_id +
+      Log.i("PHB TEMP", "ShoppingCartActivity::GetCartItem. product_id: " + product_id +
     		            ", pid: " + item.pid_);
 	  if (item.pid_ == product_id) {
 	    return item;
 	  }
     }
-    Log.e("PHB TEMP", "ShoppingCartActivity::GetCartItem. No match found.");
-    return null;
-  }
-  
-  public static synchronized ShoppingUtils.LineItem GetCartItem(String product_id) {
-    if (shopping_cart_ == null || shopping_cart_.line_items_ == null) return null;
-    Iterator<ShoppingUtils.LineItem> itr = shopping_cart_.line_items_.iterator();
-    while (itr.hasNext()) {
-      ShoppingUtils.LineItem item = itr.next(); 
-	  if (Integer.toString(item.pid_) == product_id) {
-	    return item;
-	  }
-    }
+    Log.i("PHB TEMP", "ShoppingCartActivity::GetCartItem. No match found.");
     return null;
   }
   
@@ -542,100 +705,33 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       }
     }
     
-    private synchronized void RemoveQuantityZeroItems() {
-      Iterator<ShoppingUtils.LineItem> qp_itr = quantity_positive_shopping_cart_.line_items_.iterator();
-      while (qp_itr.hasNext()) {
-    	  ShoppingUtils.LineItem item = qp_itr.next(); 
-    	  if (item.quantity_ == 0) {
-    	    qp_itr.remove();
-    	  }
-      }
-    }
-    
-    public synchronized boolean RemoveQuantityPositiveCartItem(String product_id) {
-        if (quantity_positive_shopping_cart_ == null ||
-        	quantity_positive_shopping_cart_.line_items_ == null) {
-          return false;
-        }
-        Iterator<ShoppingUtils.LineItem> qp_itr = quantity_positive_shopping_cart_.line_items_.iterator();
-        while (qp_itr.hasNext()) {
-      	  ShoppingUtils.LineItem item = qp_itr.next(); 
-      	  if (Integer.toString(item.pid_) == product_id) {
-      	    qp_itr.remove();
-      	    return true;
-      	  }
-        }
-      	return false;
-      }
-    
-    public synchronized boolean RemoveCartItem(String product_id) {
-      if (shopping_cart_ == null || shopping_cart_.line_items_ == null) return false;
+    private synchronized static void RemoveQuantityZeroItems() {
+      if (quantity_positive_shopping_cart_ == null ||
+    	  quantity_positive_shopping_cart_.line_items_ == null) return;
       Iterator<ShoppingUtils.LineItem> qp_itr = quantity_positive_shopping_cart_.line_items_.iterator();
       while (qp_itr.hasNext()) {
     	ShoppingUtils.LineItem item = qp_itr.next(); 
-    	if (Integer.toString(item.pid_) == product_id) {
+    	if (item.quantity_ == 0) {
     	  qp_itr.remove();
-    	  break;
     	}
       }
-      Iterator<ShoppingUtils.LineItem> itr = shopping_cart_.line_items_.iterator();
-      while (itr.hasNext()) {
-    	ShoppingUtils.LineItem item = itr.next(); 
-    	if (Integer.toString(item.pid_) == product_id) {
-     	  // Update server, if this represents a change in the item's quantity.
-    	  if (item.quantity_ != 0) {
-    	    item.quantity_ = 0;
-     	    UpdateLineItem(item);
-    	  }
-    	  itr.remove();
-    	  return true;
-    	}
+    }
+    
+    public synchronized static boolean RemoveQuantityPositiveCartItem(int product_id) {
+      if (quantity_positive_shopping_cart_ == null ||
+    	  quantity_positive_shopping_cart_.line_items_ == null) {
+        return false;
       }
-      return false;
+      Iterator<ShoppingUtils.LineItem> qp_itr = quantity_positive_shopping_cart_.line_items_.iterator();
+      while (qp_itr.hasNext()) {
+  	    ShoppingUtils.LineItem item = qp_itr.next(); 
+  	    if (item.pid_ == product_id) {
+  	      qp_itr.remove();
+  	      return true;
+  	    }
+      }
+  	  return false;
     }
-    
-    public synchronized void ClearCart() {
-    	if (shopping_cart_ == null || shopping_cart_.line_items_ == null) return;
-    	CreateEmptyCart();
-    }
-    
-    public synchronized ItemToAddStatus GetCartItemToAddStatus(
-    		String product_id, String title, Bitmap bitmap, int bux, int points, int usd) {
-    	return GetCartItemToAddStatus(product_id, title, bitmap, bux, points, usd, 1);
-    }
-    
-	public synchronized ItemToAddStatus GetCartItemToAddStatus(
-			String product_id, String title, Bitmap bitmap, int bux, int points, int usd, int quantity) {
-		ShoppingUtils.LineItem item = new ShoppingUtils.LineItem();
-		try {
-		  item.pid_ = Integer.parseInt(product_id);
-		  item.title_ = title;
-		  item.product_icon_ = bitmap;
-		  item.cost_ = new ArrayList<Amount>();
-		  if (bux > 0) {
-		    Amount amount = new Amount();
-		    amount.type_ = ShoppingUtils.CurrencyCode.BUX;
-		    amount.price_ = bux;
-		    item.cost_.add(amount);
-		  }
-		  if (points > 0) {
-		    Amount amount = new Amount();
-		    amount.type_ = ShoppingUtils.CurrencyCode.POINTS;
-		    amount.price_ = points;
-		    item.cost_.add(amount);
-		  }
-		  if (usd > 0) {
-		    Amount amount = new Amount();
-		    amount.type_ = ShoppingUtils.CurrencyCode.USD;
-		    amount.price_ = usd;
-		    item.cost_.add(amount);
-		  }
-		  item.quantity_ = quantity;
-		} catch (NumberFormatException e) {
-		  return ItemToAddStatus.NO_PID;
-		}
-		return GetCartItemToAddStatus(item);
-	}
 	
 	private static synchronized void FillExtraProductDetailsFromRewardsPage() {
 		FillExtraProductDetailsFromRewardsPage(shopping_cart_);
@@ -648,16 +744,16 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	}
 	
 	private static synchronized void FillExtraProductDetailsFromRewardsPage(ShoppingUtils.ShoppingCartInfo cart_info) {
-	  if (cart_info == null) return;
-	  for (ShoppingUtils.LineItem item : shopping_cart_.line_items_) {
+	  if (cart_info == null || cart_info.line_items_ == null) return;
+	  for (ShoppingUtils.LineItem item : cart_info.line_items_) {
 		ProductsActivity.FillItemDetails(item);
 	  }
 	}
 	
 	private static synchronized void FillExtraProductDetailsFromRewardsPage(
 	    ShoppingUtils.ShoppingCartInfo cart_info, ShoppingUtils.LineItem item) {
-	  if (cart_info == null || item == null ) return;
-	  for (ShoppingUtils.LineItem cart_item : shopping_cart_.line_items_) {
+	  if (cart_info == null || cart_info.line_items_ == null || item == null ) return;
+	  for (ShoppingUtils.LineItem cart_item : cart_info.line_items_) {
 		if (cart_item.pid_ == item.pid_) {
 		  ProductsActivity.FillItemDetails(cart_item);
 		  break;
@@ -666,7 +762,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	}
 	
 	// Adds a item to the cart (or updates the item, in case it's already present in the cart).
-	public static synchronized ItemToAddStatus GetCartItemToAddStatus(ShoppingUtils.LineItem item) {
+	private static synchronized ItemToAddStatus GetCartItemToAddStatus(ShoppingUtils.LineItem item) {
 		if (item == null) {
 			Log.e("PHB ERROR", "ShoppingCartActivity::ItemToAddStatus. 1");
 			return ItemToAddStatus.NO_PID;
@@ -685,9 +781,56 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		if (GetNumberCartItems() >= MAX_CART_ITEMS) {
 			return ItemToAddStatus.CART_FULL;
 		}
+		if (item.is_drawing_) {
+		  // Check that item has drawing date, and that this date is in future.
+		  if (item.drawing_date_ == null) {
+		    return ItemToAddStatus.NO_DATE;
+		  } else if (!IsFutureDate(item.drawing_date_)) {
+		    return ItemToAddStatus.EXPIRED_DATE;
+		  }
+		}
 		return EnforceCartRules(item.pid_, 1 + item.quantity_, item.type_);
 	}
 	
+	private static boolean IsFutureDate(String date_str) {
+	  if (date_str == null) return false;
+	  DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+	  int prefix = date_str.indexOf(DATE_PREFIX);
+	  String date_to_parse = date_str;
+	  if (prefix >= 0) {
+		date_to_parse = date_str.substring(prefix + DATE_PREFIX.length());
+	  }
+	  try {
+		Date drawing_date = format.parse(date_to_parse);
+		DateFormat date_format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+		Calendar cal = Calendar.getInstance();
+		Date current_date = date_format.parse(date_format.format(cal.getTime()));
+		return drawing_date.after(current_date);
+	  } catch (ParseException e) {
+		Log.e("ShoppingCartActivity::IsFutureDate",
+			  "ParseException for date_to_parse " + date_to_parse + ": " + e.getMessage());
+		return false;
+	  }
+	}
+	  
+	private static synchronized ItemToAddStatus EnforceCartRules(int pid, int quantity, String type) {
+	  if (shopping_cart_ == null) return ItemToAddStatus.CART_NOT_READY;
+	  int max_quantity = ProductsActivity.GetMaxQuantity(pid);
+	  if (max_quantity == -2) {
+	    return ItemToAddStatus.REWARDS_NOT_FETCHED;
+	  } else if (max_quantity > 0 && max_quantity < quantity) {
+	    return ItemToAddStatus.MAX_QUANTITY_EXCEEDED;
+	  }
+	  if (shopping_cart_.line_items_ != null) {
+	    for (ShoppingUtils.LineItem item : shopping_cart_.line_items_) {
+	      if (item.quantity_ > 0 && item.type_ != type) {
+	        return ItemToAddStatus.INCOMPATIBLE_TYPE;
+	      }
+	    }
+	  }
+	  return ItemToAddStatus.OK;
+	}
+	  
 	public static JactAddress GetShippingAddress() {
 		return shipping_address_;
 	}
@@ -715,19 +858,29 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	}
 	
 	public void doProceedToShippingButtonClick(View view) {
-		if (GetTotalCartQuantity() == 0) {
-			dialog_ = new JactDialogFragment("No Items in Cart.");
-			dialog_.show(getSupportFragmentManager(), "No_items_in_cart");
-		} else {
-			if (shopping_cart_ == null || shopping_cart_.order_id_ == 0) {
-			  dialog_ = new JactDialogFragment("Order Id not found.");
-			  dialog_.show(getSupportFragmentManager(), "No_order_id");
-			} else {
-			  fadeAllViews(true);
-			  CheckoutActivity.SetOrderId(shopping_cart_.order_id_);
-			  startActivity(new Intent(this, CheckoutActivity.class));
-			}
+	    CartAccessResponse response = new CartAccessResponse();
+	    if (!AccessCart(CartAccessType.GET_NUM_CART_ITEMS, response)) {
+	      Log.e("PHB ERROR", "ShoppingCartActivity::doProceedToShippingButtonClick. Failed Cart Access.");
+	    } else if (response.num_cart_items_ == 0) {
+		  dialog_ = new JactDialogFragment("No Items in Cart.");
+		  dialog_.show(getSupportFragmentManager(), "No_items_in_cart");
+		  return;
+	    }
+	    
+	    CartAccessResponse response_two = new CartAccessResponse();
+		if (!AccessCart(CartAccessType.GET_ORDER_ID, response_two)) {
+		  Log.e("PHB ERROR", "ShoppingCartActivity::doProceedToShippingButtonClick. " +
+		                     "Unable to get order id.");
+		  return;
 		}
+	    if (response_two.order_id_ == 0) {
+		  dialog_ = new JactDialogFragment("Order Id not found.");
+		  dialog_.show(getSupportFragmentManager(), "No_order_id");
+		  return;
+		}
+		fadeAllViews(true);
+		CheckoutActivity.SetOrderId(response_two.order_id_);
+		startActivity(new Intent(this, CheckoutActivity.class));
 
 		// PHB Old: The following code will execute the checkout process within the App
 		// (i.e. it won't use a WebView of the Mobile website).
@@ -756,8 +909,10 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		BillingActivity.WriteAddresses(user_info.billing_addresses_);
 		
 		// Get total price for all items in cart, and make sure User has enough BUX and Points.
-		TotalCartPrice total_price = new TotalCartPrice();
-		GetTotalCartPrice(total_price);
+		CartAccessResponse response = new ShoppingCartActivity.CartAccessResponse();
+		response.total_cart_price_ = new TotalCartPrice();
+		AccessCart(CartAccessType.GET_TOTAL_CART_PRICE, response);
+		TotalCartPrice total_price = response.total_cart_price_; 
 		Log.e("PHB", "Total cart value: " + total_price.toString());
 		if (user_info.points_ < total_price.points_) {
 			fadeAllViews(false);
@@ -781,15 +936,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		}
 	}
 	
-	public static synchronized int GetOrderId() {
-		if (shopping_cart_ == null) {
-			Log.e("PHB ERROR", "ShoppingCartActivity::GetOrderId. Unexpected call to GetOrderId: Shopping cart not intialized yet.");
-			return -1;
-		}
-		return shopping_cart_.order_id_;
-	}
-	
-	public static synchronized boolean SetShoppingCartFromGetCartStatic(String webpage) {
+	private static synchronized boolean SetShoppingCartFromGetCartStatic(String webpage) {
 	  if (!ShoppingUtils.ParseCartFromGetCartPage(webpage, shopping_cart_)) return false;
 	  
 	  // Copy shopping_cart_ over to quantity_positive_shopping_cart_.
@@ -799,13 +946,19 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  if (quantity_positive_shopping_cart_.line_items_ == null) {
 		quantity_positive_shopping_cart_.line_items_ = new ArrayList<LineItem>();
 	  }
-	  Iterator<ShoppingUtils.LineItem> sc_itr = shopping_cart_.line_items_.iterator();
-      while (sc_itr.hasNext()) {
-    	ShoppingUtils.LineItem sc_item = sc_itr.next();
-    	quantity_positive_shopping_cart_.line_items_.add(sc_item);
-      }
+	  if (shopping_cart_.line_items_ != null) {
+	    quantity_positive_shopping_cart_.line_items_ =
+	        (ArrayList<LineItem>) shopping_cart_.line_items_.clone();
+	  }
+	  
+	  //PHBIterator<ShoppingUtils.LineItem> sc_itr = shopping_cart_.line_items_.iterator();
+      //PHBwhile (sc_itr.hasNext()) {
+      //PHB	ShoppingUtils.LineItem sc_item = sc_itr.next();
+      //PHB	quantity_positive_shopping_cart_.line_items_.add(sc_item);
+      //PHB}
 	  
 	  // Remove any items with quantity zero.
+	  if (quantity_positive_shopping_cart_.line_items_ == null) return true;
 	  Iterator<ShoppingUtils.LineItem> qp_itr = quantity_positive_shopping_cart_.line_items_.iterator();
       while (qp_itr.hasNext()) {
     	ShoppingUtils.LineItem qp_item = qp_itr.next();
@@ -818,17 +971,25 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	
 	public static synchronized boolean UpdateLineItemStatic(ShoppingUtils.LineItem line_item) {
 	  if (shopping_cart_ == null || line_item == null) return false;
+	  if (quantity_positive_shopping_cart_ == null) {
+		Log.e("ShoppingCartActivity::UpdateLineItemStatic",  "Unexpected null qp_shopping_cart.");
+		quantity_positive_shopping_cart_ = new ShoppingUtils.ShoppingCartInfo();
+	  }
+	  
+	  // Create shopping cart line_items array if they are null.
 	  if (shopping_cart_.line_items_ == null) {
 	    shopping_cart_.line_items_ = new ArrayList<LineItem>(1);
 	    quantity_positive_shopping_cart_.line_items_ = new ArrayList<LineItem>(1);
 	  }
-	  // Look to see if there is already a line_item with a matching PID; if so, update that
-	  // line item.
+	  
+	  // Update quantity_positive_shopping_cart_ first. Check if this line_item already exists
+	  // there, if so, update quantity.
       Iterator<ShoppingUtils.LineItem> qp_itr = quantity_positive_shopping_cart_.line_items_.iterator();
       boolean found_pid = false;
       while (qp_itr.hasNext()) {
     	ShoppingUtils.LineItem item = qp_itr.next();
     	if (item.pid_ == line_item.pid_) {
+    	  // Found item. Update quantity.
     	  found_pid = true;
     	  if (line_item.quantity_ == 0) {
     	    qp_itr.remove();
@@ -836,7 +997,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     	  } else {
 	        item = line_item;
 			FillExtraProductDetailsFromRewardsPage(item);
-	        break;
+			break;
     	  }
 	    }
 	  }
@@ -857,45 +1018,128 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  return true;
 	}
 	
-	private synchronized void UpdateShoppingCart(ShoppingUtils.ShoppingCartInfo temp_cart) {
-	  if (temp_cart == null) return;
+	private synchronized static boolean UpdateServerShoppingCart(
+		ShoppingUtils.ShoppingCartInfo temp_cart, CartAccessResponse response) {
+	  if (temp_cart == null) return false;
 	  
-	  temp_shopping_cart_ = temp_cart;
 	  // App has no knowledge of a current shopping cart, copy parsed cart into shopping_cart_.
 	  if (shopping_cart_.revision_id_ == 0) {
-	    shopping_cart_ = temp_shopping_cart_;
-	    quantity_positive_shopping_cart_ = temp_shopping_cart_;
+	    shopping_cart_ = new ShoppingCartInfo(temp_cart);
+	    quantity_positive_shopping_cart_ = new ShoppingCartInfo(temp_cart);
 	    RemoveQuantityZeroItems();
 	    FillExtraProductDetailsFromRewardsPage();
-	    return;
+	    return false;
 	  }
 
 	  // App already has a cart on hand. Compare App's version to server's version, and update
 	  // whichever one is older.
-	  if (temp_shopping_cart_.timestamp_ >= shopping_cart_.timestamp_) {
-	    shopping_cart_ = temp_shopping_cart_;
-	    quantity_positive_shopping_cart_ = temp_shopping_cart_;
+	  if (temp_cart.timestamp_ >= shopping_cart_.timestamp_) {
+	    shopping_cart_ = temp_cart;
+	    quantity_positive_shopping_cart_ = temp_cart;
 	    RemoveQuantityZeroItems();
 	    FillExtraProductDetailsFromRewardsPage();
-	    return;
+	    return false;
 	  }
 	  // App's version of cart is more up-to-date. Update server's cart.
-	  Log.w("PHB TEMP", "ShoppingCartActivity::UpdateShoppingCart. Calling UpdateCart. Old timestamp: " +
+	  Log.w("PHB TEMP", "ShoppingCartActivity::UpdateServerShoppingCart. Calling UpdateCart. Old timestamp: " +
 	                     shopping_cart_.revision_id_ + ", new timestamp: " +
-	                     temp_shopping_cart_.revision_id_);
-	  UpdateCart();
+	                     temp_cart.revision_id_);
+	  response.cart_ = new ShoppingUtils.ShoppingCartInfo();
+	  response.cart_ = shopping_cart_;
+	  return true;
 	}
 	
-	private synchronized void UpdateCart() {
+    // Updates server's cart (represented by old_cart) to reflect the changes in new_cart.
+    // Note that since this method is only called when timestamp on new_cart is more recent
+    // than on old_cart, this method should only be called when the App wants to update the
+    // cart, by changing quantity of an item (i.e. there should only be one difference between
+    // the old_cart and the new_cart).
+	private synchronized void UpdateCart(
+		ShoppingUtils.ShoppingCartInfo new_cart, ShoppingUtils.ShoppingCartInfo old_cart) {
+	  if (new_cart == null) {
+	    Log.e("PHB ERROR", "ShoppingCartActivity::UpdateCart. Null new cart.");
+	    return;
+	  }
+	  
 	  hay_active_cart_request_ = true;
 	  // First check that we have an old cart to compare/update.
-      if (temp_shopping_cart_ == null) {
+      if (old_cart == null) {
     	num_server_tasks_++;
+	    Log.e("PHB ERROR", "ShoppingCartActivity::UpdateCart. Null old cart.");
 	    new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(
 			jact_shopping_cart_url_, "GET", "", "", ShoppingUtils.GET_CART_TASK);
         return;
       }
-      
+    
+      // Check if there is an existing cart.
+      if (old_cart.order_id_ == 0) {
+        if (new_cart == null || new_cart.line_items_ == null || new_cart.line_items_.isEmpty()) {
+          CreateEmptyCart();
+          return;
+        } else if (new_cart.line_items_.size() == 1) {
+          CreateCartWithLineItem(new_cart.line_items_.get(0));
+          return;
+        } else {
+    	  // New cart should differ from the old cart by at most one line item. Log error and abort.
+    	  Log.e("PHB ERROR", "ShoppingCartActivity::UpdateCart. Expected at most one line item, but found " +
+    	                     new_cart.line_items_.size() + ". Cart:\n" + new_cart.toString());
+    	  return;
+        }
+      }
+    
+      // There is an existing cart. Verify order_id's match.
+      if (old_cart.order_id_ != new_cart.order_id_) {
+        Log.e("PHB ERROR", "ShoppingCartActivity::UpdateCart. Old order id (" + old_cart.order_id_ +
+    	  	               ") does not match new order id: " + new_cart.order_id_);
+        return;
+      }
+    
+      // Go through new_cart's line items. They should exactly match the old_cart's line items,
+      // except possibly for one line item that needs to be updated.
+      int line_item_to_update = -1;
+      int updated_quantity = -1;
+      Iterator<LineItem> new_items_itr = new_cart.line_items_.iterator();
+  	  while (new_items_itr.hasNext()) {
+        LineItem new_item = new_items_itr.next();
+        updated_quantity = -1;
+        boolean found_match = false;
+        Iterator<LineItem> old_items_itr = old_cart.line_items_.iterator();
+        while (!found_match && old_items_itr.hasNext()) {
+          LineItem old_item = old_items_itr.next();
+         if (new_item.id_ == old_item.id_) {
+            // Sanity check line item is consistent with PID, Entity ID, and order_id.
+            if (new_item.order_id_ != old_item.order_id_ || new_item.pid_ != old_item.pid_ ||
+        	    new_item.entity_id_ != old_item.entity_id_) {
+              Log.e("PHB ERROR", "ShoppingCartActivity::UpdateCart. Mismatching line item " +
+        	                     new_item.id_ + ". New item: " + new_item.toString() +
+        	                     ". Old item: " + old_item.toString());
+              return;
+            }
+            found_match = true;
+            if (new_item.quantity_ != old_item.quantity_) {
+              updated_quantity = new_item.quantity_;
+            }
+          }
+        }
+        // Check if we need to update this line item.
+        if (!found_match || updated_quantity != -1) {
+          // As mentioned above, we only allow a single update in this method.
+    	  if (line_item_to_update != -1) {
+    	    Log.e("PHB ERROR", "ShoppingCartActivity::UpdateCart. Multiple line items to update: " +
+	                           line_item_to_update + " and " + new_item.id_);
+    	    return;
+    	  }
+    	  line_item_to_update = new_item.id_;
+    	  updated_quantity = new_item.quantity_;
+        }
+      }
+  	
+  	  // Check if there were any mismatching items; return without additional work if not; otherwise
+  	  // update server's cart.
+  	  if (line_item_to_update == -1) {
+  		return;
+  	  }
+  	  
       // Need cookies and csrf_token to update server's cart.
 	  SharedPreferences user_info = getSharedPreferences(
           getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
@@ -919,13 +1163,9 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       
       // Update server's cart.
       num_server_tasks_++;
-	  if (!ShoppingUtils.UpdateServerCart(this, cookies, csrf_token, temp_shopping_cart_, shopping_cart_)) {
-	    num_server_tasks_--;
-		dialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
-		dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
-	  }
+  	  ShoppingUtils.UpdateLineItem(this, cookies, csrf_token, line_item_to_update, updated_quantity);
 	}
-	
+	/* TODO(PHB): Remove below function (no longer used)
 	public synchronized void UpdateLineItemIfModified(ShoppingUtils.LineItem line_item) {
 	  if (line_item == null || line_item.pid_ == 0) return;
 	  
@@ -947,7 +1187,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		                ShoppingUtils.PrintLineItemHumanReadable(line_item) + "Old line item:\n" +
                         ShoppingUtils.PrintLineItemHumanReadable(existing_item));
 	  UpdateLineItem(line_item);
-	}
+	}*/
 	
 	public synchronized void UpdateLineItem(ShoppingUtils.LineItem line_item) {
       hay_active_cart_request_ = true;
@@ -1017,16 +1257,51 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
    		dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
    	  }
 	}
+	
+	public synchronized void CreateCartWithLineItem(LineItem line_item) {
+      hay_active_cart_request_ = true;
+      // Need cookies and csrf_token to update server's cart.
+   	  SharedPreferences user_info = getSharedPreferences(
+         getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+      String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+      if (cookies.isEmpty()) {
+   	    String username = user_info.getString(getString(R.string.ui_username), "");
+   	    String password = user_info.getString(getString(R.string.ui_password), "");
+   	    num_server_tasks_++;
+        ShoppingUtils.RefreshCookies(
+            this, username, password, ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK +
+            ShoppingUtils.TASK_CART_SEPARATOR + ShoppingUtils.PrintLineItem(line_item));
+        return;
+      }
+      String csrf_token = user_info.getString(getString(R.string.ui_csrf_token), "");
+      if (csrf_token.isEmpty()) {
+    	num_server_tasks_++;
+        if (!ShoppingUtils.GetCsrfToken(
+        	    this, cookies, ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK +
+        	    ShoppingUtils.TASK_CART_SEPARATOR + ShoppingUtils.PrintLineItem(line_item))) {
+          num_server_tasks_--;
+        }
+        return;
+      }
+      
+      // Update line-item in server's cart.
+      num_server_tasks_++;
+   	  if (!ShoppingUtils.CreateServerCart(
+   			  this, cookies, csrf_token, line_item)) {
+   		dialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
+   		dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
+   	  }
+	}
 
 	@Override
 	public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
 	  // Look for TASK_TASK_SEPARATOR. If present, store token to SharedPreferences, then
       // strip it (and things before it) out of extra_params, and do next task.
-	  Log.w("PHB Temp", "ShoppingCartActivity::ProcessUrlResponse. Response:\n" + webpage);
+	  Log.d("PHB Temp", "ShoppingCartActivity::ProcessUrlResponse. Response:\n" + webpage);
 	  num_server_tasks_--;
 	  if (extra_params.equalsIgnoreCase(GET_REWARDS_PAGE_TASK)) {
 	    ProductsActivity.SetProductsList(webpage);
-	    FillExtraProductDetailsFromRewardsPage();
+	    AccessCart(CartAccessType.ADD_INFO_FROM_REWARDS);
 	  } else if (extra_params.equalsIgnoreCase(GET_SHIPPING_INFO_TASK)) {
 		ProcessShippingInfoResponse(webpage, cookies);
 	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CART_TASK)) {
@@ -1037,7 +1312,10 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		  dialog_.show(getSupportFragmentManager(), "Unable_to_fetch_cart");
 		return;
 		}
-	    UpdateShoppingCart(temp_cart);
+		CartAccessResponse response = new CartAccessResponse();
+	    if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
+	      UpdateCart(temp_cart, response.cart_);
+	    }
 	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK)) {
 		SaveCookies(cookies);
 		GetInitialShoppingCart();
@@ -1049,7 +1327,10 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		  dialog_.show(getSupportFragmentManager(), "Unable_to_fetch_cart");
 		return;
 		}
-	    UpdateShoppingCart(temp_cart);
+		CartAccessResponse response = new CartAccessResponse();
+	    if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
+	      UpdateCart(temp_cart, response.cart_);
+	    }
 	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK)) {
 	    SaveCookies(cookies);
 	    CreateEmptyCart();
@@ -1072,27 +1353,24 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		    Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
 		    return;
 		  }
-		  if (new_line_items.size() != 1 || !UpdateLineItemStatic(new_line_items.get(0))) {
+		  if (new_line_items.size() != 1 ||
+			  !AccessCart(CartAccessType.UPDATE_LINE_ITEM, new_line_items.get(0))) {
 			// TODO(PHB): Handle this error (e.g. popup warning to user).
 			Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse cart response. " +
 			                   "Num new line items: " + new_line_items.size() + "; Webpage response:\n" + webpage);
 		  }
 		  // PHB Temp.
-		  Log.w("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Updated line item. Now shopping cart is: " +
-		                    ShoppingCartActivity.PrintCart());
+		  //Log.w("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Updated line item. Now shopping cart is: " +
+		  //                  ShoppingCartActivity.PrintCart());
 		} catch (JSONException e) {
 		  // TODO(PHB): Handle this error (e.g. popup warning to user).
 		  Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse add line-item response " +
 		                     "from server. Exception: " + e.getMessage() + "; webpage response:\n" + webpage);
 		}
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK)) {
-	    SaveCookies(cookies);
-	    UpdateCart();
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK)) {
-	    SaveCsrfToken(webpage);
-	    UpdateCart();
 	  } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
 			     (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0 ||
+				  extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) == 0 ||
+				  extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) == 0 ||
 			      extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
 			      extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0)) {
 	    // Create Cart was called to create a new cart/order, but the new item was not
@@ -1101,9 +1379,11 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		String parsed_line_item = extra_params.substring(
 		    extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
 		    ShoppingUtils.TASK_CART_SEPARATOR.length());
-		if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0) {
+		if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
+			extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) == 0) {
 		  SaveCookies(cookies);
-		} else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0) {
+		} else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
+				   extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) == 0) {
 		  SaveCsrfToken(webpage);
 		} else if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0) {
 		  // Parse webpage to a new cart.
@@ -1113,9 +1393,23 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 			dialog_.show(getSupportFragmentManager(), "Unable_to_fetch_cart");
 			return;
 		  }
-		  UpdateShoppingCart(temp_cart);
+	      CartAccessResponse response = new CartAccessResponse();
+		  if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
+		    UpdateCart(temp_cart, response.cart_);
+		  }
 		}
-		UpdateLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
+		if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) == 0 ||
+		    extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) == 0) {
+		  CreateCartWithLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
+		} else {
+		  UpdateLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
+		}
+	  //} else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK)) {
+		//SaveCookies(cookies);
+	    //UpdateCart();
+	  //} else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK)) {
+	    //SaveCsrfToken(webpage);
+	    //UpdateCart();
 	  } else {
 	    Log.e("PHB ERROR", "ShoppingCartActivity::ProcessUrlResponse. Returning from " +
 	                       "unrecognized task:\n" + extra_params);
@@ -1167,7 +1461,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		                   "; extra_params: " + extra_params + ". Trying parent resolution.");
 	    // ProcessFailedCartResponse will decrement num_server_tasks_, so re-increment it here so the net is no change.
 	    num_server_tasks_++;
-	    ProcessFailedCartResponse(status, extra_params);
+	    ProcessFailedCartResponse(this, status, extra_params);
 	  }
 	}
 }

@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
+import com.example.jactfirstdemo.ShoppingCartActivity.CartAccessResponse;
 import com.example.jactfirstdemo.ShoppingCartActivity.ItemToAddStatus;
 
 import android.content.Context;
@@ -69,9 +70,7 @@ public class ProductsActivity extends JactActionBarActivity
     private ArrayList<String> product_types_;
     
     private JactNavigationDrawer navigation_drawer_;
-    private Menu menu_bar_;
     private JactDialogFragment dialog_;
-	
     private enum SortState {
 		  NONE,
 		  ASC,
@@ -89,8 +88,11 @@ public class ProductsActivity extends JactActionBarActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        ShoppingCartActivity.InitializeOnce();
+ 
+    	if (ShoppingCartActivity.AccessCart(
+    		    ShoppingCartActivity.CartAccessType.INITIALIZE_CART)) {
+    	  GetInitialShoppingCart();
+    	}
         SetProductsList();
         SetHeaderBar();
         SetFilterBar();
@@ -110,14 +112,14 @@ public class ProductsActivity extends JactActionBarActivity
       filter_category_ = "";
       filter_type_ = "";
       adapter_.getFilter().filter("");
+      ShoppingCartActivity.ResetNumCsrfRequests();
       //PHBadapter_.notifyDataSetChanged();
   	  // Re-enable parent activity before transitioning to the next activity.
   	  // This ensures e.g. that when user hits 'back' button, the screen
   	  // is 'active' (not faded) when the user returns.
   	  
       // Set Cart Icon.
-      InitializeCallback(this);
-  	  GetCart();
+  	  GetCart(this);
 	  fadeAllViews(num_server_tasks_ > 0);
  	  super.onResume();
     }
@@ -448,7 +450,11 @@ public class ProductsActivity extends JactActionBarActivity
     
     public static synchronized void SetProductsList(String webpage) {
         products_list_ = new ArrayList<ProductsPageParser.ProductItem>();
+        Log.d("PHB", "ProductsActivity::SetProductsList. Rewards page response:\n" + webpage);
         ProductsPageParser.ParseRewardsPage(webpage, products_list_);
+        for (ProductsPageParser.ProductItem item : products_list_) {
+          Log.d("PHB", "Parsed Rewards item: " + item.toString());
+        }
     }
     
     private synchronized void SetProductsList() {
@@ -520,10 +526,36 @@ public class ProductsActivity extends JactActionBarActivity
       return -2;
     }
     
+    public synchronized void GetInitialShoppingCart() {
+    	// Need cookies and csrf_token to update server's cart.
+    	SharedPreferences user_info = getSharedPreferences(
+            getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+        String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+        if (cookies.isEmpty()) {
+          String username = user_info.getString(getString(R.string.ui_username), "");
+          String password = user_info.getString(getString(R.string.ui_password), "");
+          num_server_tasks_++;
+          ShoppingUtils.RefreshCookies(
+              this, username, password, ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK);
+          return;
+        }
+        
+        num_server_tasks_++;
+        GetUrlTask task = new GetUrlTask(this, GetUrlTask.TargetType.JSON);
+    	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
+    	params.url_ = jact_shopping_cart_url_;
+    	params.connection_type_ = "GET";
+    	params.extra_info_ = ShoppingUtils.GET_CART_TASK;
+    	params.cookies_ = cookies;
+    	task.execute(params);
+      }
+    
     // Implement this same way e.g. ShoppingCartActivity.CreateEmptyCart(): Do checks on cookies and
     // csrf_token. Then implement all the successful/failed responses.
     private void AddLineItem(ShoppingUtils.LineItem line_item) {
     	if (line_item == null) return;
+    	Log.i("PHB TEMP", "ProductsActivity::AddLineItem. Adding line item:\n" +
+    	                  ShoppingUtils.PrintLineItemHumanReadable(line_item));
     	
         // Need cookies and csrf_token to create server's cart.
      	SharedPreferences user_info = getSharedPreferences(
@@ -541,7 +573,9 @@ public class ProductsActivity extends JactActionBarActivity
 
     	// Make sure shopping cart has been initialized. If not, fetch it from server; then
     	// add the line item in a subsequent call to server.
-    	if (ShoppingCartActivity.InitializeOnce()) {
+        // UPDATE: We call InitializeOnce in onCreate(), and there is no way to reach here
+        // without going through there, so no need to call InitializeOnce below.
+    	/*if (ShoppingCartActivity.InitializeOnce()) {
     	  // PHB Temp: remove below log line.
     	  num_server_tasks_++;
     	  Log.e("PHB TEMP", "ProductsActivity::AddLineItem. Initializing shopping_cart_");
@@ -555,17 +589,17 @@ public class ProductsActivity extends JactActionBarActivity
     	  params.cookies_ = cookies;
     	  task.execute(params);
 	      return;
-	    }
+	    }*/
     	
     	// Shopping Cart should be initialized if we reach this point. Set order id from it.
-    	line_item.order_id_ = ShoppingCartActivity.GetOrderId();
-    	// PHB TEMP: Remove below code, as there are times when it may be valid to have an order_id of 0,
-    	// e.g. when there is no existing order yet.
-    	Log.e("PHB TEMP", "ProductsActivity::AddLineItem. Just fetched order_id: " + line_item.order_id_);
-    	if (line_item.order_id_ <= 0) {
-    		Log.e("PHB TEMP", "ProductsActivity::AddLineItem. Artificially aborting due to '0' order id.");
-    		return;
-    	}
+        CartAccessResponse response = new CartAccessResponse();
+		if (!ShoppingCartActivity.AccessCart(
+		  ShoppingCartActivity.CartAccessType.GET_ORDER_ID, response)) {
+		  Log.e("PHB ERROR", "ProductsActivity::AddLineItem. Failed to get order id.");
+		  return;
+		}
+        line_item.order_id_ = response.order_id_;
+    	Log.i("PHB TEMP", "ProductsActivity::AddLineItem. Just fetched order_id: " + line_item.order_id_);
     	
         String csrf_token = user_info.getString(getString(R.string.ui_csrf_token), "");
         if (csrf_token.isEmpty()) {
@@ -642,12 +676,12 @@ public class ProductsActivity extends JactActionBarActivity
       ClearSortStates();
       if (current == SortState.NONE || current == SortState.DES) {
         // Sort by buxs (Ascending).
-    	adapter_.sort(JactComparators.BuxComparatorAscending());
+    	adapter_.sort(JactComparators.PriceComparatorAscending());
         bux_sort_ = SortState.ASC;
         bux_arrow_.setImageResource(R.drawable.up_arrow);
       } else if (current == SortState.ASC) {
         // Toggle to sort by buxs (Descending).
-      	adapter_.sort(JactComparators.BuxComparatorDescending());
+      	adapter_.sort(JactComparators.PriceComparatorDescending());
         bux_sort_ = SortState.DES;
         bux_arrow_.setImageResource(R.drawable.down_arrow);
       }
@@ -657,7 +691,7 @@ public class ProductsActivity extends JactActionBarActivity
     }
     
     public void doPopupDismissClick(View view) {
-    	product_listener_.DismissClick();
+      product_listener_.DismissClick();
     }
     
     public void doDialogOkClick(View view) {
@@ -670,7 +704,8 @@ public class ProductsActivity extends JactActionBarActivity
     	ShoppingUtils.LineItem item = new ShoppingUtils.LineItem();
     	// Get the product details that are available from the Product Popup View (pid, title, etc.).
     	ShoppingCartActivity.ItemStatus item_status = product_listener_.GetProductDetails(item);
-    	Log.e("PHB TEMP", "ProductsActivity::doAddToCartClick. Item: " + ShoppingUtils.PrintLineItem(item));
+    	Log.i("PHB TEMP", "ProductsActivity::doAddToCartClick. Item: " +
+    	                  ShoppingUtils.PrintLineItemHumanReadable(item));
     	if (item_status != ShoppingCartActivity.ItemStatus.VALID) {
     	  String message = "";
     	  if (item_status == ShoppingCartActivity.ItemStatus.INVALID_PRICE) {
@@ -683,8 +718,8 @@ public class ProductsActivity extends JactActionBarActivity
     		  message = "No Product Title";
     	  }
 	      product_listener_.DismissClick();
-  		  Log.e("PHB ERROR", "ProductsActivity::doAddToCartClick. Unable to add item to cart." +
-                "\nLine Item: " + ShoppingUtils.PrintLineItem(item));
+  		  Log.e("PHB ERROR", "ProductsActivity::doAddToCartClick. Unable to add item to cart: " +
+                "Item Status: " + item_status + "\nLine Item: " + ShoppingUtils.PrintLineItem(item));
 	      dialog_ = new JactDialogFragment("Unable to Add Item: " + message);
 	      dialog_.show(getSupportFragmentManager(), "Bad_Add_Product_Dialog");
 	      return;
@@ -701,7 +736,15 @@ public class ProductsActivity extends JactActionBarActivity
     		                   item.toString());
     		return;
     	}
-    	ItemToAddStatus add_status = ShoppingCartActivity.GetCartItemToAddStatus(item);
+    	
+    	// Get Item_to_add_status.
+    	ShoppingCartActivity.CartAccessResponse response = new ShoppingCartActivity.CartAccessResponse();
+    	if (!ShoppingCartActivity.AccessCart(
+    		    ShoppingCartActivity.CartAccessType.ITEM_TO_ADD_STATUS, item, response)) {
+    	  Log.e("PHB ERROR", "ProductsActivity::doAddToCartClick. Failed Cart Access.");
+    	  return;
+    	}
+    	ItemToAddStatus add_status = response.to_add_status_;
     	String title = "";
     	String message = "";
     	if (add_status == ItemToAddStatus.CART_FULL) {
@@ -714,12 +757,19 @@ public class ProductsActivity extends JactActionBarActivity
     		title = "Unable to Add Item";
     		message = "Product Id not recognized; Try again later";
     	} else if (add_status == ItemToAddStatus.INCREMENTED) {
-    		ShoppingUtils.LineItem line_item = ShoppingCartActivity.GetCartItem(item.pid_);
-    		line_item.quantity_++;
-    		Log.e("PHB TEMP", "ProductsActivity::doAddToCartButton. Incrementing to: " + line_item.quantity_);
-    		AddLineItem(line_item);
-    		title = "Item Added to Cart";
-    		message = "Item already existed in cart; increased quantity for this product by one";
+  	      ShoppingCartActivity.CartAccessResponse response_two = new ShoppingCartActivity.CartAccessResponse();
+  	      response_two.line_item_ = new ShoppingUtils.LineItem();
+  	      if (!ShoppingCartActivity.AccessCart(
+  	    	      ShoppingCartActivity.CartAccessType.GET_LINE_ITEM, item.pid_, -1, "", response_two)) {
+  	    	Log.e("PHB ERROR", "CheckoutAdapter::onItemSelected. Failed Cart Access.");
+  	    	return;
+  	      }
+  		  ShoppingUtils.LineItem line_item = response_two.line_item_;
+          line_item.quantity_++;
+    	  Log.i("PHB TEMP", "ProductsActivity::doAddToCartButton. Incrementing to: " + line_item.quantity_);
+    	  AddLineItem(line_item);
+    	  title = "Item Added to Cart";
+    	  message = "Item already existed in cart; increased quantity for this product by one";
     	} else if (add_status == ItemToAddStatus.CART_NOT_READY) {
     	  title = "Unable to Add Item";
     	  message = "Still communicating with Jact for Cart.";
@@ -733,10 +783,16 @@ public class ProductsActivity extends JactActionBarActivity
     	} else if (add_status == ItemToAddStatus.REWARDS_NOT_FETCHED) {
       	  title = "Unable to Add Item";
       	  message = "Still communicating with Jact to get product details.";
+    	} else if (add_status == ItemToAddStatus.EXPIRED_DATE) {
+      	  title = "Unable to Add Item";
+          message = "Drawing Date has passed.";
+    	} else if (add_status == ItemToAddStatus.NO_DATE) {
+    	  title = "Unable to Add Item";
+      	  message = "Unable to find a Drawing Date for this product.";
     	} else if (add_status == ItemToAddStatus.OK) {
     		//PHBShoppingUtils.LineItem line_item = ShoppingCartActivity.GetCartItem(item.pid_);
     		//PHBAddLineItem(line_item);
-    		Log.e("PHB TEMP", "ProductsActivity::doAddToCartButton. Adding new item.");
+    		Log.i("PHB TEMP", "ProductsActivity::doAddToCartButton. Adding new item.");
     		AddLineItem(item);
     		title = "Item Added to Cart";
     	} else {
@@ -751,7 +807,8 @@ public class ProductsActivity extends JactActionBarActivity
     	
     	// Display popup alerting user of the results of the attempt to add item to cart.
     	if (!title.isEmpty() && !title.equals("Item Added to Cart")) {
-    	  Log.e("PHB ERROR", "ProductsActivity::doAddToCartClick. Unable to add item to cart." +
+    	  Log.w("PHB ERROR", "ProductsActivity::doAddToCartClick. Unable to add item to cart. " +
+    	                     "Title of Error: " + title + ", message: " + message +
     	                     "\nLine Item: " + ShoppingUtils.PrintLineItem(item));
     	  dialog_ = new JactDialogFragment(title, message);
     	  dialog_.show(getSupportFragmentManager(), "Bad_Add_Product_Dialog");
@@ -796,7 +853,10 @@ public class ProductsActivity extends JactActionBarActivity
 	  // Look for TASK_TASK_SEPARATOR. If present, store token to SharedPreferences, then
       // strip it (and things before it) out of extra_params, and do next task.
 	  num_server_tasks_--;
-	  if (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
+	  if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK) == 0) {
+		SaveCookies(cookies);
+		GetInitialShoppingCart();
+	  } else if (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
 		  extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0) {
 		try {
 		  JSONObject line_item = new JSONObject(webpage);
@@ -812,15 +872,17 @@ public class ProductsActivity extends JactActionBarActivity
 		    Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
 		    return;
 		  }
-		  if (new_line_items.size() != 1 || !ShoppingCartActivity.UpdateLineItemStatic(new_line_items.get(0))) {
+		  if (new_line_items.size() != 1 ||
+			  !ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.UPDATE_LINE_ITEM,
+					                           new_line_items.get(0))) {
 			// TODO(PHB): Handle this error (e.g. popup warning to user).
 			Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse cart response. " +
 			                   "Num new line items: " + new_line_items.size() + "; Webpage response:\n" + webpage);
 			return;
 		  }
 		  // PHB Temp.
-		  Log.w("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Updated line item. Now shopping cart is: " +
-		                    ShoppingCartActivity.PrintCart());
+		  //Log.w("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Updated line item. Now shopping cart is: " +
+		  //                  ShoppingCartActivity.PrintCart());
     	  dialog_ = new JactDialogFragment("Added Item to Cart");
     	  dialog_.show(getSupportFragmentManager(), "Finally_added_item");
     	  SetCartIcon(this);
@@ -834,21 +896,30 @@ public class ProductsActivity extends JactActionBarActivity
 	  } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
 			     (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
 			      extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
+			      extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0 ||
 			      extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0)) {
 		String parsed_line_item = extra_params.substring(
 		    extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
 		    ShoppingUtils.TASK_CART_SEPARATOR.length());
 		if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0) {
+		  Log.e("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Got cookies: " + cookies);
 		  SaveCookies(cookies);
 		} else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0) {
 		  SaveCsrfToken(webpage);
 		} else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
-		  if (!ShoppingCartActivity.SetShoppingCartFromGetCartStatic(webpage)) {
-			// TODO(PHB): Handle this gracefully (popup a dialog).
+		  if (!ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.SET_CART_FROM_WEBPAGE, webpage)) {
+			// TODO(PHB): Handle this gracefully (pop-up a dialog).
 			Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse cart response:\n" + webpage);
 			return;
 		  }
+		} else if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0) {
+		  if (!ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.SET_CART_FROM_WEBPAGE, webpage)) {
+		    // TODO(PHB): Handle this gracefully (pop-up a dialog).
+	        Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Create_cart: Unable to parse cart response:\n" + webpage);
+		    return;
+		  }
 		}
+		Log.i("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Successfully got cart/cookies/csrf token: " + webpage);
 		AddLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
 	  } else {
 	    Log.w("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Returning from " +
@@ -856,7 +927,7 @@ public class ProductsActivity extends JactActionBarActivity
 	    // ProcessCartResponse below is going to decrement num_server_tasks_. Artificially
 	    // increase it here, so that there is a zero net effect.
 	    num_server_tasks_++;
-	    ProcessCartResponse(webpage, cookies, extra_params);
+	    ProcessCartResponse(this, webpage, cookies, extra_params);
 	    return;
 	  }
 	  if (num_server_tasks_ == 0) {
@@ -879,7 +950,8 @@ public class ProductsActivity extends JactActionBarActivity
 	  num_server_tasks_--;
 	  if (status == GetUrlTask.FetchStatus.ERROR_CSRF_FAILED) {
 		if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
-			(extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
+			(extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0 ||
+			 extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
 			 extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0)) {
 		  String parsed_line_item = extra_params.substring(
 		      extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
@@ -893,13 +965,16 @@ public class ProductsActivity extends JactActionBarActivity
 	      if (!ShoppingUtils.GetCsrfToken(this, cookies, task)) {
 	        num_server_tasks_--;
 	      }
+		} else {
+		  Log.e("PHB TEMP", "ProductsActivity::ProcessFailedResponse. Status: " + status +
+                            "; extra_params: " + extra_params);
 		}
 	  } else {
 	    Log.w("PHB TEMP", "ProductsActivity::ProcessFailedResponse. Status: " + status +
 		                   "; extra_params: " + extra_params + ". Attempting parent resolution.");
 	    // ProcessFailedCartResponse will decrement num_server_tasks_, so re-increment it here so the net is no change.
 	    num_server_tasks_++;
-	    ProcessFailedCartResponse(status, extra_params);
+	    ProcessFailedCartResponse(this, status, extra_params);
 	  }
 	}
 }

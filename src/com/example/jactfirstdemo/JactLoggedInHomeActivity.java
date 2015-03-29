@@ -241,9 +241,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
     	SetUserPoints(webpage);
     } else if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK) == 0) {
   	  SaveCookies(cookies);
-  	  GetCart();
+  	  GetCart(this);
   	} else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
-  	  if (!ShoppingCartActivity.SetShoppingCartFromGetCartStatic(webpage)) {
+  	  if (!ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.SET_CART_FROM_WEBPAGE, webpage)) {
   		// TODO(PHB): Handle this gracefully (popup a dialog).
   		Log.e("PHB ERROR", "JactActionBarActivity::ProcessCartResponse. Unable to parse cart response:\n" + webpage);
   	  }
@@ -288,7 +288,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
 	// TODO(PHB): Implement this.
 	Log.e("PHB ERROR", "JLIHA::ProcessFailedResponse. Status: " + status);
     if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
-  	  GetCookiesThenGetCart();
+  	  GetCookiesThenGetCart(this);
   	  return;
     }
 	num_server_tasks_--;

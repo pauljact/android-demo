@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 
+import com.example.jactfirstdemo.ShoppingCartActivity.CartAccessResponse;
 import com.example.jactfirstdemo.ShoppingUtils.Amount;
 
 import android.content.Context;
@@ -209,7 +210,22 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implem
 		if (parent.getId() == R.id.cart_quantity_spinner) {
 		  LinearLayout holder_ll = (LinearLayout) parent.getParent().getParent();
 		  TextView pid_tv = (TextView) holder_ll.getChildAt(REL_POS_OF_PID);
-		  ShoppingUtils.LineItem item = ShoppingCartActivity.GetCartItem(pid_tv.getText().toString());
+		  int pid = 0;
+		  try {
+			pid = Integer.parseInt(pid_tv.getText().toString());
+		  } catch (NumberFormatException e) {
+		    Log.e("PHB ERROR", "CheckoutAdapter::onItemSelectd. Unable to parse PID|" +
+		                       pid_tv.getText().toString() + "|as int.");
+		    return;
+		  }
+	      ShoppingCartActivity.CartAccessResponse response = new ShoppingCartActivity.CartAccessResponse();
+	      response.line_item_ = new ShoppingUtils.LineItem();
+	      if (!ShoppingCartActivity.AccessCart(
+	    	      ShoppingCartActivity.CartAccessType.GET_LINE_ITEM, pid, -1, "", response)) {
+	    	Log.e("PHB ERROR", "CheckoutAdapter::onItemSelected. Failed Cart Access.");
+	    	return;
+	      }
+		  ShoppingUtils.LineItem item = response.line_item_;
 		  
 		  // Check if the selected position matches the current quantity for this item.
 		  if (item.quantity_ == position) {
@@ -218,9 +234,14 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implem
 		    		     ShoppingUtils.PrintLineItemHumanReadable(item));
 		    return;
 		  }
-		  
-		  ShoppingCartActivity.ItemToAddStatus item_status =
-			  ShoppingCartActivity.EnforceCartRules(item.pid_, position, item.type_); 
+
+		  CartAccessResponse response_two = new CartAccessResponse();
+		  if (!ShoppingCartActivity.AccessCart(
+			  ShoppingCartActivity.CartAccessType.ENFORCE_CART_RULES, item.pid_, position, item.type_, response_two)) {
+			Log.e("PHB ERROR", "CheckoutAdapter::onItemSelected. Failed CartAccessResponse.");
+			return;
+		  }
+		  ShoppingCartActivity.ItemToAddStatus item_status = response_two.to_add_status_;
 		  if (item_status != ShoppingCartActivity.ItemToAddStatus.OK) {
 			if (item_status == ShoppingCartActivity.ItemToAddStatus.INCOMPATIBLE_TYPE) {
 			  parent_activity_.DisplayPopup("Unable to add item: Cart already contains items of different type.",
@@ -247,7 +268,6 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implem
 		    // Manually update cart icon, since technically the item has not yet been removed from
 		    // the cart yet.
 		    int current_icon_index = parent_activity_.GetCartIconPos();
-		    Log.e("PHB TEMP", "CheckoutAdapter::onItemSelected. current_icon_index: " + current_icon_index);
 		    if (current_icon_index >= 0) {
 		      ShoppingCartActivity.SetCartIcon(parent_activity_.menu_bar_, current_icon_index + 1);
 		    }

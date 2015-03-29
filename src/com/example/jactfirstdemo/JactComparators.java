@@ -123,38 +123,83 @@ public class JactComparators {
 	};
   }
   
-  static public Comparator<ProductsPageParser.ProductItem> BuxComparatorAscending() {
+  static public Comparator<ProductsPageParser.ProductItem> PriceComparatorAscending() {
     return new Comparator<ProductsPageParser.ProductItem>() {
 	    public int compare(ProductsPageParser.ProductItem arg0,
 	    		           ProductsPageParser.ProductItem arg1) {
-	    	if ((arg1.usd_ != null && arg1.usd_.isEmpty()) !=
-	    		(arg0.usd_ != null && arg0.usd_.isEmpty())) {
-	    		return (arg0.usd_ != null && arg0.usd_.isEmpty()) ? -1 : 1;
-	    	} else if (arg0.usd_ != null && !arg0.usd_.isEmpty() && !arg0.usd_.equalsIgnoreCase(arg1.usd_)) {
-	    		return arg0.usd_.compareTo(arg1.usd_);
-	    	} else if ((arg1.points_ != null && arg1.points_.isEmpty()) != 
-	    			   (arg0.points_ != null && arg0.points_.isEmpty())) {
-	    		return (arg0.points_ != null && arg0.points_.isEmpty()) ? -1 : 1;
-	    	} else if (arg0.points_ != null && !arg0.points_.isEmpty() && !arg0.points_.equalsIgnoreCase(arg1.points_)) {
-	    		return arg0.points_.compareTo(arg1.points_);
-	    	} else if ((arg1.bux_ != null && arg1.bux_.isEmpty()) !=
-		    		   (arg0.bux_ != null && arg0.bux_.isEmpty())) {
-		    	return (arg0.bux_ != null && arg0.bux_.isEmpty()) ? -1 : 1;
-	    	} else if (arg0.bux_ != null && arg0.bux_.isEmpty()) {
-	    		return arg0.bux_.compareTo(arg1.bux_);
+	    	if (arg0.usd_ != null && !arg0.usd_.isEmpty()) {
+	    	  // First item has non-zero USD price. Check the other.
+	    	  if (arg1.usd_ != null && !arg1.usd_.isEmpty()) {
+	    		// Second item also has non-zero USD. Return the lesser.
+			 	if (!arg0.usd_.equals(arg1.usd_)) {
+	    		  return arg0.usd_.compareTo(arg1.usd_);
+			 	}
+	    	  } else {
+	    		// Second item does NOT have USD price. Rank second item second.
+	    		return 1;
+	    	  }
+	    	} else if (arg1.usd_ != null && !arg1.usd_.isEmpty()) {
+	          // The second has USD, but the first doesn't. Rank first item second.
+	    	  return -1;
 	    	}
-	    	// Only reach here if all three prices of both items are null and/or empty.
-	    	return 0;
-	    }
+	    	
+	    	// Either neither item has USD, or they have equal USD amounts. Compare POINTS.
+	    	if (arg0.points_ != null && arg0.points_.isEmpty()) {
+	    	  // First item has non-zero POINTS price. Check the other.
+	    	  if (arg1.points_ != null && !arg1.points_.isEmpty()) {
+	    		// Second item also has non-zero POINTS. Return the lesser.
+			 	return arg0.points_.compareTo(arg1.points_);
+	    	  } else {
+	    		// Second item does NOT have POINTS price. Rank second item second.
+	    		return 1;
+	    	  }
+	    	} else if (arg1.points_ != null && !arg1.points_.isEmpty()) {
+		      // The second has POINTS, but the first doesn't. Rank first item second.
+		      return -1;
+	    	}
+		 	// Only reach here if all three prices of both items are null and/or empty.
+		 	return 0;
+	      }
 	};
   }
 
-  static public Comparator<ProductsPageParser.ProductItem> BuxComparatorDescending() {
+  static public Comparator<ProductsPageParser.ProductItem> PriceComparatorDescending() {
     return new Comparator<ProductsPageParser.ProductItem>() {
 	    public int compare(ProductsPageParser.ProductItem arg0,
 	    		           ProductsPageParser.ProductItem arg1) {
-	    	return arg1.bux_.compareTo(arg0.bux_);
-	    }
-	};
-  }
+	    	if (arg0.usd_ != null && !arg0.usd_.isEmpty()) {
+	    	  // First item has non-zero USD price. Check the other.
+	    	  if (arg1.usd_ != null && !arg1.usd_.isEmpty()) {
+	    		// Second item also has non-zero USD. Return the lesser.
+	    		if (!arg0.usd_.equals(arg1.usd_)) {
+			 	  return arg1.usd_.compareTo(arg0.usd_);
+	    		}
+	    	  } else {
+	    		// Second item does NOT have USD price. Rank second item first.
+	    		return -1;
+	    	  }
+	    	} else if (arg1.usd_ != null && !arg1.usd_.isEmpty()) {
+	          // The second has USD, but the first doesn't. Rank first item first.
+	    	  return 1;
+	    	}
+	    	
+	    	// Either neither item has USD, or they have equal USD amounts. Compare POINTS.
+	    	if (arg0.points_ != null && arg0.points_.isEmpty()) {
+	    	  // First item has non-zero POINTS price. Check the other.
+	    	  if (arg1.points_ != null && !arg1.points_.isEmpty()) {
+	    		// Second item also has non-zero POINTS. Return the lesser.
+			 	return arg1.points_.compareTo(arg0.points_);
+	    	  } else {
+	    		// Second item does NOT have POINTS price. Rank second item first.
+	    		return -1;
+	    	  }
+	    	} else if (arg1.points_ != null && !arg1.points_.isEmpty()) {
+		      // The second has POINTS, but the first doesn't. Rank first item first.
+		      return 1;
+	    	}
+		 	// Only reach here if all three prices of both items are null and/or empty.
+		 	return 0;
+	      }
+	    };
+    }
 }

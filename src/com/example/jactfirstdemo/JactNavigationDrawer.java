@@ -279,6 +279,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   }
   
   private void startEarnActivity() {
+	EarnActivity.SetShouldRefreshEarnItems(true);
     parent_activity_.startActivity(new Intent(parent_activity_, EarnActivity.class));
   }
   

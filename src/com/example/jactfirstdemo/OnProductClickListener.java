@@ -160,8 +160,11 @@ public class OnProductClickListener implements OnItemClickListener {
 		item.product_icon_ = Bitmap.createBitmap(view_holder_.img_.getDrawingCache());
 		view_holder_.img_.setDrawingCacheEnabled(false);
 		
-		// Fetch from the Popup whether this product is a drawing or not.
+		// Fetch from the Popup whether this product is a drawing or not; and if so, grab date.
 		item.is_drawing_ = view_holder_.drawing_.isShown();
+		if (item.is_drawing_ && view_holder_.date_ != null) {
+		  item.drawing_date_ = view_holder_.date_.getText().toString();
+		}
 		
 		// Fetch Product Title from the Popup.
 		item.title_ = view_holder_.title_.getText().toString();

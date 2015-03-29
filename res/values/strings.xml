@@ -106,7 +106,7 @@
     <!-- Miscellaneous -->
     <string name="empty_string"></string>
     <string name="null_str">null</string>
-    <string name="app_name">Jact</string>
+    <string name="app_name">JACT</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="jact_simple_name">JACT</string>
@@ -116,6 +116,7 @@
     <string name="jact_password">PASSWORD</string>
     <string name="jact_login">LOG IN</string>
     <string name="youtube_id">youtube_id</string>
+    <string name="earn_now">Earn Now</string>
     <!-- End Miscellaneous -->
     
     <!-- Quantity 0-10 -->

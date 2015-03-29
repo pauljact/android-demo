@@ -72,11 +72,17 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  ERROR_IO_EXCEPTION,
 	  ERROR_OTHER_EXCEPTION,
 	  ERROR_EMPTY_WEBPAGE,
-	  ERROR_BAD_PARAMS,
+	  ERROR_BAD_TYPE_PARAMS,
+	  ERROR_BAD_POST_PARAMS,
+	  ERROR_BAD_URL_PARAMS,
 	  ERROR_BAD_FORM_ITEM,
 	  ERROR_INPUT_STREAM_ERROR,
 	  ERROR_OUTPUT_STREAM_ERROR,
 	  ERROR_UNABLE_TO_CONNECT,
+	  ERROR_PROTOCOL_EXCEPTION,
+	  ERROR_WRITE_RESPONSE_ENCODING,
+	  ERROR_WRITE_RESPONSE_IO,
+	  ERROR_UNSUPPORTED_CONTENT_TYPE
   }
   
   static final String COOKIES_HEADER = "Set-Cookie";
@@ -202,12 +208,12 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	} catch (MalformedURLException e1) {
 	  // TODO(PHB) Auto-generated catch block
 	  e1.printStackTrace();
-      status_ = FetchStatus.ERROR_BAD_PARAMS;
+      status_ = FetchStatus.ERROR_BAD_URL_PARAMS;
 	  return null;
 	}
     String connection_type = params[1];  // Should be 'GET' or 'POST' or 'PUT'.
     if (!connection_type.equals("GET") && !connection_type.equals("POST") && !connection_type.equals("PUT")) {
-      status_ = FetchStatus.ERROR_BAD_PARAMS;
+      status_ = FetchStatus.ERROR_BAD_TYPE_PARAMS;
       return null;
     }
       
@@ -230,7 +236,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	} catch (ProtocolException e1) {
 	  // TODO Auto-generated catch block
 	  e1.printStackTrace();
-      status_ = FetchStatus.ERROR_BAD_PARAMS;
+      status_ = FetchStatus.ERROR_PROTOCOL_EXCEPTION;
 	  return null;
 	}
     connection.setDoInput(true);
@@ -244,7 +250,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
       ArrayList<HeaderInfo> header_info = new ArrayList<HeaderInfo>();
       params[3] = ParseHeadersFromParams(params[3], header_info);
       if (params[3].equals("PHB_ERROR")) {
-        status_ = FetchStatus.ERROR_BAD_PARAMS;
+        status_ = FetchStatus.ERROR_BAD_POST_PARAMS;
         return null;
       }
       for (HeaderInfo info : header_info) {
@@ -283,12 +289,12 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  } catch (UnsupportedEncodingException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	    status_ = FetchStatus.ERROR_BAD_PARAMS;
+	    status_ = FetchStatus.ERROR_WRITE_RESPONSE_ENCODING;
 		return null;
 	  } catch (IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	    status_ = FetchStatus.ERROR_BAD_PARAMS;
+	    status_ = FetchStatus.ERROR_WRITE_RESPONSE_IO;
 		return null;
 	  }
     }
@@ -321,6 +327,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
         return null;
       }
     } catch (IOException e) {
+      Log.w("PHB ERROR", "GetUrlTask::doInBackground. Failed to get response code and/or InputStream.");
 	  // Surround fetching of the response code with try/catch is neccessary when the server returns 401
 	  // errors; see e.g. this post explaining it:
 	  // http://stackoverflow.com/questions/17121213/java-io-ioexception-no-authentication-challenges-found
@@ -338,9 +345,13 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  }
 	  if (responsecode == 401) {
 	    Log.w("PHB", "GetUrlTask::doInBackground. CSRF Failed. Response (" +
-	                 responsecode + "); response:\n" + input_stream +
+	                 responsecode + "); response:" + input_stream +
 	                 ". PHB. Error string: " + error_stream);
-	    status_ = FetchStatus.ERROR_CSRF_FAILED;
+	    if (error_stream.indexOf("\"Missing required argument data\"") >= 0) {
+	      status_ = FetchStatus.ERROR_UNSUPPORTED_CONTENT_TYPE;
+	    } else {
+	      status_ = FetchStatus.ERROR_CSRF_FAILED;
+	    }
 	  } else if (responsecode == 400) {
 	    Log.e("PHB ERROR", "GetUrlTask::doInBackground. Server didn't recognize a form field. Response (" +
 	                       responsecode + "); response:\n" + input_stream +
@@ -411,7 +422,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
       List<String> cookies_header_list = header_fields.get(COOKIES_HEADER);
       if (cookies_header_list != null && !cookies_header_list.isEmpty()) {
         cookies_ = TextUtils.join(COOKIES_SEPERATOR, cookies_header_list);
-        Log.w("PHB", "BHP cookie header_length: " + cookies_header_list.size() + ", saving cookies:\n" + cookies_);
+        Log.i("PHB", "BHP cookie header_length: " + cookies_header_list.size() + ", saving cookies:\n" + cookies_);
       }
     }
     status_ = FetchStatus.SUCCESS;
@@ -528,9 +539,12 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
       Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Null pointer here");
       return;
     }
-    if (status_ == null || status_ != FetchStatus.SUCCESS) {
+    if (status_ == null) {
       Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Null status");
   	  callback_.ProcessFailedResponse(status_, extra_params_);
+    } else if (status_ != FetchStatus.SUCCESS) {
+      Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Non Success");
+      callback_.ProcessFailedResponse(status_, extra_params_);
     } else if (webpage_ != null && !webpage_.isEmpty()) {
       callback_.ProcessUrlResponse(webpage_, cookies_, extra_params_);
     } else if (picture_ != null) {

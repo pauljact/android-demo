@@ -252,6 +252,12 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
         TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
         tv.setVisibility(View.INVISIBLE);
         tv.setVisibility(View.VISIBLE);
+    } else if (status == GetUrlTask.FetchStatus.ERROR_BAD_POST_PARAMS) {
+    	dialog_ = new JactDialogFragment("Must Enter Username and Password");
+    	dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog_Post_Params");
+        TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
+        tv.setVisibility(View.INVISIBLE);
+        tv.setVisibility(View.VISIBLE);
     } else {
       dialog_ = new JactDialogFragment(
           "Unable to Reach Jact",

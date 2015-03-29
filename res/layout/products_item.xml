@@ -37,7 +37,7 @@
     <!-- Title Of Product-->
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_weight="0.41"
+        android:layout_weight="0.60"
         android:background="@color/transparent"
         android:orientation="vertical">
     <TextView
@@ -45,11 +45,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/transparent"
-        android:text="Drawing"
+        android:text="Prize Drawing"
         android:textColor="#FF2200"
         android:typeface="sans"
         android:textSize="18sp"
         android:textStyle="bold"/>
+    <!-- Drawing Date -->
+    <TextView
+        android:id="@+id/product_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#343434"
+        android:background="@color/transparent"
+        android:textSize="10sp"/>
     <TextView
         android:id="@+id/product_title"
         android:layout_width="wrap_content"
@@ -61,17 +69,7 @@
         android:textStyle="bold"/>
     </LinearLayout>
  
-    <!-- Drawing Date -->
-    <TextView
-        android:id="@+id/product_date"
-        android:layout_width="0dp"
-        android:layout_weight="0.19"
-        android:layout_height="wrap_content"
-	    android:gravity="right"
-        android:textColor="#343434"
-        android:background="@color/transparent"
-        android:textSize="10sp"
-    />
+
  
     <!-- Price -->
     <LinearLayout
@@ -93,7 +91,7 @@
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:background="@color/transparent"
-	        android:gravity="center"
+	        android:gravity="right"
 	        android:textSize="10sp"
 	        android:textColor="@color/dark_blue"
 	        android:textStyle="bold"

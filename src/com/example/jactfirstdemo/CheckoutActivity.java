@@ -32,8 +32,11 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
   private JactNavigationDrawer navigation_drawer_;
   public static Cookie cookie_ = null;
   private static int order_id_;
+  private JactDialogFragment dialog_;
   private static final String checkout_url_ = "https://us7.jact.com:3081/checkout/";
+  private static final String cart_url_ = "https://us7.jact.com:3081/cart";
   //private static final String checkout_url_ = "http://us7.jact.com:3080/checkout/";
+  //private static final String cart_url_ = "http://us7.jact.com:3080/cart";
 
   public static synchronized void SetOrderId(int order_id) {
     order_id_ = order_id;
@@ -71,22 +74,26 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
         getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
     String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
     List<String> cookie_headers = Arrays.asList(cookies.split(GetUrlTask.COOKIES_SEPERATOR));
-    java.net.CookieManager cookie_manager = new java.net.CookieManager();
-    //java.net.CookieManager cookie_manager = java.net.CookieManager.getInstance();
-    for (String cookie : cookie_headers) {
-      cookie_manager.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
+    HttpCookie cookie = null;
+    for (String cookie_str : cookie_headers) {
+      cookie = HttpCookie.parse(cookie_str).get(0);
     }
-    //CookieSyncManager.createInstance(this);
-    //CookieManager cookieManager = CookieManager.getInstance();
-    //Cookie session_cookie = cookie_;
-    //if (session_cookie != null) {
-    //	cookieManager.removeSessionCookie();
-    //}
-    // http://stackoverflow.com/questions/1652850/android-webview-cookie-problem
+    if (cookie != null) {
+      CookieManager cookie_manager = CookieManager.getInstance();
+      cookie_manager.setCookie(
+    		  checkout_url_,
+    		  cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain());
+    }
     // Set webview from checkout_url_.
-    // TODO(PHB): Handle case order_id_ hasn't yet been initialized and/or is '0'.
+    String url_to_load = checkout_url_ + Integer.toString(order_id_);
+    if (order_id_ <= 0) {
+      url_to_load = cart_url_;
+      Log.e("PHB ERROR", "CheckoutActivity::onResume. Order id: " + order_id_);
+      onBackPressed();
+    }
+    Log.e("PHB TEMP", "CheckoutActivity::onResume. Loading Checkout webpage with order id: " + order_id_);
     WebView web_view = (WebView) findViewById(R.id.checkout_mobile_webview);
-    web_view.loadUrl(checkout_url_ + Integer.toString(order_id_));
+    web_view.loadUrl(url_to_load);
     web_view.setWebViewClient(new WebViewClient() {
     	@Override
     	public void onPageFinished(WebView view, String url) {
@@ -154,7 +161,7 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
 
   @Override
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
-    ProcessCartResponse(webpage, cookies, extra_params);
+    ProcessCartResponse(this, webpage, cookies, extra_params);
   }
 
   @Override
@@ -164,6 +171,6 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
 
   @Override
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
-	ProcessFailedCartResponse(status, extra_params);
+	ProcessFailedCartResponse(this, status, extra_params);
   }
 }

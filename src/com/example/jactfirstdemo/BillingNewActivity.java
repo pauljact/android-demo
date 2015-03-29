@@ -396,7 +396,7 @@ public class BillingNewActivity extends JactActionBarActivity implements OnItemS
 
   @Override
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
-	ProcessCartResponse(webpage, cookies, extra_params);
+	ProcessCartResponse(this, webpage, cookies, extra_params);
   }
 
   @Override
@@ -406,6 +406,6 @@ public class BillingNewActivity extends JactActionBarActivity implements OnItemS
 
   @Override
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
-	ProcessFailedCartResponse(status, extra_params);
+	ProcessFailedCartResponse(this, status, extra_params);
   }
 }

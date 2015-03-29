@@ -214,12 +214,13 @@
    	</RelativeLayout>
     <!-- End No Products Message -->
             
+    <!-- List of Products -->
     <LinearLayout
         android:layout_below="@id/checkout_no_items_rl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-    <!-- List of Products -->
+    <!-- Product List -->
     <ListView
         android:id="@+id/checkout_list"
         android:layout_width="match_parent"
@@ -229,6 +230,8 @@
         android:dividerHeight="1dp"
         android:listSelector="@drawable/products_bg_selector"
     />
+    <!--  End Product List -->
+	</LinearLayout>
     <!-- End List of Products -->
     
     <!-- Proceed to Checkout Button -->
@@ -256,7 +259,6 @@
 	   	    android:onClick="doProceedToShippingButtonClick"
 	   	    android:text="@string/proceed_to_shipping"
 	   	    android:textColor="@color/white"/>
-	</LinearLayout>
 	</LinearLayout>
     <!-- End Proceed to Checkout Button -->
 
