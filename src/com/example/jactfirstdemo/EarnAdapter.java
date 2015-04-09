@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
  
-public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> {
+public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implements AdapterWithImages {
 
 	private EarnActivity parent_activity_;
 	private ArrayList<EarnPageParser.EarnItem> earn_items_;
@@ -47,7 +47,8 @@ public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> {
         	parent_activity_.getApplicationContext(), this, activity_name);
 	}
 	
-	public void alertPositionsReady (HashSet<Integer> positions) {
+	@Override
+	public void AlertPositionsReady (HashSet<Integer> positions) {
 		if (positions == null) {
 			Log.e("PHB ERROR", "EarnAdapter::alertPositionsReady. Null positions");
 			return;

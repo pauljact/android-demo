@@ -7,11 +7,14 @@ import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 class JactDialogFragment extends DialogFragment {
 	private String title_;
 	private String message_;
+	private String button_one_text_;
+	private String button_two_text_;
 	
 	public JactDialogFragment() {
 	  title_ = "";
@@ -26,6 +29,14 @@ class JactDialogFragment extends DialogFragment {
 	  message_ = message;
 	}
 	
+	public void SetButtonOneText(String text) {
+	  button_one_text_ = text; 
+	}
+	
+	public void SetButtonTwoText(String text) {
+	  button_two_text_ = text; 
+	}
+	
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
@@ -35,13 +46,28 @@ class JactDialogFragment extends DialogFragment {
 
         // Inflate and set the layout for the dialog.
         // Pass null as the parent view because its going in the dialog layout.
-        View dialog_view = inflater.inflate(R.layout.jact_dialog_layout, null);
+        View dialog_view;
+        TextView title_tv;
+        TextView message_tv;
+        Button button_one;
+        Button button_two = null;
+        if (button_two_text_ == null || button_two_text_.isEmpty()) {
+          dialog_view = inflater.inflate(R.layout.jact_dialog_layout, null);
+          title_tv = (TextView) dialog_view.findViewById(R.id.jact_dialog_title);
+          message_tv = (TextView) dialog_view.findViewById(R.id.jact_dialog_message);
+          button_one = (Button) dialog_view.findViewById(R.id.jact_dialog_button);
+        } else {
+          dialog_view = inflater.inflate(R.layout.jact_dialog_two_layout, null);
+          title_tv = (TextView) dialog_view.findViewById(R.id.jact_dialog_two_title);
+          message_tv = (TextView) dialog_view.findViewById(R.id.jact_dialog_two_message);
+          button_one = (Button) dialog_view.findViewById(R.id.jact_dialog_two_button);
+          button_two = (Button) dialog_view.findViewById(R.id.jact_dialog_two_button_two);
+        }
         
         // Construct Dialog.
         builder.setView(dialog_view);
         
         // Add title, if present.
-        TextView title_tv = (TextView) dialog_view.findViewById(R.id.jact_dialog_title);
         if (title_tv == null) {
           Log.e("PHB ERROR", "JactDialogFragment::Constructor. Null title text view");
           return builder.create();
@@ -56,7 +82,6 @@ class JactDialogFragment extends DialogFragment {
         }
         
         // Add message, if present.
-        TextView message_tv = (TextView) dialog_view.findViewById(R.id.jact_dialog_message);
         if (message_tv == null) {
           Log.e("PHB ERROR", "JactDialogFragment::Constructor. Null message text view");
           return builder.create();
@@ -66,6 +91,15 @@ class JactDialogFragment extends DialogFragment {
         } else {
           message_tv.setHeight(0);
           message_tv.setVisibility(View.INVISIBLE);
+        }
+        
+        // Set Button One text, if present.
+        if (button_one_text_ != null && !button_one_text_.isEmpty()) {
+          button_one.setText(button_one_text_);
+        }
+        // Set Button Two text, if present.
+        if (button_two_text_ != null && !button_two_text_.isEmpty() && button_two != null) {
+          button_two.setText(button_two_text_);
         }
         
         return builder.create();

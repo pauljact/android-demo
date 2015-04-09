@@ -19,8 +19,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class FaqActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private JactNavigationDrawer navigation_drawer_;
   private static String url_;
+  private static final String faq_url_ = "http://m.jact.com:3080/faq-page";
   private static String title_;
   
   public static synchronized void SetUrlAndTitle(String url, String title) {
@@ -31,31 +31,18 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
-    super.onCreate(savedInstanceState);
-    num_server_tasks_ = 0;
-    setContentView(R.layout.faq_layout);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
-    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(R.string.faq_label);
-    setSupportActionBar(toolbar);
-    getSupportActionBar().setHomeButtonEnabled(true);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    super.onCreate(savedInstanceState, R.string.faq_label,
+		       R.layout.faq_layout,
+		       JactNavigationDrawer.ActivityIndex.FAQ);
     
     // Initialize url_ and title_ to dummy values if necessary (they should get re-written
     // to valid values before they are actually used).
     if (url_ == null || url_.isEmpty()) {
-      url_ = "https://us7.jact.com:3081/faq-page";
+      url_ = faq_url_;
     }
     if (title_ == null || title_.isEmpty()) {
       title_ = "FAQ";
     }
-
-    // Set Navigation Drawer.
-    navigation_drawer_ =
-        new JactNavigationDrawer(this,
-        		                 findViewById(R.id.faq_drawer_layout),
-        		                 findViewById(R.id.faq_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.FAQ);
   }
     
   @Override
@@ -89,41 +76,6 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
     // Set spinner (and hide WebView) until page has finished loading.
     SetCartIcon(this);
     fadeAllViews(num_server_tasks_ > 0);
-  }
-  
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    // Sync the toggle state after onRestoreInstanceState has occurred.
-    navigation_drawer_.onPostCreate(savedInstanceState);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    navigation_drawer_.onConfigurationChanged(newConfig);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu items for use in the action bar.
-    getMenuInflater().inflate(R.menu.action_bar, menu);
-    boolean set_cart_icon = false;
-    if (menu_bar_ == null) set_cart_icon = true;
-    menu_bar_ = menu;
-    if (set_cart_icon) {
-      SetCartIcon(this);
-    }
-	ShoppingCartActivity.SetCartIcon(menu);
-    return super.onCreateOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (navigation_drawer_.onOptionsItemSelected(item)) {
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
   }
 
   @Override

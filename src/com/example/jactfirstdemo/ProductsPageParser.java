@@ -8,16 +8,19 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-public class ProductsPageParser {	  
+public class ProductsPageParser {
   // Website node keys.
   static final String WEBSITE_NID = "nid";
   static final String WEBSITE_TITLE = "node_title";
+  static final String WEBSITE_SUMMARY_BODY = "Body";
+  static final String WEBSITE_SUMMARY = "summary";
   static final String WEBSITE_PID = "commerce_product_field_data_field_product_product_id";
   static final String WEBSITE_NODE_TYPE = "node_type";
   static final String WEBSITE_DATE = "drawing date";
   static final String WEBSITE_DRAWING_DATE = "Drawing_Ends";
   static final String WEBSITE_SKU = "commerce_product_field_data_field_product_sku";
   static final String WEBSITE_PROMOTE = "Promote";
+  static final String WEBSITE_MAX_QUANTITY_OLD = "Max order quantity";
   static final String WEBSITE_MAX_QUANTITY = "Max_order_quantity";
   static final String WEBSITE_VALUE = "value";
   static final String WEBSITE_IMAGE = "field_product_image";
@@ -33,6 +36,7 @@ public class ProductsPageParser {
   public static class ProductItem {
     public String nid_;
     public String title_;
+    public String summary_;
     public String pid_;
     public String max_quantity_;
     public String node_type_;
@@ -53,7 +57,8 @@ public class ProductsPageParser {
     	  types += type + ", ";
         }
       }
-      return "NID: " + nid_ + ", title: " + title_ + ", pid: " + pid_ + ", node_type: " +
+      return "NID: " + nid_ + ", title: " + title_ + ", summary: " + summary_ + 
+    		 ", pid: " + pid_ + ", node_type: " +
              node_type_ + ", date: " + date_ + ", sku: " + sku_ + ", image_url_: " +
     	     img_url_ + ", drawing url: " + drawing_url_ + ", bux: " + bux_ +
     		 ", usd: " + usd_ + ", points: " + points_ + ", types: " + types;
@@ -68,9 +73,6 @@ public class ProductsPageParser {
 	  // When tag is present, it is a JSONObject; but when it is absent, it is an empty JSONArray.
 	  // This makes handling them annoying.
 	  JSONObject block = new JSONObject(node.getString(tag));
-	  if (block == null || block.length() == 0) {
-	    return "";
-	  }
 	  return block.getString(WEBSITE_VALUE);
 	} catch (JSONException e) {
 	  try {
@@ -173,6 +175,11 @@ public class ProductsPageParser {
 
   static private void ParseRewardsMaxQuantity(JSONObject node, ProductItem item) {
 	String value = ParseNode(node, WEBSITE_MAX_QUANTITY);
+	// Rest/Rewards was returning a bad string for this node title.
+	// The below makes this code compatible for either version.
+	if (value.isEmpty()) {
+	  value = ParseNode(node, WEBSITE_MAX_QUANTITY_OLD);
+	}
 	if (value.isEmpty() || value.equals("-1") || value.equals("0")) {
 	  item.max_quantity_ = "-1";
 	} else {
@@ -215,6 +222,24 @@ public class ProductsPageParser {
     }
   }
   
+  static private void ParseRewardsSummary(JSONObject node, ProductItem item) {
+	if (!node.has(WEBSITE_SUMMARY_BODY) || node.isNull(WEBSITE_SUMMARY_BODY)) {
+      Log.e("ProductsPageParse::ParseRewardsSummary", "Unable to find Body tag:\n" + node.toString());
+	  return;
+	}
+	try {
+	  JSONObject summary_body = new JSONObject(node.getString(WEBSITE_SUMMARY_BODY));
+	  String summary = summary_body.getString(WEBSITE_SUMMARY);
+	  if (summary.isEmpty()) {
+        Log.e("ProductsPageParse::ParseRewardsSummary", "Unable to find summary:\n" + node.toString());
+        return;
+	  }
+	  item.summary_ = summary;
+	} catch (JSONException e) {
+      Log.e("ProductsPageParse::ParseRewardsPrice", "Unable to parse Body tag:\n" + node.toString());
+    }
+  }
+	
   static private void ParseRewardsPrice(JSONObject node, ProductItem item) {
 	if (!node.has(WEBSITE_PRICE) || node.isNull(WEBSITE_PRICE)) {
       Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPrice. Unable to find Price tag:\n" + node.toString());
@@ -292,6 +317,9 @@ public class ProductsPageParser {
         
         // Parse node_title.
         ParseRewardsNodeTitle(product.getString(WEBSITE_TITLE), item);
+        
+        // Parse Summary.
+        ParseRewardsSummary(product, item);
         
         // Parse sku.
         ParseRewardsSku(product.getString(WEBSITE_SKU), item);

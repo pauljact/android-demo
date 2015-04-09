@@ -20,46 +20,25 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class JactLoggedInHomeActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  public enum OnTaskCompleted {
-    PROFILE_PICTURE,
-    USER_POINTS,
-    POINTS_PICTURE,
-    USER_VIEW
-  }
-  
+public class JactLoggedInHomeActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {  
   static final String PROFILE_PIC = "profile_pic";
   static final String BUX_LOGO = "bux_logo";
   static final String USER_POINTS = "user_points";
   
-  private static String jact_website_ = "https://us7.jact.com:3081/";
-  //private static String jact_website_ = "http://us7.jact.com:3080/";
+  private static String jact_website_ = "https://us7.jact.com:3081/rest/userpoints/";
+  //private static String jact_website_ = "http://us7.jact.com:3080/rest/userpoints/";
   private String jact_user_name_;
   private String jact_user_id_;
   private String jact_profile_pic_url_;
   private String jact_user_points_;
   private boolean init_once_;
-  
-  private JactNavigationDrawer navigation_drawer_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    num_server_tasks_ = 0;
+    super.onCreate(savedInstanceState, R.string.app_name,
+    		       R.layout.jact_logged_in_home_screen,
+    		       JactNavigationDrawer.ActivityIndex.PROFILE);
     init_once_ = false;
-    // Set layout.
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.jact_logged_in_home_screen);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
-    setSupportActionBar(toolbar);
-    getSupportActionBar().setHomeButtonEnabled(true);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-    // Set Navigation Drawer.
-    navigation_drawer_ =
-        new JactNavigationDrawer(this,
-        		                 findViewById(R.id.profile_drawer_layout),
-        		                 findViewById(R.id.profile_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.PROFILE);
   }
   
   @Override
@@ -98,41 +77,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
     // is 'active' (not faded) when the user returns.
     fadeAllViews(num_server_tasks_ != 0);
 	super.onResume();
-  }
-
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    // Sync the toggle state after onRestoreInstanceState has occurred.
-    navigation_drawer_.onPostCreate(savedInstanceState);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    navigation_drawer_.onConfigurationChanged(newConfig);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu items for use in the action bar.
-    getMenuInflater().inflate(R.menu.action_bar, menu);
-    boolean set_cart_icon = false;
-    if (menu_bar_ == null) set_cart_icon = true;
-    menu_bar_ = menu;
-    if (set_cart_icon) {
-      SetCartIcon(this);
-    }
-	ShoppingCartActivity.SetCartIcon(menu_bar_);
-    return super.onCreateOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (navigation_drawer_.onOptionsItemSelected(item)) {
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
   }
   
   @Override
@@ -173,7 +117,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
       TextView tv = (TextView) this.findViewById(R.id.current_points);
       tv.setText(" User Points:  ...");
       new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(
-          jact_website_ + "rest/userpoints/" + jact_user_id_ + ".json",
+          jact_website_ + jact_user_id_ + ".json",
           "GET", "", "", USER_POINTS);
     } else {
       TextView tv = (TextView) this.findViewById(R.id.current_points);

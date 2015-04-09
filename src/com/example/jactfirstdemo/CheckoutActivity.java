@@ -29,14 +29,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class CheckoutActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private JactNavigationDrawer navigation_drawer_;
   public static Cookie cookie_ = null;
   private static int order_id_;
   private JactDialogFragment dialog_;
   private static final String checkout_url_ = "https://us7.jact.com:3081/checkout/";
-  private static final String cart_url_ = "https://us7.jact.com:3081/cart";
+  //private static final String checkout_url_ = "http://m.jact.com:3080/checkout/";
   //private static final String checkout_url_ = "http://us7.jact.com:3080/checkout/";
-  //private static final String cart_url_ = "http://us7.jact.com:3080/cart";
 
   public static synchronized void SetOrderId(int order_id) {
     order_id_ = order_id;
@@ -45,22 +43,9 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
-    super.onCreate(savedInstanceState);
-    num_server_tasks_ = 0;
-    setContentView(R.layout.checkout_mobile_layout);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
-    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(R.string.checkout_label);
-    setSupportActionBar(toolbar);
-    getSupportActionBar().setHomeButtonEnabled(true);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-    // Set Navigation Drawer.
-    navigation_drawer_ =
-        new JactNavigationDrawer(this,
-        		                 findViewById(R.id.checkout_mobile_drawer_layout),
-        		                 findViewById(R.id.checkout_mobile_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.CHECKOUT_VIA_MOBILE_SITE);
+    super.onCreate(savedInstanceState, R.string.checkout_label,
+    		       R.layout.checkout_mobile_layout,
+    		       JactNavigationDrawer.ActivityIndex.CHECKOUT_VIA_MOBILE_SITE);
   }
     
   @Override
@@ -87,9 +72,9 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
     // Set webview from checkout_url_.
     String url_to_load = checkout_url_ + Integer.toString(order_id_);
     if (order_id_ <= 0) {
-      url_to_load = cart_url_;
       Log.e("PHB ERROR", "CheckoutActivity::onResume. Order id: " + order_id_);
       onBackPressed();
+      return;
     }
     Log.e("PHB TEMP", "CheckoutActivity::onResume. Loading Checkout webpage with order id: " + order_id_);
     WebView web_view = (WebView) findViewById(R.id.checkout_mobile_webview);
@@ -103,41 +88,6 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
     // Set spinner (and hide WebView) until page has finished loading.
     SetCartIcon(this);
     fadeAllViews(num_server_tasks_ > 0);
-  }
-  
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    // Sync the toggle state after onRestoreInstanceState has occurred.
-    navigation_drawer_.onPostCreate(savedInstanceState);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    navigation_drawer_.onConfigurationChanged(newConfig);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu items for use in the action bar.
-    getMenuInflater().inflate(R.menu.action_bar, menu);
-    boolean set_cart_icon = false;
-    if (menu_bar_ == null) set_cart_icon = true;
-    menu_bar_ = menu;
-    if (set_cart_icon) {
-      SetCartIcon(this);
-    }
-	ShoppingCartActivity.SetCartIcon(menu);
-    return super.onCreateOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (navigation_drawer_.onOptionsItemSelected(item)) {
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
   }
 
   @Override

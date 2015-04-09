@@ -30,17 +30,12 @@ public class ProductsImageLoader {
     private FileCache file_cache_;
     private final int stub_id_ = R.drawable.no_image;
     private ExecutorService executor_service_;
-    private ProductsAdapter parent_product_adapter_;
-    private CheckoutAdapter parent_checkout_adapter_;
-    private EarnAdapter parent_earn_adapter_;
+    private AdapterWithImages parent_adapter_;
     private Map<ImageView, String> image_views_;
     private Map<String, HashSet<Integer>> urls_being_fetched_;
 
-    // Constructor from ProductsAdapter.
-    public ProductsImageLoader(Context context, ProductsAdapter a, String activity_name) {
-    	parent_product_adapter_ = a;
-    	parent_checkout_adapter_ = null;
-    	parent_earn_adapter_ = null;
+    public ProductsImageLoader(Context context, AdapterWithImages a, String activity_name) {
+    	parent_adapter_ = a;
     	memory_cache_ = new MemoryCache();
         file_cache_ = new FileCache(context.getCacheDir(), activity_name, 4 * 1024 * 1024 /* 4Mb */);
         executor_service_ = Executors.newFixedThreadPool(10);
@@ -50,34 +45,6 @@ public class ProductsImageLoader {
                 Collections.synchronizedMap(new HashMap<String, HashSet<Integer>>());
     }
     
-    // Constructor from CheckoutAdapter.
-    public ProductsImageLoader(Context context, CheckoutAdapter a, String activity_name) {
-    	parent_checkout_adapter_ = a;
-    	parent_product_adapter_ = null;
-    	parent_earn_adapter_ = null;
-    	memory_cache_ = new MemoryCache();
-        file_cache_ = new FileCache(context.getCacheDir(), activity_name, 4 * 1024 * 1024 /* 4Mb */);
-        executor_service_ = Executors.newFixedThreadPool(10);
-        image_views_ =
-            Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
-        urls_being_fetched_  =
-                Collections.synchronizedMap(new HashMap<String, HashSet<Integer>>());
-    }
-    
-    // Constructor from EarnAdapter
-    public ProductsImageLoader(Context context, EarnAdapter a, String activity_name) {
-    	parent_checkout_adapter_ = null;
-    	parent_product_adapter_ = null;
-    	parent_earn_adapter_ = a;
-    	memory_cache_ = new MemoryCache();
-        file_cache_ = new FileCache(context.getCacheDir(), activity_name, 4 * 1024 * 1024 /* 4Mb */);
-        executor_service_ = Executors.newFixedThreadPool(10);
-        image_views_ =
-            Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
-        urls_being_fetched_  =
-                Collections.synchronizedMap(new HashMap<String, HashSet<Integer>>());
-    }
- 
     public boolean DisplayImage(String url, ImageView image_view, int position)
     {
     	// Every time DisplayImage is called, the image_view that
@@ -288,16 +255,8 @@ public class ProductsImageLoader {
     }
  
     private void AlertAdapter(String url) {
-    	if (parent_product_adapter_ != null) {
-    	  parent_product_adapter_.alertPositionsReady(urls_being_fetched_.get(url));
-    	}
-    	if (parent_checkout_adapter_ != null) {
-      	  parent_checkout_adapter_.alertPositionsReady(urls_being_fetched_.get(url));
-      	}
-    	if (parent_earn_adapter_ != null) {
-    	  parent_earn_adapter_.alertPositionsReady(urls_being_fetched_.get(url));
-    	}
-    	urls_being_fetched_.remove(url);
+      parent_adapter_.AlertPositionsReady(urls_being_fetched_.get(url));
+      urls_being_fetched_.remove(url);
     }
     
     public void clearCaches() {

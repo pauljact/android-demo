@@ -22,7 +22,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class ShippingActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private JactNavigationDrawer navigation_drawer_;
   private ListView list_;
   private ArrayList<ShoppingCartActivity.JactAddress> addresses_;
   private AddressAdapter adapter_;
@@ -33,25 +32,11 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
-    super.onCreate(savedInstanceState);
-    num_server_tasks_ = 0;
-    setContentView(R.layout.shipping_layout);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
-    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(R.string.shipping_label);
-    setSupportActionBar(toolbar);
-    getSupportActionBar().setHomeButtonEnabled(true);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    
+    super.onCreate(savedInstanceState, R.string.shipping_label,
+		       R.layout.shipping_layout,
+		       JactNavigationDrawer.ActivityIndex.SHIPPING);
     addresses_ = new ArrayList<ShoppingCartActivity.JactAddress>();
     list_ = (ListView) findViewById(R.id.shipping_list);
-
-    // Set Navigation Drawer.
-    navigation_drawer_ =
-        new JactNavigationDrawer(this,
-        		                 findViewById(R.id.shipping_drawer_layout),
-        		                 findViewById(R.id.shipping_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.SHIPPING);
   }
     
   @Override
@@ -64,41 +49,6 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
 	SetCartIcon(this);
 	fadeAllViews(num_server_tasks_ > 0);
 	super.onResume();
-  }
-  
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    // Sync the toggle state after onRestoreInstanceState has occurred.
-    navigation_drawer_.onPostCreate(savedInstanceState);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    navigation_drawer_.onConfigurationChanged(newConfig);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu items for use in the action bar.
-    getMenuInflater().inflate(R.menu.action_bar, menu);
-    boolean set_cart_icon = false;
-    if (menu_bar_ == null) set_cart_icon = true;
-    menu_bar_ = menu;
-    if (set_cart_icon) {
-      SetCartIcon(this);
-    }
-	ShoppingCartActivity.SetCartIcon(menu);
-    return super.onCreateOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (navigation_drawer_.onOptionsItemSelected(item)) {
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
   }
 
   @Override

@@ -23,21 +23,14 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 public class BillingNewActivity extends JactActionBarActivity implements OnItemSelectedListener, ProcessUrlResponseCallback {
-  private JactNavigationDrawer navigation_drawer_;
   private JactDialogFragment dialog_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
-    super.onCreate(savedInstanceState);
-    num_server_tasks_ = 0;
-    setContentView(R.layout.credit_card_new_layout);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
-    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(R.string.billing_label);
-    setSupportActionBar(toolbar);
-    getSupportActionBar().setHomeButtonEnabled(true);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    super.onCreate(savedInstanceState, R.string.billing_label,
+		       R.layout.credit_card_new_layout,
+		       JactNavigationDrawer.ActivityIndex.BILLING_NEW);
     
     // Setup Spinner (Dropdown for Credit Card Type).
     Spinner type = (Spinner) findViewById(R.id.credit_card_type_spinner);
@@ -74,13 +67,6 @@ public class BillingNewActivity extends JactActionBarActivity implements OnItemS
     state.setAdapter(state_adapter);
     state.setOnItemSelectedListener((OnItemSelectedListener) this);
     state.setSelection(0);
-    
-    // Set Navigation Drawer.
-    navigation_drawer_ =
-        new JactNavigationDrawer(this,
-        		                 findViewById(R.id.credit_card_new_drawer_layout),
-        		                 findViewById(R.id.credit_card_new_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.BILLING_NEW);
   }
     
   @Override
@@ -90,41 +76,6 @@ public class BillingNewActivity extends JactActionBarActivity implements OnItemS
 	super.onResume();
   }
   
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    // Sync the toggle state after onRestoreInstanceState has occurred.
-    navigation_drawer_.onPostCreate(savedInstanceState);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    navigation_drawer_.onConfigurationChanged(newConfig);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu items for use in the action bar.
-    getMenuInflater().inflate(R.menu.action_bar, menu);
-    boolean set_cart_icon = false;
-    if (menu_bar_ == null) set_cart_icon = true;
-    menu_bar_ = menu;
-    if (set_cart_icon) {
-      SetCartIcon(this);
-    }
-	ShoppingCartActivity.SetCartIcon(menu);
-    return super.onCreateOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (navigation_drawer_.onOptionsItemSelected(item)) {
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
-  }
-
   @Override
   public void fadeAllViews(boolean should_fade) {
     ProgressBar spinner = (ProgressBar) findViewById(R.id.credit_card_new_progress_bar);

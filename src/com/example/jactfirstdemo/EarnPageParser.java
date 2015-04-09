@@ -14,10 +14,14 @@ public class EarnPageParser {
   // Website node keys.
   private static final String TITLE_NODE = "node_title";
   private static final String NID_NODE = "nid";
+  private static final String YOUTUBE_ID_NODE = "YouTube_ID";
+  private static final String VALUE_NODE = "value";
   private static final String YOUTUBE_URL_NODE = "field_data_field_watch_field_watch_video_url";
   private static final String IMG_URL_NODE = "field_data_field_watch_field_watch_thumbnail_path";
   private static final String POINTS_NODE = "field_earn";
   private static final String POINTS_SUFFIX = " Points";
+  private static final String YOUTUBE_URL_PREFIX = "https://www.youtube.com/watch?v=";
+  private static final String YOUTUBE_URL_PREFIX_TWO = "http://www.youtube.com/watch?v=";
   static final String jact_icons_website_ = "https://us7.jact.com:3081/sites/default/files/styles/product_page/public/";
 
   public static class EarnItem {
@@ -45,9 +49,38 @@ public class EarnPageParser {
     return true;
   }
   
-  static private boolean ParseYoutubeUrl(String url, EarnItem item) {
+  static private boolean ParseYoutubeUrl(String youtube_id, EarnItem item) {
+	if (youtube_id == null || youtube_id.isEmpty()) return false;
+	try {
+	  JSONObject youtube_object = new JSONObject(youtube_id);
+	  String id = youtube_object.getString(VALUE_NODE);
+	  if (id == null || id.isEmpty()) {
+		Log.e("EarnPageParser::ParseYoutubeUrl", "Unable to parse youtube id: " + youtube_id);
+		return false;
+	  }
+	  item.youtube_url_ = id;
+	} catch (JSONException e) {
+	  Log.e("EarnPageParser::ParseYoutubeUrl", "Unable to parse youtube id block: " + youtube_id +
+			                                   ". Error: " + e.getMessage());
+	  return false;
+	}
+    return true;
+  }
+  
+  // DEPRECATED. Youtube ID now available directly; see ParseYoutubeUrl().
+  static private boolean ParseYoutubeUrlOld(String url, EarnItem item) {
     if (url == null || url.isEmpty()) return false;
-    item.youtube_url_ = url;
+    int youtube_prefix = url.indexOf(YOUTUBE_URL_PREFIX);
+    if (youtube_prefix == 0) {
+      item.youtube_url_ = url.substring(YOUTUBE_URL_PREFIX.length());
+      return true;
+    }
+    youtube_prefix = url.indexOf(YOUTUBE_URL_PREFIX_TWO);
+    if (youtube_prefix != 0) {
+      Log.e("EarnPageParser::ParseYoutubeUrl", "Unexpected Youtube url: " + url);
+      return false;
+    }
+    item.youtube_url_ = url.substring(YOUTUBE_URL_PREFIX_TWO.length());
     return true;
   }
   
@@ -94,16 +127,21 @@ public class EarnPageParser {
         
         // Parse Node id.
         if (!ParseNodeId(item.getString(NID_NODE), earn_item)) {
-            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse title: " +
+            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse nid: " +
 		                       item.getString(NID_NODE));
             return;
         }
         
         // Parse Youtube Url.
-        if (!ParseYoutubeUrl(item.getString(YOUTUBE_URL_NODE), earn_item)) {
-            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse title: " +
- 		                       item.getString(YOUTUBE_URL_NODE));
-            return;
+        if (!ParseYoutubeUrl(item.getString(YOUTUBE_ID_NODE), earn_item)) {
+            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube id: " +
+ 		                       item.getString(YOUTUBE_ID_NODE));
+            // Try getting youtube id the old way.
+            if (!ParseYoutubeUrlOld(item.getString(YOUTUBE_URL_NODE), earn_item)) {
+              Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube url: " +
+	                             item.getString(YOUTUBE_URL_NODE));
+              return;
+            }
         }
         
         // Parse Image Url.

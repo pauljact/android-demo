@@ -18,29 +18,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class GamesActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private JactNavigationDrawer navigation_drawer_;
-  private static final String games_url_ = "https://us7.jact.com:3081/games";
+  private static final String games_url_ = "http://m.jact.com:3080/games";
+  //private static final String games_url_ = "https://us7.jact.com:3081/games";
   //private static final String games_url_ = "http://us7.jact.com:3080/games";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
-    super.onCreate(savedInstanceState);
-    num_server_tasks_ = 0;
-    setContentView(R.layout.games_layout);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
-    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(R.string.games_label);
-    setSupportActionBar(toolbar);
-    getSupportActionBar().setHomeButtonEnabled(true);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-    // Set Navigation Drawer.
-    navigation_drawer_ =
-        new JactNavigationDrawer(this,
-        		                 findViewById(R.id.games_drawer_layout),
-        		                 findViewById(R.id.games_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.GAMES);
+    super.onCreate(savedInstanceState, R.string.games_label,
+		       R.layout.games_layout,
+		       JactNavigationDrawer.ActivityIndex.GAMES);
   }
     
   @Override
@@ -60,41 +47,6 @@ public class GamesActivity extends JactActionBarActivity implements ProcessUrlRe
     // Set spinner (and hide WebView) until page has finished loading.
     SetCartIcon(this);
     fadeAllViews(num_server_tasks_ > 0);
-  }
-  
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    // Sync the toggle state after onRestoreInstanceState has occurred.
-    navigation_drawer_.onPostCreate(savedInstanceState);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    navigation_drawer_.onConfigurationChanged(newConfig);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu items for use in the action bar.
-    getMenuInflater().inflate(R.menu.action_bar, menu);
-    boolean set_cart_icon = false;
-    if (menu_bar_ == null) set_cart_icon = true;
-    menu_bar_ = menu;
-    if (set_cart_icon) {
-      SetCartIcon(this);
-    }
-	ShoppingCartActivity.SetCartIcon(menu);
-    return super.onCreateOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (navigation_drawer_.onOptionsItemSelected(item)) {
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
   }
 
   @Override

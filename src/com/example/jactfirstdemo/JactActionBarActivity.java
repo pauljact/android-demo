@@ -13,36 +13,65 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 public abstract class JactActionBarActivity extends ActionBarActivity {
   protected Menu menu_bar_;
   protected static final String jact_shopping_cart_url_ = "https://us7.jact.com:3081/rest/cart.json";
   protected int num_server_tasks_;
+  protected JactNavigationDrawer navigation_drawer_;
 	
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  protected void onCreate(Bundle savedInstanceState, int activity_id,
+		                  int layout, JactNavigationDrawer.ActivityIndex index) {
     super.onCreate(savedInstanceState);
+    num_server_tasks_ = 0;
+    setContentView(layout);
+    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
+    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
+    ab_title.setText(activity_id);
+    setSupportActionBar(toolbar);
+    getSupportActionBar().setHomeButtonEnabled(true);
+    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+    // Set Navigation Drawer.
+    navigation_drawer_ =
+        new JactNavigationDrawer(this,
+          		                 findViewById(R.id.activity_drawer_layout),
+          		                 findViewById(R.id.nav_left_drawer),
+          		                 index);
+
   }
+  
   @Override
   protected void onPostCreate(Bundle savedInstanceState) {
     super.onPostCreate(savedInstanceState);
+    navigation_drawer_.onPostCreate(savedInstanceState);
   }
 
   @Override
   public void onConfigurationChanged(Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
+    navigation_drawer_.onConfigurationChanged(newConfig);
   }
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    return super.onCreateOptionsMenu(menu);
+    // Inflate the menu items for use in the action bar.
+    getMenuInflater().inflate(R.menu.action_bar, menu);
+    menu_bar_ = menu;
+	ShoppingCartActivity.SetCartIcon(menu_bar_);
+	return super.onCreateOptionsMenu(menu);
   }
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
+    if (navigation_drawer_.onOptionsItemSelected(item)) {
+      return true;
+    }
     return super.onOptionsItemSelected(item);
   }
   

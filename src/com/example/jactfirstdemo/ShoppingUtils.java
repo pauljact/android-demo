@@ -323,7 +323,9 @@ public class ShoppingUtils {
   	  form_info.add(GetUrlTask.CreateFormInfo("commerce_product", Integer.toString(pid)));
   	}
   	if (!type.isEmpty()) {
-  	  form_info.add(GetUrlTask.CreateFormInfo("type", type));
+  	  String cart_type = "product";
+  	  if (type.equals("premium_product")) cart_type = type;
+  	  form_info.add(GetUrlTask.CreateFormInfo("type", cart_type));
   	}
   	if (node_id > 0) {
   	  form_info.add(GetUrlTask.CreateFormInfo("commerce_display_path", "node/" + Integer.toString(node_id)));

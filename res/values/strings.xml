@@ -9,8 +9,8 @@
     <string name="earn_label">Earn</string>
     <string name="games_label">Games</string>
     <string name="community_label">Community</string>
-    <string name="forgot_password_label">Send Password</string>
-    <string name="new_user_label">Registration</string>
+    <string name="forgot_password_label">Forgot Password</string>
+    <string name="new_user_label">Register</string>
     <string name="checkout_label">Checkout</string>
     <string name="rewards_label">Rewards</string>
     <string name="jact_logged_in_home_activity_label">Jact - Play With Purpose</string>
@@ -20,6 +20,7 @@
     <string name="logged_off_key">logged_off</string>
     <string name="webview_url_key">webview_url_key</string>
     <string name="webview_title_key">webview_title_key</string>
+    <string name="earn_url_key">earn_url_key</string>
     <!-- End SharedPreferences Keys -->
     
     <!-- XML Keys -->
@@ -103,6 +104,15 @@
     <string name="year_str">Year</string>
     <!-- End Address Terms -->
     
+    <!-- New User Layout -->
+    <string name="username">Username</string>
+    <string name="email">E-mail Address</string>
+    <string name="password">Password</string>
+    <string name="password_confirm">Confirm Password</string>
+    <string name="select_icon">Select User Icon</string>
+    <string name="register_button_str">Create New Account</string>
+    <!-- END New User Layout -->
+    
     <!-- Miscellaneous -->
     <string name="empty_string"></string>
     <string name="null_str">null</string>
@@ -117,6 +127,8 @@
     <string name="jact_login">LOG IN</string>
     <string name="youtube_id">youtube_id</string>
     <string name="earn_now">Earn Now</string>
+    <string name="forgot_password_str">Username or Email Address</string>
+    <string name="email_password_str">E-Mail New Password</string>
     <!-- End Miscellaneous -->
     
     <!-- Quantity 0-10 -->

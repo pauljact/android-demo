@@ -69,7 +69,6 @@ public class ProductsActivity extends JactActionBarActivity
     private ArrayList<String> product_categories_;
     private ArrayList<String> product_types_;
     
-    private JactNavigationDrawer navigation_drawer_;
     private JactDialogFragment dialog_;
     private enum SortState {
 		  NONE,
@@ -79,16 +78,8 @@ public class ProductsActivity extends JactActionBarActivity
  
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        num_server_tasks_ = 0;
-        setContentView(R.layout.products_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
-        TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-        ab_title.setText(R.string.rewards_label);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
- 
+    	super.onCreate(savedInstanceState, R.string.rewards_label,
+    			       R.layout.products_main, JactNavigationDrawer.ActivityIndex.REWARDS); 
     	if (ShoppingCartActivity.AccessCart(
     		    ShoppingCartActivity.CartAccessType.INITIALIZE_CART)) {
     	  GetInitialShoppingCart();
@@ -97,13 +88,6 @@ public class ProductsActivity extends JactActionBarActivity
         SetHeaderBar();
         SetFilterBar();
         SetFilters();
-
-        // Initialize Navigation Drawer.
-        navigation_drawer_ =
-            new JactNavigationDrawer(this,
-            		                 findViewById(R.id.products_drawer_layout),
-            		                 findViewById(R.id.products_left_drawer),
-            		                 JactNavigationDrawer.ActivityIndex.REWARDS);
     }
 
     @Override
@@ -113,11 +97,6 @@ public class ProductsActivity extends JactActionBarActivity
       filter_type_ = "";
       adapter_.getFilter().filter("");
       ShoppingCartActivity.ResetNumCsrfRequests();
-      //PHBadapter_.notifyDataSetChanged();
-  	  // Re-enable parent activity before transitioning to the next activity.
-  	  // This ensures e.g. that when user hits 'back' button, the screen
-  	  // is 'active' (not faded) when the user returns.
-  	  
       // Set Cart Icon.
   	  GetCart(this);
 	  fadeAllViews(num_server_tasks_ > 0);
@@ -137,37 +116,7 @@ public class ProductsActivity extends JactActionBarActivity
     	});
     	super.onDestroy();
     }
-    
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-      super.onPostCreate(savedInstanceState);
-      // Sync the toggle state after onRestoreInstanceState has occurred.
-      navigation_drawer_.onPostCreate(savedInstanceState);
-    }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-      super.onConfigurationChanged(newConfig);
-      navigation_drawer_.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-      // Inflate the menu items for use in the action bar.
-      getMenuInflater().inflate(R.menu.action_bar, menu);
-      menu_bar_ = menu;
-  	  ShoppingCartActivity.SetCartIcon(menu_bar_);
-      return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-      if (navigation_drawer_.onOptionsItemSelected(item)) {
-        return true;
-      }
-      return super.onOptionsItemSelected(item);
-    }
-    
     @Override
     public void fadeAllViews(boolean should_fade) {
       ProgressBar spinner = (ProgressBar) findViewById(R.id.products_progress_bar);
@@ -513,15 +462,15 @@ public class ProductsActivity extends JactActionBarActivity
     public static synchronized int GetMaxQuantity(int pid) {
       if (products_list_ == null) return -2;
       for (ProductsPageParser.ProductItem item : products_list_) {
-          if (item.pid_.equals(Integer.toString(pid))) {
-        	try {
-        	 return Integer.parseInt(item.max_quantity_);
-        	} catch (NumberFormatException e) {
-        	  Log.e("PHB ERROR", "ProductsActivity::GetMaxQuantity. Unable to parse " +
-        	                     "max quantity: " + item.max_quantity_ + " as an int.");
-        	  return -2;
-        	}
-          }
+        if (item.pid_.equals(Integer.toString(pid))) {
+    	  try {
+    	    return Integer.parseInt(item.max_quantity_);
+    	  } catch (NumberFormatException e) {
+    	    Log.e("PHB ERROR", "ProductsActivity::GetMaxQuantity. Unable to parse " +
+    	                       "max quantity: " + item.max_quantity_ + " as an int.");
+    	    return -2;
+    	  }
+        }
       }
       return -2;
     }
@@ -745,6 +694,7 @@ public class ProductsActivity extends JactActionBarActivity
     	  return;
     	}
     	ItemToAddStatus add_status = response.to_add_status_;
+    	Log.e("PHB TEMP", "ProductsActivity::OnClick. add_status: " + add_status);
     	String title = "";
     	String message = "";
     	if (add_status == ItemToAddStatus.CART_FULL) {

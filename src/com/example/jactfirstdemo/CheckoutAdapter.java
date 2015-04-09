@@ -24,7 +24,8 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implements OnItemSelectedListener {
+public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
+                             implements OnItemSelectedListener, AdapterWithImages {
 	private ShoppingCartActivity parent_activity_;
 	private ArrayList<ShoppingUtils.LineItem> items_;
 	private boolean[] unfinished_list_elements_;
@@ -54,13 +55,14 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem> implem
         	parent_activity_.getApplicationContext(), this, "ShoppingCartActivity");
 	}
 	
-	public void alertPositionsReady (HashSet<Integer> positions) {
+	@Override
+	public void AlertPositionsReady (HashSet<Integer> positions) {
 	  if (positions == null) {
-		Log.e("PHB ERROR", "ProductsAdapter::alertPositionsReady. Null positions");
+		Log.e("PHB ERROR", "CheckoutAdapter::alertPositionsReady. Null positions");
 		return;
 	  }
 	  if (positions.isEmpty()) {
-		Log.e("PHB ERROR", "ProductsAdapter::alertPositionsReady. Empty positions");
+		Log.e("PHB ERROR", "CheckoutAdapter::alertPositionsReady. Empty positions");
 		return;
 	  }
 	  boolean should_alert_state_change = false;

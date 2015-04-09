@@ -62,7 +62,6 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	private static ArrayList<String> items_to_remove_;
 	private ListView items_listview_;
 	private CheckoutAdapter adapter_;
-	private JactNavigationDrawer navigation_drawer_;
 	private JactDialogFragment dialog_;
 	
 	public enum CardType {
@@ -366,23 +365,10 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
-    super.onCreate(savedInstanceState);
-    num_server_tasks_ = 0;
-    setContentView(R.layout.checkout_layout);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
-    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(R.string.cart_activity_label);
-    setSupportActionBar(toolbar);
-    getSupportActionBar().setHomeButtonEnabled(true);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-    // Set Navigation Drawer.
-    navigation_drawer_ =
-        new JactNavigationDrawer(this,
-        		                 findViewById(R.id.checkout_drawer_layout),
-        		                 findViewById(R.id.checkout_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.CHECKOUT_MAIN);
-	hay_active_cart_request_ = false;
+    super.onCreate(savedInstanceState, R.string.cart_activity_label,
+    		       R.layout.checkout_layout,
+    		       JactNavigationDrawer.ActivityIndex.CHECKOUT_MAIN);
+    hay_active_cart_request_ = false;
     if (InitializeOnce()) {
       GetInitialShoppingCart();
     }
@@ -409,36 +395,6 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  }
 	  Log.i("PHB TEMP", "SCA::onResume. num_server_tasks_: " + num_server_tasks_);
 	  super.onResume();
-  }
-
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    // Sync the toggle state after onRestoreInstanceState has occurred.
-    navigation_drawer_.onPostCreate(savedInstanceState);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    navigation_drawer_.onConfigurationChanged(newConfig);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu items for use in the action bar.
-    getMenuInflater().inflate(R.menu.action_bar, menu);
-    menu_bar_ = menu;
-	SetCartIcon(menu_bar_);
-    return super.onCreateOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (navigation_drawer_.onOptionsItemSelected(item)) {
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
   }
   
   @Override
@@ -763,6 +719,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	
 	// Adds a item to the cart (or updates the item, in case it's already present in the cart).
 	private static synchronized ItemToAddStatus GetCartItemToAddStatus(ShoppingUtils.LineItem item) {
+		Log.e("PHB TEMP", "Here");
 		if (item == null) {
 			Log.e("PHB ERROR", "ShoppingCartActivity::ItemToAddStatus. 1");
 			return ItemToAddStatus.NO_PID;
@@ -771,13 +728,10 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 			Log.e("PHB ERROR", "ShoppingCartActivity::ItemToAddStatus. 2");
 			return ItemToAddStatus.NO_PID;
 		}
-		ShoppingUtils.LineItem temp_item = GetCartItem(item.pid_);
-		if (temp_item != null) {
-			if (temp_item.quantity_ > 10) {
-				return ItemToAddStatus.ITEM_MAX;
-			}
-			return ItemToAddStatus.INCREMENTED;
-		}
+		int max_quantity = ProductsActivity.GetMaxQuantity(item.pid_);
+		if (max_quantity != -2 && max_quantity > 0 && max_quantity <= item.quantity_) {
+	      return ItemToAddStatus.MAX_QUANTITY_EXCEEDED;
+	    }
 		if (GetNumberCartItems() >= MAX_CART_ITEMS) {
 			return ItemToAddStatus.CART_FULL;
 		}
@@ -788,6 +742,11 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		  } else if (!IsFutureDate(item.drawing_date_)) {
 		    return ItemToAddStatus.EXPIRED_DATE;
 		  }
+		}
+		// If item already exists in cart, increment it. Otherwise, enforce remaining rules.
+		ShoppingUtils.LineItem temp_item = GetCartItem(item.pid_);
+		if (temp_item != null) {
+		  return ItemToAddStatus.INCREMENTED;
 		}
 		return EnforceCartRules(item.pid_, 1 + item.quantity_, item.type_);
 	}
@@ -813,12 +772,13 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  }
 	}
 	  
-	private static synchronized ItemToAddStatus EnforceCartRules(int pid, int quantity, String type) {
+	private static synchronized ItemToAddStatus EnforceCartRules(int pid, int new_quantity, String type) {
 	  if (shopping_cart_ == null) return ItemToAddStatus.CART_NOT_READY;
 	  int max_quantity = ProductsActivity.GetMaxQuantity(pid);
+	  Log.e("PHB TEMP", "SCA::EnforceCartRules. quantity: " + new_quantity + ", max: " + max_quantity);
 	  if (max_quantity == -2) {
 	    return ItemToAddStatus.REWARDS_NOT_FETCHED;
-	  } else if (max_quantity > 0 && max_quantity < quantity) {
+	  } else if (max_quantity > 0 && max_quantity < new_quantity) {
 	    return ItemToAddStatus.MAX_QUANTITY_EXCEEDED;
 	  }
 	  if (shopping_cart_.line_items_ != null) {

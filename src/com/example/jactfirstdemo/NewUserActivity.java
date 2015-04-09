@@ -1,103 +1,180 @@
 package com.example.jactfirstdemo;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
-import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
+import java.util.ArrayList;
 
-import android.content.res.Configuration;
+import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
-public class NewUserActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private JactNavigationDrawer navigation_drawer_;
-  private static final String new_user_url_ = "https://us7.jact.com:3081/user/register";
-  //private static final String earn_url_ = "http://us7.jact.com:3080/user/register";
+public class NewUserActivity extends ActionBarActivity
+                             implements OnItemClickListener, ProcessUrlResponseCallback {
+  private static final String new_user_url_ = "https://us7.jact.com:3081/rest/user/register";
+  //private static final String earn_url_ = "http://us7.jact.com:3080/rest/user/register";
+  private JactDialogFragment dialog_;
+  private static ArrayList<AvatarItem> avatars_list_;
+  private ListView list_;
+  private AvatarAdapter adapter_;
+  private String avatar_id_;
+  private static final String REGISTER_NEW_USER_TASK = "register_new_user_task";
+  
+  public static class AvatarItem {
+    public String id_;
+    public String img_url_;
+    public Bitmap icon_;
+  }
+  
+  // TODO(PHB): Update this once I can fetch avatar images from phone; and/or
+  // when we have a rest view for avatar images.
+  private void SetAvatars() {
+	avatars_list_ = new ArrayList<AvatarItem>();
+	// TODO(PHB): Current populating of avatars_list_ is a hack/temporary. Populate it for real.
+	AvatarItem item_one = new AvatarItem();
+	item_one.id_ = "222";  // blue
+	item_one.img_url_ = "http://us7.jact.com:3080/sites/default/files/avatar_selection/avatars-blue.jpg";
+	avatars_list_.add(item_one);
+	AvatarItem item_two = new AvatarItem();
+	item_two.id_ = "223";  // green
+	item_two.img_url_ = "http://us7.jact.com:3080/sites/default/files/avatar_selection/avatars-green.jpg";
+	avatars_list_.add(item_two);
+	AvatarItem item_three = new AvatarItem();
+	item_three.id_ = "224";  // red
+	item_three.img_url_ = "http://us7.jact.com:3080/sites/default/files/avatar_selection/avatars-red.jpg";
+	avatars_list_.add(item_three);
+	
+    list_ = (ListView) findViewById(R.id.avatar_list);
 
+    // Getting adapter by passing xml data ArrayList.
+    adapter_ = new AvatarAdapter(this, R.layout.avatar_item_layout, avatars_list_);
+    list_.setAdapter(adapter_);
+
+    // Click event on Avatar.
+    list_.setOnItemClickListener(this);
+  }
+  
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    // Set layout.
     super.onCreate(savedInstanceState);
-    num_server_tasks_ = 0;
     setContentView(R.layout.new_user_layout);
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
     TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
     ab_title.setText(R.string.new_user_label);
     setSupportActionBar(toolbar);
-    getSupportActionBar().setHomeButtonEnabled(true);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-    // Set Navigation Drawer.
-    navigation_drawer_ =
-        new JactNavigationDrawer(this,
-        		                 findViewById(R.id.new_user_drawer_layout),
-        		                 findViewById(R.id.new_user_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.REGISTER);
   }
     
   @Override
   protected void onResume() {
 	super.onResume();
-    navigation_drawer_.setActivityIndex(ActivityIndex.REGISTER);
-    
-    // Set webview from new_user_url_.
-    WebView web_view = (WebView) findViewById(R.id.new_user_webview);
-    web_view.loadUrl(new_user_url_);
-    web_view.setWebViewClient(new WebViewClient() {
-    	@Override
-    	public void onPageFinished(WebView view, String url) {
-    		fadeAllViews(false);
-    	}
-    });
-    // Set spinner (and hide WebView) until page has finished loading.
-    SetCartIcon(this);
-    fadeAllViews(num_server_tasks_ > 0);
+	SetAvatars();
+	avatar_id_ = "";
+  }
+
+  @Override
+  public void onBackPressed() {
+    Log.e("PHB TEMP", "ForgotPassword::onBackPressed");
+    JactLoginActivity.SetRequireLogin(true);
+    super.onBackPressed();
   }
   
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    // Sync the toggle state after onRestoreInstanceState has occurred.
-    navigation_drawer_.onPostCreate(savedInstanceState);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    navigation_drawer_.onConfigurationChanged(newConfig);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu items for use in the action bar.
-    getMenuInflater().inflate(R.menu.action_bar, menu);
-    boolean set_cart_icon = false;
-    if (menu_bar_ == null) set_cart_icon = true;
-    menu_bar_ = menu;
-    if (set_cart_icon) {
-      SetCartIcon(this);
+  public void doRegisterClick(View view) {
+	EditText username_et = (EditText) findViewById(R.id.new_user_name_et);
+    String username = username_et.getText().toString().trim();
+    if (username.isEmpty()) {
+      EmptyEditTextWarning("Must Enter a Username");
+      return;
     }
-	ShoppingCartActivity.SetCartIcon(menu);
-    return super.onCreateOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (navigation_drawer_.onOptionsItemSelected(item)) {
-      return true;
+	EditText email_et = (EditText) findViewById(R.id.new_user_email_et);
+    String email = email_et.getText().toString().trim();
+    if (email.isEmpty()) {
+      EmptyEditTextWarning("Must Enter an Email Address");
+      return;
     }
-    return super.onOptionsItemSelected(item);
+	EditText password_et = (EditText) findViewById(R.id.new_user_password_et);
+    String password = password_et.getText().toString().trim();
+    if (password.isEmpty()) {
+      EmptyEditTextWarning("Must Enter a Password");
+      return;
+    }
+	EditText pass2_et = (EditText) findViewById(R.id.new_user_password_confirm_et);
+    String pass2 = pass2_et.getText().toString().trim();
+    if (!pass2.equals(password)) {
+      EmptyEditTextWarning("Passwords Do Not Match. Re-enter Password(s)");
+      return;
+    }
+    // TODO(PHB): Update this when we handle avatars for real.
+    if (avatar_id_.isEmpty()) {
+      EmptyEditTextWarning("You Must Select an Avatar");
+      return;
+    }
+    
+    // TODO(PHB): Add avatar selection.
+    SendRequest(username, email, password, pass2, avatar_id_);
   }
-
-  @Override
+  
+  private void SendRequest(String username, String email, String password, String pass2, String avatar_id) {
+	GetUrlTask task = new GetUrlTask(this, GetUrlTask.TargetType.JSON);
+	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
+	params.url_ = new_user_url_;
+	params.connection_type_ = "POST";
+	params.extra_info_ = REGISTER_NEW_USER_TASK;
+    ArrayList<String> form_info = new ArrayList<String>();
+    form_info.add(GetUrlTask.CreateFormInfo("name", username));
+    form_info.add(GetUrlTask.CreateFormInfo("mail", email));
+    form_info.add(GetUrlTask.CreateFormInfo("pass[pass1]", password));
+    form_info.add(GetUrlTask.CreateFormInfo("pass[pass2]", pass2));
+    // TODO(PHB): Implement avatar selection, and possibly timezone (key="timezone", value=e.g."America/New_York")
+    form_info.add(GetUrlTask.CreateFormInfo("select_avatar", avatar_id));
+  	params.post_string_ = GetUrlTask.CreatePostString(null, form_info);
+  	fadeAllViews(true);
+  	Log.e("PHB TEMP", "NewUserActivity::SendRequest. post string: " + params.post_string_);
+	task.execute(params);
+  }
+  
+  private void EmptyEditTextWarning(String warning) {
+	dialog_ = new JactDialogFragment(warning);
+	dialog_.show(getSupportFragmentManager(), warning);
+  }
+  
+  public void doDialogOkClick(View view) {
+    // Close Dialog window.
+    dialog_.dismiss();
+  }
+  
+  private void Login() {
+	EditText username_et = (EditText) findViewById(R.id.new_user_name_et);
+    String username = username_et.getText().toString().trim();
+    if (username.isEmpty()) {
+      Log.e("NewUserActivity::Login", "Username field empty; unable to login.");
+      return;
+    }
+	EditText password_et = (EditText) findViewById(R.id.new_user_password_et);
+    String password = password_et.getText().toString().trim();
+    if (password.isEmpty()) {
+      Log.e("NewUserActivity::Login", "Password field empty; unable to login.");
+      return;
+    }
+    SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+    SharedPreferences.Editor editor = user_info.edit();
+    editor.putString(getString(R.string.ui_username), username);
+    editor.putString(getString(R.string.ui_password), password);
+    editor.commit();
+	startActivity(new Intent(this, JactLoginActivity.class));
+  }
+  
   public void fadeAllViews(boolean should_fade) {
     ProgressBar spinner = (ProgressBar) findViewById(R.id.new_user_progress_bar);
     AlphaAnimation alpha;
@@ -117,8 +194,18 @@ public class NewUserActivity extends JactActionBarActivity implements ProcessUrl
   }
   
   @Override
+  public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+	AvatarAdapter.AvatarViewHolder holder = (AvatarAdapter.AvatarViewHolder) view.getTag();
+	avatar_id_ = holder.id_.getText().toString().trim();
+  }
+  
+  @Override
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
-	ProcessCartResponse(this, webpage, cookies, extra_params);
+	if (extra_params.indexOf(REGISTER_NEW_USER_TASK) == 0) {
+	  Login();
+	} else {
+	  Log.e("NewUserActivity::ProcessUrlResponse", "Unexpected task: " + extra_params);
+	}
   }
 
   @Override
@@ -128,6 +215,27 @@ public class NewUserActivity extends JactActionBarActivity implements ProcessUrl
 
   @Override
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
-	ProcessFailedCartResponse(this, status, extra_params);
+	if (extra_params.indexOf(REGISTER_NEW_USER_TASK) == 0) {
+	  if (status == FetchStatus.ERROR_NEW_USER_BAD_AVATAR) {
+		EmptyEditTextWarning("Unrecognized Avatar. Please Re-Select Avatar.");
+	  } else if (status == FetchStatus.ERROR_NEW_USER_BAD_EMAIL) {
+		EditText email_et = (EditText) findViewById(R.id.new_user_email_et);
+	    String email = email_et.getText().toString().trim();
+		EmptyEditTextWarning("The Email Address '" + email + "' is Already Registered");
+	  } else if (status == FetchStatus.ERROR_NEW_USER_BAD_NAME) {
+		EditText username_et = (EditText) findViewById(R.id.new_user_name_et);
+	    String username = username_et.getText().toString().trim();
+		EmptyEditTextWarning("The Username '" + username + "' is Already Taken");
+	  } else if (status == FetchStatus.ERROR_NEW_USER_MISMATCHING_PASSWORDS) {
+		EmptyEditTextWarning("Passwords Do Not Match. Re-enter Password(s)");
+	  } else if (status == FetchStatus.ERROR_UNKNOWN_406) {
+		Log.e("NewUserActivity::ProcessFailedResponse", "Unknown 406 error");
+	  } else {
+		EmptyEditTextWarning("");
+		Log.e("NewUserActivity::ProcessFailedResponse", "Unknown status: " + status);
+	  }
+	} else {
+	  Log.e("NewUserActivity::ProcessUrlResponse", "Unexpected task: " + extra_params);
+	}
   }
 }

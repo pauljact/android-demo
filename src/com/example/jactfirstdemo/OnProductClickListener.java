@@ -24,6 +24,7 @@ public class OnProductClickListener implements OnItemClickListener {
 	static class PopupWindowViewHolder {
 	  public TextView drawing_;
 	  public TextView title_;
+	  public TextView summary_;
 	  public TextView date_;
 	  public TextView bux_;
 	  public TextView points_;
@@ -41,13 +42,14 @@ public class OnProductClickListener implements OnItemClickListener {
 		view_holder_ = new PopupWindowViewHolder();
         view_holder_.drawing_ = (TextView) vi.findViewById(R.id.product_popup_text_drawing);
         view_holder_.title_ = (TextView) vi.findViewById(R.id.product_popup_text_title);
+        view_holder_.summary_ = (TextView) vi.findViewById(R.id.product_popup_text_summary);
         view_holder_.date_ = (TextView) vi.findViewById(R.id.product_popup_text_date);
         view_holder_.bux_ = (TextView) vi.findViewById(R.id.product_popup_text_bux);
         view_holder_.points_ = (TextView) vi.findViewById(R.id.product_popup_text_points);
         view_holder_.pid_ = (TextView) vi.findViewById(R.id.product_popup_text_pid);
         view_holder_.img_ = (ImageView) vi.findViewById(R.id.product_popup_img);
         vi.setTag(view_holder_);
-        if (view_holder_.title_ == null || view_holder_.date_ == null ||
+        if (view_holder_.title_ == null || view_holder_.summary_ == null || view_holder_.date_ == null ||
             view_holder_.bux_ == null || view_holder_.img_ == null || view_holder_.pid_ == null) {
         	// TODO(PHB): Gracefully handle this.
         	Log.e("PHB ERROR", "OnProductClickListener::Constructor.\n" +
@@ -130,7 +132,13 @@ public class OnProductClickListener implements OnItemClickListener {
 			popup_holder.drawing_.setVisibility(View.GONE);
 		}
 		popup_holder.title_.setText(orig_holder.title_.getText());
-        popup_holder.date_.setText("Drawing Date: " + orig_holder.date_.getText());
+		popup_holder.summary_.setText(orig_holder.summary_.getText());
+		if (orig_holder.drawing_.isShown()) {
+		  popup_holder.date_.setVisibility(View.VISIBLE);
+		  popup_holder.date_.setText("Drawing Date: " + orig_holder.date_.getText());
+		} else {
+		  popup_holder.date_.setVisibility(View.GONE);
+		}
         popup_holder.bux_.setText(orig_holder.bux_.getText());
         if (orig_holder.points_.isShown()) {
         	popup_holder.points_.setText("+ " + orig_holder.points_.getText());

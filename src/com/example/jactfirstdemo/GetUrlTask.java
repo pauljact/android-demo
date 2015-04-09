@@ -82,7 +82,14 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  ERROR_PROTOCOL_EXCEPTION,
 	  ERROR_WRITE_RESPONSE_ENCODING,
 	  ERROR_WRITE_RESPONSE_IO,
-	  ERROR_UNSUPPORTED_CONTENT_TYPE
+	  ERROR_UNSUPPORTED_CONTENT_TYPE,
+	  ERROR_NEW_USER_BAD_NAME,
+	  ERROR_NEW_USER_MISMATCHING_PASSWORDS,
+	  ERROR_NEW_USER_BAD_EMAIL,
+	  ERROR_NEW_USER_BAD_AVATAR,
+	  ERROR_UNKNOWN_406,
+	  ERROR_UNRECOGNIZED_USERNAME,
+	  ERROR_BAD_USERNAME_OR_PASSWORD,
   }
   
   static final String COOKIES_HEADER = "Set-Cookie";
@@ -343,69 +350,13 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	    		           input_stream + ". PHB. Error string: " + error_stream +
 	   					   "; responsecode" + responsecode);
 	  }
-	  if (responsecode == 401) {
-	    Log.w("PHB", "GetUrlTask::doInBackground. CSRF Failed. Response (" +
-	                 responsecode + "); response:" + input_stream +
-	                 ". PHB. Error string: " + error_stream);
-	    if (error_stream.indexOf("\"Missing required argument data\"") >= 0) {
-	      status_ = FetchStatus.ERROR_UNSUPPORTED_CONTENT_TYPE;
-	    } else {
-	      status_ = FetchStatus.ERROR_CSRF_FAILED;
-	    }
-	  } else if (responsecode == 400) {
-	    Log.e("PHB ERROR", "GetUrlTask::doInBackground. Server didn't recognize a form field. Response (" +
-	                       responsecode + "); response:\n" + input_stream +
-	                       ". PHB. Error string: " + error_stream);
-	    status_ = FetchStatus.ERROR_BAD_FORM_ITEM;
-	  } else {
-	    Log.e("PHB ERROR", "GetUrlTask::doInBackground. Bad response (" +
-	                       responsecode + "); response:\n" + input_stream +
-	                       ". PHB. Error string: " + error_stream);
-	    status_ = FetchStatus.ERROR_RESPONSE_CODE;
-	  }
-	  // Makes sure that the InputStream is closed after the app is finished using it.
-	  if (is != null) {
-	    try {
-		  is.close();
-		} catch (IOException e5) {
-		  // TODO Auto-generated catch block
-		  e5.printStackTrace();
-		  status_ = FetchStatus.ERROR_INPUT_STREAM_ERROR;
-		  return null;
-		}
-	  }
+	  status_ = GetStatusForFailedResponse(responsecode, is, input_stream, error_stream);
 	  return null;
     }
 
     // Handle HTTP Error codes.
     if (response != 200) {
-      if (response == 403) {
-        // TODO(PHB): Handle error here.
-        Log.e("PHB ERROR", "GetUrlTask::doInBackground. " +
-                           "Server responded with 403, likely because " +
-                           "logged-in credentials (cookies) were not properly " +
-                           "transferred to the server.");
-        status_ = FetchStatus.ERROR_403;
-        return null;
-      } else if (response == 401) {
-	    Log.w("PHB", "GetUrlTask::doInBackground. CSRF Failed. Response (" +
-	                 response + "); response:\n" + input_stream +
-	                 ". PHB. Error string: " + error_stream);
-	    status_ = FetchStatus.ERROR_CSRF_FAILED;
-	  } else if (response == 400) {
-	    Log.e("PHB ERROR", "GetUrlTask::doInBackground. Server didn't recognize a form field. Response (" +
-	                       response + "); response:\n" + input_stream +
-	                       ". PHB. Error string: " + error_stream);
-	    status_ = FetchStatus.ERROR_BAD_FORM_ITEM;
-	  } else if (response == 404) {
-	    status_ = FetchStatus.ERROR_NO_CONTROLLER;
-	    return null;
-	  } else {
-	    Log.e("PHB ERROR", "GetUrlTask::doInBackground. Bad response (" +
-	                       response + "); response:\n" + input_stream +
-	                       ". PHB. Error string: " + error_stream);
-	    status_ = FetchStatus.ERROR_RESPONSE_CODE;
-      }
+      status_ = GetStatusForFailedResponse(response, is, input_stream, error_stream);
       return null;
     }
   	  
@@ -427,6 +378,70 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
     }
     status_ = FetchStatus.SUCCESS;
     return null;
+  }
+  
+  private FetchStatus GetStatusForFailedResponse(
+		  int responsecode, InputStream is, String input_stream, String error_stream) {
+	FetchStatus to_return;
+    if (responsecode == 400) {
+	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. Server didn't recognize a form field. Response (" +
+	                     responsecode + "); response:\n" + input_stream +
+	                     ". PHB. Error string: " + error_stream);
+	  to_return = FetchStatus.ERROR_BAD_FORM_ITEM;
+    } else if (responsecode == 401) {
+  	  Log.w("PHB", "GetUrlTask::doInBackground. CSRF Failed. Response (" +
+  	               responsecode + "); response:" + input_stream +
+  	               ". PHB. Error string: " + error_stream);
+  	  if (error_stream.indexOf("\"Missing required argument data\"") >= 0) {
+  	    to_return = FetchStatus.ERROR_UNSUPPORTED_CONTENT_TYPE;
+  	  } else if (error_stream.indexOf("Wrong username or password") >= 0) {
+  		to_return = FetchStatus.ERROR_BAD_USERNAME_OR_PASSWORD;
+  	  } else {
+  	    to_return = FetchStatus.ERROR_CSRF_FAILED;
+  	  }    
+    } else if (responsecode == 403) {
+      // TODO(PHB): Handle error here.
+      Log.e("PHB ERROR", "GetUrlTask::doInBackground. " +
+                         "Server responded with 403, likely because " +
+                         "logged-in credentials (cookies) were not properly " +
+                         "transferred to the server.");
+      to_return = FetchStatus.ERROR_403;
+    } else if (responsecode == 404) {
+      Log.e("PHB ERROR", "GetUrlTask::doInBackground. Response 404. error: " + error_stream);	
+      to_return = FetchStatus.ERROR_NO_CONTROLLER;
+    } else if (responsecode == 406) {
+      Log.e("PHB ERROR", "GetUrlTask::doInBackground. Response 406. error: " + error_stream);
+      if (error_stream.indexOf("The name") >= 0 && error_stream.indexOf("is already taken.") >= 0) {
+    	to_return = FetchStatus.ERROR_NEW_USER_BAD_NAME;
+      } else if (error_stream.indexOf("The specified passwords do not match.") >= 0) {
+    	to_return = FetchStatus.ERROR_NEW_USER_MISMATCHING_PASSWORDS;
+      } else if (error_stream.indexOf("The e-mail address ") >= 0 && error_stream.indexOf("is already registered") >= 0) {
+    	to_return = FetchStatus.ERROR_NEW_USER_BAD_EMAIL;
+      } else if (error_stream.indexOf("An illegal choice has been detected.") >= 0) {
+    	to_return = FetchStatus.ERROR_NEW_USER_BAD_AVATAR;
+      } else if (error_stream.indexOf("is not recognized as a user") >= 0) {
+    	to_return = FetchStatus.ERROR_UNRECOGNIZED_USERNAME;
+      } else {
+    	to_return = FetchStatus.ERROR_UNKNOWN_406;
+      }
+    } else {
+	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. Bad response (" +
+	                     responsecode + "); response:\n" + input_stream +
+	                     ". PHB. Error string: " + error_stream);
+	  to_return = FetchStatus.ERROR_RESPONSE_CODE;
+	}
+    
+	// Makes sure that the InputStream is closed after the app is finished using it.
+	if (is != null) {
+	  try {
+	    is.close();
+	  } catch (IOException e5) {
+		// TODO Auto-generated catch block
+		e5.printStackTrace();
+		return FetchStatus.ERROR_INPUT_STREAM_ERROR;
+      }
+	}
+	return to_return;
   }
 
   private String ParseHeadersFromParams(String params, ArrayList<HeaderInfo> header_info) {
@@ -478,9 +493,19 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
    	    return error_msg;
  	  }
  	  forms_str = header_and_form.get(1);
+ 	} else if (header_and_form.size() == 2) {
+ 	  // Verify first part (header) is empty; then set forms_str to second part.
+ 	  if (!header_and_form.get(0).isEmpty()) {
+ 	 	Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
+                           "size = " + header_and_form.size() + ", header_and_form.get(0): " +
+                           header_and_form.get(0) + ", header_and_form.get(1): " +
+                           header_and_form.get(1) + ", post_params_: " + params);
+ 	 	return error_msg;
+ 	  }
+ 	  forms_str = header_and_form.get(1);
    	} else if (header_and_form.size() != 1) {
  	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
- 	                     "sizze = " + header_and_form.size() + ", post_params_: " + params);
+ 	                     "size = " + header_and_form.size() + ", post_params_: " + params);
  	  return error_msg;
    	} else {
  	  forms_str = header_and_form.get(0);

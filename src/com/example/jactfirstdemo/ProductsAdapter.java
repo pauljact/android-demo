@@ -16,7 +16,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
  
-public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem> {
+public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem> implements AdapterWithImages {
 
 	private ProductsActivity parent_activity_;
 	private ArrayList<ProductsPageParser.ProductItem> products_;
@@ -28,6 +28,7 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
 	  public RelativeLayout layout_;
 	  public TextView drawing_;
 	  public TextView title_;
+	  public TextView summary_;
 	  public TextView date_;
 	  public TextView bux_;
 	  public TextView price_and_;
@@ -48,7 +49,8 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         	parent_activity_.getApplicationContext(), this, activity_name);
 	}
 	
-	public void alertPositionsReady (HashSet<Integer> positions) {
+	@Override
+	public void AlertPositionsReady (HashSet<Integer> positions) {
 		if (positions == null) {
 			Log.e("PHB ERROR", "ProductsAdapter::alertPositionsReady. Null positions");
 			return;
@@ -107,6 +109,7 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
             viewHolder.layout_ = (RelativeLayout) vi.findViewById(R.id.products_item_ll);
             viewHolder.drawing_ = (TextView) vi.findViewById(R.id.product_drawing_title);
             viewHolder.title_ = (TextView) vi.findViewById(R.id.product_title);
+            viewHolder.summary_ = (TextView) vi.findViewById(R.id.product_summary);
             viewHolder.date_ = (TextView) vi.findViewById(R.id.product_date);
             viewHolder.bux_ = (TextView) vi.findViewById(R.id.product_bux);
             viewHolder.price_and_ = (TextView) vi.findViewById(R.id.product_price_seperator);
@@ -124,6 +127,11 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         // Set Title.
         if (product.title_ != null) {
           holder.title_.setText(product.title_);
+        }
+        
+        // Set Summary.
+        if (product.summary_ != null) {
+          holder.summary_.setText(product.summary_);
         }
         
         if (product.date_ != null && !product.date_.isEmpty()) {

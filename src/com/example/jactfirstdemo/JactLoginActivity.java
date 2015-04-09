@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -15,6 +14,7 @@ import android.widget.TextView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.support.v4.app.FragmentActivity;
+//PHBimport android.support.v4.app.FragmentTransaction;
 import android.widget.EditText;
 
 import org.json.JSONException;
@@ -24,11 +24,11 @@ import com.example.jactfirstdemo.JactLoggedInHomeActivity;
 import com.example.jactfirstdemo.R;
 
 public class JactLoginActivity extends FragmentActivity implements ProcessUrlResponseCallback {
-  private static final String COOKIES_HEADER = "Set-Cookie";
   private static final String login_url_ = "https://us7.jact.com:3081/rest/user/login";
   //private static final String login_url_ = "http://us7.jact.com:3080/rest/user/login";
   private String username_;
   private String password_;
+  private static boolean require_login_;
   private boolean logging_in_;
   private boolean requires_user_input_;
   private JactDialogFragment dialog_;
@@ -36,6 +36,7 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    require_login_ = false;
   }
   
   @Override
@@ -64,14 +65,20 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     username_ = user_info.getString(getString(R.string.ui_username), "");
     password_ = user_info.getString(getString(R.string.ui_password), "");
     logging_in_ = false;
-    if (username_ == null || username_.isEmpty() || password_ == null || password_.isEmpty()) {
+    if (require_login_ || username_ == null || username_.isEmpty() || password_ == null || password_.isEmpty()) {
       requires_user_input_ = true;
+      // Reset require login.
+      require_login_ = false;
       setContentView(R.layout.jact_welcome_screen);
     } else {
       requires_user_input_ = false;
       setContentView(R.layout.jact_empty_welcome_screen);
       Login(username_, password_);
     }
+  }
+  
+  public static void SetRequireLogin(boolean value) {
+	require_login_ = value;
   }
   
   private void SetLoggingInState(boolean logging_in) {
@@ -246,7 +253,8 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
 	SetLoggingInState(false);
 	Log.e("PHB ERROR", "JactLoginActivity.ProcessFailedResponse. Status: " + status);
     // Handle failed POST
-    if (status == GetUrlTask.FetchStatus.ERROR_403) {
+    if (status == GetUrlTask.FetchStatus.ERROR_403 ||
+    	status == GetUrlTask.FetchStatus.ERROR_BAD_USERNAME_OR_PASSWORD) {
     	dialog_ = new JactDialogFragment("Wrong Username or Password");
     	dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog_403");
         TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
@@ -263,6 +271,9 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
           "Unable to Reach Jact",
           "Check internet connection, and try again.");
       dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
+      /*FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+      ft.add(dialog_, null);
+      ft.commitAllowingStateLoss();*/
     }
   }
 }

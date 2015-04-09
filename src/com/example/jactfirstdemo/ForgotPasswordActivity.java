@@ -1,110 +1,116 @@
 package com.example.jactfirstdemo;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
-import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
+import java.util.ArrayList;
 
-import android.content.res.Configuration;
+import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
+
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class ForgotPasswordActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private JactNavigationDrawer navigation_drawer_;
-  private static final String forgot_password_url_ = "https://us7.jact.com:3081/user/password";
-  //private static final String forgot_password_url_ = "http://us7.jact.com:3080/user/password";
+public class ForgotPasswordActivity extends ActionBarActivity implements ProcessUrlResponseCallback {
+  private static final String forgot_password_url_ = "https://us7.jact.com:3081/rest/user/request_new_password";
+  //private static final String forgot_password_url_ = "http://us7.jact.com:3080/rest/user/request_new_password";
+  private JactDialogFragment dialog_;
+  private boolean is_password_reset_;
+  private static final String FORGOT_PASSWORD_TASK = "forgot_password_task";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    // Set layout.
     super.onCreate(savedInstanceState);
-    num_server_tasks_ = 0;
-    setContentView(R.layout.forgot_password_layout);
+	setContentView(R.layout.forgot_password_layout);
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
     TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
     ab_title.setText(R.string.forgot_password_label);
     setSupportActionBar(toolbar);
-    getSupportActionBar().setHomeButtonEnabled(true);
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-    // Set Navigation Drawer.
-    navigation_drawer_ =
-        new JactNavigationDrawer(this,
-        		                 findViewById(R.id.forgot_password_drawer_layout),
-        		                 findViewById(R.id.forgot_password_left_drawer),
-        		                 JactNavigationDrawer.ActivityIndex.FORGOT_PASSWORD);
   }
     
   @Override
   protected void onResume() {
 	super.onResume();
-    navigation_drawer_.setActivityIndex(ActivityIndex.FORGOT_PASSWORD);
-    
-    // Set webview from forgot_password_url_.
-    WebView web_view = (WebView) findViewById(R.id.forgot_password_webview);
-    web_view.loadUrl(forgot_password_url_);
-    web_view.setWebViewClient(new WebViewClient() {
-    	@Override
-    	public void onPageFinished(WebView view, String url) {
-    		fadeAllViews(false);
-    	}
-    });
-    // Set spinner (and hide WebView) until page has finished loading.
-    SetCartIcon(this);
-    fadeAllViews(num_server_tasks_ > 0);  }
+	is_password_reset_ = false;
+  }
+
+  public void doForgotPasswordClick(View view) {
+	EditText username_et = (EditText) findViewById(R.id.forgot_password_et);
+    String username = username_et.getText().toString().trim();
+    if (username.isEmpty()) {
+      EmptyEditTextWarning();
+      return;
+    }
+    SendRequest(username);
+  }
   
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    // Sync the toggle state after onRestoreInstanceState has occurred.
-    navigation_drawer_.onPostCreate(savedInstanceState);
+  private void SendRequest(String username) {
+	GetUrlTask task = new GetUrlTask(this, GetUrlTask.TargetType.JSON);
+	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
+	params.url_ = forgot_password_url_;
+	params.connection_type_ = "POST";
+	params.extra_info_ = FORGOT_PASSWORD_TASK;
+  	ArrayList<String> header_info = new ArrayList<String>();
+    header_info.add(GetUrlTask.CreateHeaderInfo("Content-Type", "application/json"));
+    ArrayList<String> form_info = new ArrayList<String>();
+    form_info.add(GetUrlTask.CreateFormInfo("name", username));
+  	params.post_string_ = GetUrlTask.CreatePostString(header_info, form_info);
+  	fadeAllViews(true);
+  	Log.e("PHB TEMP", "ForgotPasswordActivity::SendRequest. post string: " + params.post_string_);
+	task.execute(params);
   }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    navigation_drawer_.onConfigurationChanged(newConfig);
+  
+  private void EmptyEditTextWarning() {
+	dialog_ = new JactDialogFragment("Enter Username or Email Address");
+	dialog_.show(getSupportFragmentManager(), "Empty_username");
   }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu items for use in the action bar.
-    getMenuInflater().inflate(R.menu.action_bar, menu);
-    boolean set_cart_icon = false;
-    if (menu_bar_ == null) set_cart_icon = true;
-    menu_bar_ = menu;
-    if (set_cart_icon) {
-      SetCartIcon(this);
+  
+  private void UnrecognizedUsernameWarning() {
+	EditText username_et = (EditText) findViewById(R.id.forgot_password_et);
+    String username = username_et.getText().toString().trim();
+    if (username.isEmpty()) {
+      EmptyEditTextWarning();
+      return;
     }
-	ShoppingCartActivity.SetCartIcon(menu);
-    return super.onCreateOptionsMenu(menu);
+	dialog_ = new JactDialogFragment("Jact has no username/email '" + username + "'",
+			                         "Re-enter valid username or email, Or sign up as new  user.");
+	dialog_.show(getSupportFragmentManager(), "Bad_username");
+  }
+  
+  public void doDialogOkClick(View view) {
+    // Close Dialog window.
+    dialog_.dismiss();
+	if (is_password_reset_) {
+	  is_password_reset_ = false;
+	  startActivity(new Intent(this, JactLoginActivity.class));
+	}
   }
 
   @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (navigation_drawer_.onOptionsItemSelected(item)) {
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
+  public void onBackPressed() {
+    Log.e("PHB TEMP", "ForgotPassword::onBackPressed");
+    JactLoginActivity.SetRequireLogin(true);
+    super.onBackPressed();
   }
-
-  @Override
+  
   public void fadeAllViews(boolean should_fade) {
     ProgressBar spinner = (ProgressBar) findViewById(R.id.forgot_password_progress_bar);
+    EditText textbox = (EditText) findViewById(R.id.forgot_password_et);
     AlphaAnimation alpha;
     if (should_fade) {
       spinner.setVisibility(View.VISIBLE);
+      textbox.setEnabled(false);
       alpha = new AlphaAnimation(0.5F, 0.5F);
     } else {
       spinner.setVisibility(View.INVISIBLE);
+      textbox.setEnabled(true);
       alpha = new AlphaAnimation(1.0F, 1.0F);
     }
     // The AlphaAnimation will make the whole content frame transparent
@@ -117,16 +123,30 @@ public class ForgotPasswordActivity extends JactActionBarActivity implements Pro
   
   @Override
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
-	ProcessCartResponse(this, webpage, cookies, extra_params);
+    if (extra_params.indexOf(FORGOT_PASSWORD_TASK) == 0) {
+      dialog_ = new JactDialogFragment("Further Instructions Have Been Sent to Your Email");
+      dialog_.show(getSupportFragmentManager(), "Successful_password_reset");
+      is_password_reset_ = true;
+    } else {
+      Log.e("ForgotPasswordActivity::ProcessUrlResponse", "Unrecognized task: " + extra_params);
+    }
   }
 
   @Override
   public void ProcessUrlResponse(Bitmap pic, String cookies, String extra_params) {
-	// TODO Auto-generated method stub
   }
 
   @Override
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
-	ProcessFailedCartResponse(this, status, extra_params);
+	fadeAllViews(false);
+	// TODO(PHB): Implement this for real, once Forgot Password is figured out.
+	Log.e("PHB TEMP", "ForgotPassword::ProcessFailedResponse. Status: " + status);
+	if (status == FetchStatus.ERROR_UNRECOGNIZED_USERNAME) {
+	  UnrecognizedUsernameWarning();
+	} else {
+      dialog_ = new JactDialogFragment("Unable to Reach Jact",
+                                       "Check internet connection, and try again.");
+      dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
+	}
   }
 }
