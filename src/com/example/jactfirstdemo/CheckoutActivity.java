@@ -32,8 +32,8 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
   public static Cookie cookie_ = null;
   private static int order_id_;
   private JactDialogFragment dialog_;
-  private static final String checkout_url_ = "https://us7.jact.com:3081/checkout/";
-  //private static final String checkout_url_ = "http://m.jact.com:3080/checkout/";
+  //private static final String checkout_url_ = "https://us7.jact.com:3081/checkout/";
+  private static final String checkout_url_ = "https://m.jact.com:3081/checkout/";
   //private static final String checkout_url_ = "http://us7.jact.com:3080/checkout/";
 
   public static synchronized void SetOrderId(int order_id) {

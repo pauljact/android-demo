@@ -87,6 +87,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  UPDATE_LINE_ITEM,
 	  UPDATE_CART,
 	  REMOVE_QP_CART_ITEM,
+	  GET_PRODUCT_QUANTITY,
 	}
 	
 	public static class CartAccessResponse {
@@ -222,6 +223,10 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  response.printed_cart_ = PrintCart(); 
 	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
 	  return true;
+	} else if (type == CartAccessType.GET_PRODUCT_QUANTITY) {
+	  response.num_cart_items_ = GetProductQuantity(pid);
+      Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
+      return true;
 	} else if (type == CartAccessType.GET_NUM_DISTINCT_CART_ITEMS) {
 	  response.num_distinct_cart_items_ = GetNumberDistinctCartItems(); 
 	  Log.i("PHB TEMP", "ShoppingCartActivity::AccessCart. Leaving from: " + type);
@@ -301,6 +306,9 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
   }
   public static synchronized boolean AccessCart(CartAccessType type, int pid) {
     return AccessCart(type, pid, -1, "", "", null, null, null);
+  }
+  public static synchronized boolean AccessCart(CartAccessType type, int pid, CartAccessResponse response) {
+    return AccessCart(type, pid, -1, "", "", null, null, response);
   }
   public static synchronized boolean AccessCart(CartAccessType type, LineItem item) {
     return AccessCart(type, -1, -1, "", item, null);
@@ -490,6 +498,16 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
   private static synchronized String PrintCart() {
     if (shopping_cart_ == null) return "";
 	return shopping_cart_.toString();
+  }
+  
+  private static synchronized int GetProductQuantity(int product_id) {
+	if (shopping_cart_ == null || shopping_cart_.line_items_ == null) return -1;
+  	Iterator<ShoppingUtils.LineItem> itr = shopping_cart_.line_items_.iterator();
+    while (itr.hasNext()) {
+	  ShoppingUtils.LineItem item = itr.next();
+	  if (item.pid_ == product_id) return item.quantity_;
+    }
+	return -1;
   }
   
   private static synchronized int GetNumberCartItems() {
@@ -719,7 +737,6 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	
 	// Adds a item to the cart (or updates the item, in case it's already present in the cart).
 	private static synchronized ItemToAddStatus GetCartItemToAddStatus(ShoppingUtils.LineItem item) {
-		Log.e("PHB TEMP", "Here");
 		if (item == null) {
 			Log.e("PHB ERROR", "ShoppingCartActivity::ItemToAddStatus. 1");
 			return ItemToAddStatus.NO_PID;
@@ -729,7 +746,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 			return ItemToAddStatus.NO_PID;
 		}
 		int max_quantity = ProductsActivity.GetMaxQuantity(item.pid_);
-		if (max_quantity != -2 && max_quantity > 0 && max_quantity <= item.quantity_) {
+		if (max_quantity != -2 && max_quantity > 0 && max_quantity < item.quantity_) {
 	      return ItemToAddStatus.MAX_QUANTITY_EXCEEDED;
 	    }
 		if (GetNumberCartItems() >= MAX_CART_ITEMS) {
@@ -748,7 +765,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		if (temp_item != null) {
 		  return ItemToAddStatus.INCREMENTED;
 		}
-		return EnforceCartRules(item.pid_, 1 + item.quantity_, item.type_);
+		return EnforceCartRules(item.pid_, item.quantity_, item.type_);
 	}
 	
 	private static boolean IsFutureDate(String date_str) {

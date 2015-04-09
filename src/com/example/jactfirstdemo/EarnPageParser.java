@@ -15,6 +15,7 @@ public class EarnPageParser {
   private static final String TITLE_NODE = "node_title";
   private static final String NID_NODE = "nid";
   private static final String YOUTUBE_ID_NODE = "YouTube_ID";
+  private static final String YOUTUBE_ID_NODE_TWO = "YouTube ID";
   private static final String VALUE_NODE = "value";
   private static final String YOUTUBE_URL_NODE = "field_data_field_watch_field_watch_video_url";
   private static final String IMG_URL_NODE = "field_data_field_watch_field_watch_thumbnail_path";
@@ -133,15 +134,29 @@ public class EarnPageParser {
         }
         
         // Parse Youtube Url.
-        if (!ParseYoutubeUrl(item.getString(YOUTUBE_ID_NODE), earn_item)) {
+        boolean found_id = false;
+        if (item.has(YOUTUBE_ID_NODE)) {
+          if (!ParseYoutubeUrl(item.getString(YOUTUBE_ID_NODE), earn_item)) {
             Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube id: " +
- 		                       item.getString(YOUTUBE_ID_NODE));
-            // Try getting youtube id the old way.
-            if (!ParseYoutubeUrlOld(item.getString(YOUTUBE_URL_NODE), earn_item)) {
-              Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube url: " +
-	                             item.getString(YOUTUBE_URL_NODE));
-              return;
-            }
+ 		                        item.getString(YOUTUBE_ID_NODE));
+          } else {
+        	found_id = true;
+          }
+        } else if (item.has(YOUTUBE_ID_NODE_TWO)) {
+          if (!ParseYoutubeUrl(item.getString(YOUTUBE_ID_NODE_TWO), earn_item)) {
+            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube id: " +
+ 		                        item.getString(YOUTUBE_ID_NODE));
+          } else {
+        	found_id = true;
+          }
+        }
+        if (!found_id) {
+          // Try getting youtube id the old way.
+          if (!ParseYoutubeUrlOld(item.getString(YOUTUBE_URL_NODE), earn_item)) {
+            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube url: " +
+	                           item.getString(YOUTUBE_URL_NODE));
+            return;
+          }
         }
         
         // Parse Image Url.
@@ -162,7 +177,7 @@ public class EarnPageParser {
         earn_list.add(earn_item);
       }
     } catch (JSONException e) {
-      Log.e("PHB ERROR", "EarnPageParser.ParseEarnPage: Failed to parse response");
+      Log.e("PHB ERROR", "EarnPageParser.ParseEarnPage: Failed to parse response. Error: " + e.getMessage());
       // TODO(PHB): Handle exception.
     }
   }

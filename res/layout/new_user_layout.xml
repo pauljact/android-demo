@@ -120,10 +120,33 @@
    	    android:textStyle="bold"
    	    android:textColor="@color/black"
   		android:background="@color/transparent"/>
+    
+    <!-- Send Button -->
+    <!-- <LinearLayout android:id="@+id/bottom_send_button_ll"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:layout_alignParentBottom="true">-->
+    <Button
+   	    android:id="@+id/new_user_btn"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="40dp"
+   	    android:layout_marginTop="5dp"
+        android:layout_marginLeft="12dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+   	    android:onClick="doRegisterClick"
+   	    android:background="@drawable/button_selector_blue"
+   	    android:text="@string/register_button_str"
+   	    android:padding="5dp"
+   	    android:textColor="@color/black"/>
+    <!-- </LinearLayout>-->
+    
     <!-- List of Avatars -->
     <ListView
         android:id="@+id/avatar_list"
    	    android:layout_below="@+id/new_user_icon_tv"
+   	    android:layout_above="@+id/new_user_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
@@ -131,19 +154,7 @@
         android:dividerHeight="1dp"
         android:listSelector="@drawable/products_bg_selector"/>
     <!-- End List of Products -->
-   	<Button
-   	    android:id="@+id/new_user_btn"
-   	    android:layout_width="wrap_content"
-   	    android:layout_height="40dp"
-   	    android:layout_below="@+id/avatar_list"
-   	    android:layout_marginTop="5dp"
-        android:layout_marginLeft="12dp"
-   	    android:onClick="doRegisterClick"
-   	    android:background="@drawable/button_selector_blue"
-   	    android:text="@string/register_button_str"
-   	    android:padding="5dp"
-   	    android:textColor="@color/black"
-   	/>
+
     <ProgressBar
    	    android:id="@+id/new_user_progress_bar"
    	    style="?android:attr/progressBarStyleLarge"

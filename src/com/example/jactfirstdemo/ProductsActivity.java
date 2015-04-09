@@ -676,7 +676,18 @@ public class ProductsActivity extends JactActionBarActivity
     	
     	// Set quantity to '1'. Below, GetCartItem(item.pid_) will adjust this appropriately
     	// if item is already in cart (i.e., it will increment quantity by one).
-    	item.quantity_ = 1;
+    	ShoppingCartActivity.CartAccessResponse quantity_response =
+    		new ShoppingCartActivity.CartAccessResponse();
+    	if (!ShoppingCartActivity.AccessCart(
+    		    ShoppingCartActivity.CartAccessType.GET_PRODUCT_QUANTITY, item.pid_, quantity_response)) {
+    	  Log.e("PHB ERROR", "ProductsActivity::doAddToCartClick. Failed to get quantity.");
+    	  return;
+    	}
+    	if (quantity_response.num_cart_items_ == -1) {
+    	  item.quantity_ = 1;
+    	} else {
+    	  item.quantity_ = quantity_response.num_cart_items_ + 1;
+    	}
     	// Fill in Item details that are not available from the Product Popup View
     	// (e.g. max_quantity, node_id and product_type).
     	if (!FillItemDetails(item)) {

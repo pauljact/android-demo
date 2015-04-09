@@ -380,74 +380,69 @@ public class ShoppingUtils {
   /////////////////////////// Webpage Parsers //////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   public static boolean ParseLineItem(JSONObject item, ShoppingCartInfo cart) {
-	try {
-	  String item_info = "Item keys: ";
-	  String unused_keys = "Unused keys: ";
-	  Iterator<String> item_itr = item.keys();
-	  while (item_itr.hasNext()) {
-		String key = item_itr.next();
-		item_info += key + ",";
-		if (key.equals(ORDER_NUMBER)) {
-	      // Get order id.
-          cart.order_id_ = item.getInt(key);
-	    } else if (key.equals(REVISION_ID)) { 
-          // Get Revision Id.
-          cart.revision_id_ = item.getInt(key);
-	    } else if (key.equals(REVISION_TIME)) {
-          // Get Timestamp.
-          cart.timestamp_ = item.getLong(key);
-	    } else if (key.equals(STATUS)) {
-          // Get Status.
-          // TODO(PHB): Implement these based on all possible statuses.
-          String status = item.getString(key);
-          if (status.equals("PHB foo")) {
-            cart.status_ = CheckoutStatus.EMPTY;
-          } else if (status.equals("PHB foo")) {
-            cart.status_ = CheckoutStatus.CREATE;
-          } else if (status.equals("checkout_review")) {
-            cart.status_ = CheckoutStatus.REVIEW;
-          } else if (status.equals("cart")) {
-            cart.status_ = CheckoutStatus.PENDING;
-          } else if (status.equals("checkout_checkout")) {
-            cart.status_ = CheckoutStatus.CHECKOUT;
-          } else if (status.equals("PHB foo")) {
-            cart.status_ = CheckoutStatus.COMPLETE;
-          } else {
-            Log.e("PHB ERROR", "ShoppingUtils::ParseCart. Unrecognized status: " + status);
-            //return PrintErrorAndAbort("Unable to parse status: " + status);
-          }
-	    } else if (key.equals(LINE_ITEMS_BLOCK)) {
-          // Get Line Items.
-          if (!GetLineItems(item, cart)) return false;
-	    } else if (key.equals(BILLING_ADDRESSES)) {
-          // Get Billing Info.
-          if (!GetBillingInfo(item, cart)) return false;
-	    } else if (key.equals(SHIPPING_ADDRESSES)) {
-          // Get Shipping Info.
-          if (!GetShippingInfo(item, cart)) return false;
-	    } else {
-	      unused_keys += key + ", ";
-	    }
+	Iterator<String> item_itr = item.keys();
+	while (item_itr.hasNext()) {
+	  String key = item_itr.next();
+	  if (!ParseLineItem(item, key, cart)) {
+		return false;
 	  }
-      return true;
+	}
+    return true;
+  }
+  
+  public static boolean ParseLineItem(JSONObject item, String key, ShoppingCartInfo cart) {
+  	try {
+	  if (key.equals(ORDER_NUMBER)) {
+	    // Get order id.
+        cart.order_id_ = item.getInt(key);
+	  } else if (key.equals(REVISION_ID)) { 
+        // Get Revision Id.
+        cart.revision_id_ = item.getInt(key);
+	  } else if (key.equals(REVISION_TIME)) {
+        // Get Timestamp.
+        cart.timestamp_ = item.getLong(key);
+	  } else if (key.equals(STATUS)) {
+        // Get Status.
+        // TODO(PHB): Implement these based on all possible statuses.
+        String status = item.getString(key);
+        if (status.equals("PHB foo")) {
+          cart.status_ = CheckoutStatus.EMPTY;
+        } else if (status.equals("PHB foo")) {
+          cart.status_ = CheckoutStatus.CREATE;
+        } else if (status.equals("checkout_review")) {
+          cart.status_ = CheckoutStatus.REVIEW;
+        } else if (status.equals("cart")) {
+          cart.status_ = CheckoutStatus.PENDING;
+        } else if (status.equals("checkout_checkout")) {
+          cart.status_ = CheckoutStatus.CHECKOUT;
+        } else if (status.equals("PHB foo")) {
+          cart.status_ = CheckoutStatus.COMPLETE;
+        } else {
+          Log.e("PHB ERROR", "ShoppingUtils::ParseCart. Unrecognized status: " + status);
+          //return PrintErrorAndAbort("Unable to parse status: " + status);
+        }
+	  } else if (key.equals(LINE_ITEMS_BLOCK)) {
+        // Get Line Items.
+        if (!GetLineItems(item, cart)) return false;
+	  } else if (key.equals(BILLING_ADDRESSES)) {
+        // Get Billing Info.
+        if (!GetBillingInfo(item, cart)) return false;
+	  } else if (key.equals(SHIPPING_ADDRESSES)) {
+        // Get Shipping Info.
+        if (!GetShippingInfo(item, cart)) return false;
+	  } else {
+	    // TODO(PHB): Determine if this is a troublesome case; if so, handle it.
+	  }
+	  return true;
 	} catch (JSONException e) {
-        return PrintErrorAndAbort("Unable to parse JSON item (cart) as JSON. |Exception: " +
-                e.getMessage() + "|Webpage:\n" + cart.toString());
+      return PrintErrorAndAbort("Unable to parse JSON item (cart) as JSON. |Exception: " +
+                                e.getMessage() + "|Webpage:\n" + cart.toString());
     }
   }
   
   private static boolean ParseCartLineItemKey(JSONObject item, String key, ShoppingCartInfo cart) {
 	// Sometimes, the parse cart page response has JSONObjects for this key, sometimes it is just
 	// a string. Handle both cases here.
-	//PHBJSONObject cart_item = new JSONObject(item.getString(item_key));
-    //Object cart_item_value;
-    //try {
-	//  cart_item_value = item.getString(key);
-	//} catch (JSONException e) {
-	//  // TODO Auto-generated catch block
-	//  Log.e("PHB ERROR", "ShoppingUtils::ParseCartLineItemKey. Unable to parse as an object. Error: " + e.getMessage());
-	//  return false;
-	//}
     try {
 	  //JSONObject cart_item = (JSONObject) cart_item_value;
       JSONObject cart_item = (JSONObject) item.getJSONObject(key);
@@ -462,7 +457,7 @@ public class ShoppingUtils {
 	    if (actual_cart_value.trim().isEmpty() || actual_cart_value.trim().equalsIgnoreCase("[]")) {
 	      return true;
 	    } else {
-	      return PrintErrorAndAbort("ParseCartLineItemKey. actual cart value|" + actual_cart_value + "|");
+	      return ParseLineItem(item, key, cart);
 	    }
       } catch (JSONException second_json_ex) {
   	    return PrintErrorAndAbort("ParseCartLineItemKey. 2nd JSON Exception: " + second_json_ex.getMessage());

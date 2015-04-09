@@ -175,6 +175,7 @@
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
         	android:launchMode="singleTask"
+        	android:windowSoftInputMode="adjustPan"
             android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

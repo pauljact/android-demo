@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 public class CommunityActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   //private static final String community_url_ = "https://us7.jact.com:3081/community";
-  private static final String community_url_ = "http://m.jact.com:3080/community";
+  private static final String community_url_ = "https://m.jact.com:3081/community";
   //private static final String community_url_ = "http://us7.jact.com:3080/community";
 
   @Override

@@ -75,11 +75,25 @@ public class NewUserActivity extends ActionBarActivity
     ab_title.setText(R.string.new_user_label);
     setSupportActionBar(toolbar);
   }
+  
+  private void ClearForm() {
+	EditText username_et = (EditText) findViewById(R.id.new_user_name_et);
+	username_et.setText("");
+	EditText email_et = (EditText) findViewById(R.id.new_user_email_et);
+    email_et.setText("");
+	EditText password_et = (EditText) findViewById(R.id.new_user_password_et);
+    password_et.setText("");
+	EditText pass2_et = (EditText) findViewById(R.id.new_user_password_confirm_et);
+    pass2_et.setText("");
+    // TODO(PHB): Unselect avatar too, once Selection of Avatars has been implemented
+  }
     
   @Override
   protected void onResume() {
 	super.onResume();
 	SetAvatars();
+	ClearForm();
+	fadeAllViews(false);
 	avatar_id_ = "";
   }
 
@@ -131,14 +145,17 @@ public class NewUserActivity extends ActionBarActivity
 	params.url_ = new_user_url_;
 	params.connection_type_ = "POST";
 	params.extra_info_ = REGISTER_NEW_USER_TASK;
+  	ArrayList<String> header_info = new ArrayList<String>();
+    header_info.add(GetUrlTask.CreateHeaderInfo("Content-Type", "application/json"));
     ArrayList<String> form_info = new ArrayList<String>();
     form_info.add(GetUrlTask.CreateFormInfo("name", username));
     form_info.add(GetUrlTask.CreateFormInfo("mail", email));
-    form_info.add(GetUrlTask.CreateFormInfo("pass[pass1]", password));
-    form_info.add(GetUrlTask.CreateFormInfo("pass[pass2]", pass2));
+    form_info.add(GetUrlTask.CreateFormInfo("pass", password));
+    //PHBform_info.add(GetUrlTask.CreateFormInfo("pass%5Bpass1%5D", password));
+    //PHBform_info.add(GetUrlTask.CreateFormInfo("pass%5Bpass2%5D", pass2));
     // TODO(PHB): Implement avatar selection, and possibly timezone (key="timezone", value=e.g."America/New_York")
     form_info.add(GetUrlTask.CreateFormInfo("select_avatar", avatar_id));
-  	params.post_string_ = GetUrlTask.CreatePostString(null, form_info);
+  	params.post_string_ = GetUrlTask.CreatePostString(header_info, form_info);
   	fadeAllViews(true);
   	Log.e("PHB TEMP", "NewUserActivity::SendRequest. post string: " + params.post_string_);
 	task.execute(params);
@@ -155,6 +172,7 @@ public class NewUserActivity extends ActionBarActivity
   }
   
   private void Login() {
+	fadeAllViews(false);
 	EditText username_et = (EditText) findViewById(R.id.new_user_name_et);
     String username = username_et.getText().toString().trim();
     if (username.isEmpty()) {
@@ -215,12 +233,17 @@ public class NewUserActivity extends ActionBarActivity
 
   @Override
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
+	fadeAllViews(false);
 	if (extra_params.indexOf(REGISTER_NEW_USER_TASK) == 0) {
 	  if (status == FetchStatus.ERROR_NEW_USER_BAD_AVATAR) {
 		EmptyEditTextWarning("Unrecognized Avatar. Please Re-Select Avatar.");
 	  } else if (status == FetchStatus.ERROR_NEW_USER_BAD_EMAIL) {
 		EditText email_et = (EditText) findViewById(R.id.new_user_email_et);
 	    String email = email_et.getText().toString().trim();
+		EmptyEditTextWarning("The Email Address '" + email + "' is not Valid");
+	  } else if (status == FetchStatus.ERROR_NEW_USER_DUPLICATE_EMAIL) {
+		EditText email_et = (EditText) findViewById(R.id.new_user_email_et);
+		String email = email_et.getText().toString().trim();
 		EmptyEditTextWarning("The Email Address '" + email + "' is Already Registered");
 	  } else if (status == FetchStatus.ERROR_NEW_USER_BAD_NAME) {
 		EditText username_et = (EditText) findViewById(R.id.new_user_name_et);
@@ -231,7 +254,7 @@ public class NewUserActivity extends ActionBarActivity
 	  } else if (status == FetchStatus.ERROR_UNKNOWN_406) {
 		Log.e("NewUserActivity::ProcessFailedResponse", "Unknown 406 error");
 	  } else {
-		EmptyEditTextWarning("");
+		EmptyEditTextWarning("Unknown Error");
 		Log.e("NewUserActivity::ProcessFailedResponse", "Unknown status: " + status);
 	  }
 	} else {

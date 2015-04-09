@@ -33,7 +33,7 @@ public class YouTubePlayerActivity extends JactActionBarActivity
   private static int earn_id_;
   private boolean has_skipped_ahead_;
   private JactDialogFragment dialog_;
-  private static final String EARN_REDEEM_URL_BASE = "http://m.jact.com:3080/node/";
+  private static final String EARN_REDEEM_URL_BASE = "https://m.jact.com:3081/node/";
   //private static final String EARN_REDEEM_URL_BASE = "https://us7.jact.com:3081/node/";
   public static final String DEVELOPER_KEY = "AIzaSyBoJypQxKePzlnt_4kVbRbAez64hbULcqI";
   private EarnPlayerStateChangeListener player_state_change_listener_;

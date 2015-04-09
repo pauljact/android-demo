@@ -28,12 +28,12 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   private static final String about_jact_url_ = "http://us7.jact.com:3080/about-jact";
   */
   /* Mobile sites */
-  private static final String rewards_url_ = "http://m.jact.com:3080/rest/rewards.json";
-  private static final String faq_url_ = "http://m.jact.com:3080/faq-page";
-  private static final String contact_us_url_ = "http://m.jact.com:3080/contact";
-  private static final String privacy_policy_url_ = "http://m.jact.com:3080/privacy-policy";
-  private static final String user_agreement_url_ = "http://m.jact.com:3080/user-agreement";
-  private static final String about_jact_url_ = "http://m.jact.com:3080/about-jact";
+  private static final String rewards_url_ = "https://m.jact.com:3081/rest/rewards.json";
+  private static final String faq_url_ = "https://m.jact.com:3081/faq-page";
+  private static final String contact_us_url_ = "https://m.jact.com:3081/contact";
+  private static final String privacy_policy_url_ = "https://m.jact.com:3081/privacy-policy";
+  private static final String user_agreement_url_ = "https://m.jact.com:3081/user-agreement";
+  private static final String about_jact_url_ = "https://m.jact.com:3081/about-jact";
   /**/
   /* SSL, non-mobile sites
   private static final String rewards_url_ = "https://us7.jact.com:3081/rest/rewards.json";

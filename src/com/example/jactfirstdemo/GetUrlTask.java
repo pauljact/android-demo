@@ -90,6 +90,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  ERROR_UNKNOWN_406,
 	  ERROR_UNRECOGNIZED_USERNAME,
 	  ERROR_BAD_USERNAME_OR_PASSWORD,
+	  ERROR_NEW_USER_DUPLICATE_EMAIL,
   }
   
   static final String COOKIES_HEADER = "Set-Cookie";
@@ -415,8 +416,10 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
     	to_return = FetchStatus.ERROR_NEW_USER_BAD_NAME;
       } else if (error_stream.indexOf("The specified passwords do not match.") >= 0) {
     	to_return = FetchStatus.ERROR_NEW_USER_MISMATCHING_PASSWORDS;
-      } else if (error_stream.indexOf("The e-mail address ") >= 0 && error_stream.indexOf("is already registered") >= 0) {
+      } else if (error_stream.indexOf("The e-mail address ") >= 0 && error_stream.indexOf("is not valid") >= 0) {
     	to_return = FetchStatus.ERROR_NEW_USER_BAD_EMAIL;
+      } else if (error_stream.indexOf("The e-mail address ") >= 0 && error_stream.indexOf("is already registered") >= 0) {
+      	to_return = FetchStatus.ERROR_NEW_USER_DUPLICATE_EMAIL;
       } else if (error_stream.indexOf("An illegal choice has been detected.") >= 0) {
     	to_return = FetchStatus.ERROR_NEW_USER_BAD_AVATAR;
       } else if (error_stream.indexOf("is not recognized as a user") >= 0) {

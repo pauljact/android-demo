@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 public class FaqActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   private static String url_;
-  private static final String faq_url_ = "http://m.jact.com:3080/faq-page";
+  private static final String faq_url_ = "https://m.jact.com:3081/faq-page";
   private static String title_;
   
   public static synchronized void SetUrlAndTitle(String url, String title) {

@@ -18,7 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class GamesActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private static final String games_url_ = "http://m.jact.com:3080/games";
+  private static final String games_url_ = "https://m.jact.com:3081/games";
   //private static final String games_url_ = "https://us7.jact.com:3081/games";
   //private static final String games_url_ = "http://us7.jact.com:3080/games";
 
