@@ -31,7 +31,7 @@ public class ProductsPageParser {
   static final String WEBSITE_POINT_PRICE = "Point_Price";
   static final String WEBSITE_PRODUCT_TYPE = "Product_Type";
 	
-  static final String jact_icons_website_ = "https://us7.jact.com:3081/sites/default/files/styles/medium/public/";
+  static final String jact_icons_website_ = "https://m.jact.com:3081/sites/default/files/styles/medium/public/";
   
   public static class ProductItem {
     public String nid_;

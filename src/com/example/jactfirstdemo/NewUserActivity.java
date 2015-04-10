@@ -23,8 +23,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class NewUserActivity extends ActionBarActivity
                              implements OnItemClickListener, ProcessUrlResponseCallback {
-  private static final String new_user_url_ = "https://us7.jact.com:3081/rest/user/register";
-  //private static final String earn_url_ = "http://us7.jact.com:3080/rest/user/register";
+  private static final String new_user_url_ = "https://m.jact.com:3081/rest/user/register";
   private JactDialogFragment dialog_;
   private static ArrayList<AvatarItem> avatars_list_;
   private ListView list_;
@@ -45,15 +44,15 @@ public class NewUserActivity extends ActionBarActivity
 	// TODO(PHB): Current populating of avatars_list_ is a hack/temporary. Populate it for real.
 	AvatarItem item_one = new AvatarItem();
 	item_one.id_ = "222";  // blue
-	item_one.img_url_ = "http://us7.jact.com:3080/sites/default/files/avatar_selection/avatars-blue.jpg";
+	item_one.img_url_ = "http://m.jact.com:3080/sites/default/files/avatar_selection/avatars-blue.jpg";
 	avatars_list_.add(item_one);
 	AvatarItem item_two = new AvatarItem();
 	item_two.id_ = "223";  // green
-	item_two.img_url_ = "http://us7.jact.com:3080/sites/default/files/avatar_selection/avatars-green.jpg";
+	item_two.img_url_ = "http://m.jact.com:3080/sites/default/files/avatar_selection/avatars-green.jpg";
 	avatars_list_.add(item_two);
 	AvatarItem item_three = new AvatarItem();
 	item_three.id_ = "224";  // red
-	item_three.img_url_ = "http://us7.jact.com:3080/sites/default/files/avatar_selection/avatars-red.jpg";
+	item_three.img_url_ = "http://m.jact.com:3080/sites/default/files/avatar_selection/avatars-red.jpg";
 	avatars_list_.add(item_three);
 	
     list_ = (ListView) findViewById(R.id.avatar_list);

@@ -6,13 +6,9 @@ import java.util.Locale;
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
@@ -25,8 +21,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
   static final String BUX_LOGO = "bux_logo";
   static final String USER_POINTS = "user_points";
   
-  private static String jact_website_ = "https://us7.jact.com:3081/rest/userpoints/";
-  //private static String jact_website_ = "http://us7.jact.com:3080/rest/userpoints/";
+  private static String jact_website_ = "https://m.jact.com:3081/rest/userpoints/";
   private String jact_user_name_;
   private String jact_user_id_;
   private String jact_profile_pic_url_;

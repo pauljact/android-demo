@@ -2,17 +2,13 @@ package com.example.jactfirstdemo;
 
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.widget.ProgressBar;import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
@@ -23,8 +19,6 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlayerStyle;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerFragment;
-//import com.google.android.youtube.player.YouTubePlayer.OnFullscreenListener;
-//import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
 public class YouTubePlayerActivity extends JactActionBarActivity
                                    implements ProcessUrlResponseCallback {
@@ -34,7 +28,6 @@ public class YouTubePlayerActivity extends JactActionBarActivity
   private boolean has_skipped_ahead_;
   private JactDialogFragment dialog_;
   private static final String EARN_REDEEM_URL_BASE = "https://m.jact.com:3081/node/";
-  //private static final String EARN_REDEEM_URL_BASE = "https://us7.jact.com:3081/node/";
   public static final String DEVELOPER_KEY = "AIzaSyBoJypQxKePzlnt_4kVbRbAez64hbULcqI";
   private EarnPlayerStateChangeListener player_state_change_listener_;
   private EarnPlaybackEventListener playback_event_listener_;

@@ -18,14 +18,10 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-//import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
@@ -42,10 +38,8 @@ import com.example.jactfirstdemo.ShoppingUtils.ShoppingCartInfo;
 public class ShoppingCartActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
 	private static final int MAX_CART_ITEMS = 10;
 	// TODO(PHB): Update string below with actual target.
-	//private static final String jact_shipping_info_url_ = "http://us7.jact.com:3080/rest/rewards.json";
-	//private static final String jact_shopping_cart_url_ = "http://us7.jact.com:3080/rest/cart.json";
-	private static final String rewards_url_ = "https://us7.jact.com:3081/rest/rewards.json";
-	private static final String jact_shopping_cart_url_ = "https://us7.jact.com:3081/rest/cart.json";
+	private static final String rewards_url_ = "https://m.jact.com:3081/rest/rewards.json";
+	private static final String jact_shopping_cart_url_ = "https://m.jact.com:3081/rest/cart.json";
 	private static final String GET_SHIPPING_INFO_TASK = "get_shipping_info_task";
 	private static final String GET_REWARDS_PAGE_TASK = "get_rewards_page_task";
 	private static final String DATE_PREFIX = "Drawing Date: ";

@@ -11,30 +11,21 @@ import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 public class CheckoutActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   public static Cookie cookie_ = null;
   private static int order_id_;
-  private JactDialogFragment dialog_;
-  //private static final String checkout_url_ = "https://us7.jact.com:3081/checkout/";
   private static final String checkout_url_ = "https://m.jact.com:3081/checkout/";
-  //private static final String checkout_url_ = "http://us7.jact.com:3080/checkout/";
 
   public static synchronized void SetOrderId(int order_id) {
     order_id_ = order_id;

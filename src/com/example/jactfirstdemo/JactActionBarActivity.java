@@ -21,7 +21,7 @@ import android.widget.TextView;
 
 public abstract class JactActionBarActivity extends ActionBarActivity {
   protected Menu menu_bar_;
-  protected static final String jact_shopping_cart_url_ = "https://us7.jact.com:3081/rest/cart.json";
+  protected static final String jact_shopping_cart_url_ = "https://m.jact.com:3081/rest/cart.json";
   protected int num_server_tasks_;
   protected JactNavigationDrawer navigation_drawer_;
 	

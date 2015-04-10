@@ -5,26 +5,14 @@ import java.util.ArrayList;
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
 
-import android.app.Activity;
-import android.app.ActionBar.LayoutParams;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -49,14 +37,12 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   private static final String FETCH_EARN_PAGE_TASK = "fetch_earn_page_task";
   private static final String FETCH_YOUTUBE_URLS_TASK = "fetch_youtube_urls_task";
   private static final String GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK = "get_cookies_then_youtube_urls_task";
-  private static final String earn_url_ = "https://us7.jact.com:3081/rest/earn";
-  //private static final String earn_url_ = "https://us7.jact.com:3081/earn";
-  //private static final String earn_url_ = "http://us7.jact.com:3080/earn";
+  private static final String earn_url_ = "https://m.jact.com:3081/rest/earn";
   // DEPRECATED. The following strings are no longer needed.
   //private static final String QUOTE = "\"";
   //private static final String HREF_MARKER = "<a href=" + QUOTE + "earn/";
   //private static final String YOUTUBE_URL_IDENTIFIER =
-  //		      "https://us7.jact.com:3081/sites/default/files/styles/product_page/public/video_embed_field_thumbnails/youtube/";
+  //		      "https://m.jact.com:3081/sites/default/files/styles/product_page/public/video_embed_field_thumbnails/youtube/";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {

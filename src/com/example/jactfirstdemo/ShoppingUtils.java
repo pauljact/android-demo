@@ -71,25 +71,21 @@ public class ShoppingUtils {
   
   // The various GET/POST/PUT target urls and task names.
   // Create new (empty) cart.
-  //private static final String cart_url_ = "http://us7.jact.com:3080/rest/cart.json";
-  private static final String cart_url_ = "https://us7.jact.com:3081/rest/cart.json";
+  private static final String cart_url_ = "https://m.jact.com:3081/rest/cart.json";
   public static final String GET_CART_TASK = "get_cart_task";
   public static final String CREATE_CART_TASK = "create_cart_task";
   public static final String TASK_CART_SEPARATOR = "_PHB_TASK_CART_PHB_";
   // Add or Update a line-item (the latter requires the line-item id to be appended to the url).
-  //private static final String line_item_url_ = "http://us7.jact.com:3080/rest/line-item";
-  private static final String line_item_url_ = "https://us7.jact.com:3081/rest/line-item";
+  private static final String line_item_url_ = "https://m.jact.com:3081/rest/line-item";
   public static final String ADD_LINE_ITEM_TASK = "add_line_item_task";
   public static final String UPDATE_LINE_ITEM_TASK = "update_line_item_task";
   // Get CSRF Token, and then perform a follow-up task next.
-  //public static final String get_csrf_url_ = "http://us7.jact.com:3080/services/session/token";
-  public static final String get_csrf_url_ = "https://us7.jact.com:3081/services/session/token";
+  public static final String get_csrf_url_ = "https://m.jact.com:3081/services/session/token";
   public static final String GET_CSRF_THEN_CREATE_CART_TASK = "get_csrf_then_create_cart_task";
   public static final String GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK = "get_csrf_then_update_line_item_task";
   public static final String TASK_TASK_SEPARATOR = "_PHB_TASK_TASK_PHB_";
   // Get Cookies, and then perform a follow-up task next.
-  //public static final String get_cookies_url_ = "http://us7.jact.com:3080/rest/user/login";
-  public static final String get_cookies_url_ = "https://us7.jact.com:3081/rest/user/login";
+  public static final String get_cookies_url_ = "https://m.jact.com:3081/rest/user/login";
   public static final String GET_COOKIES_THEN_GET_CART_TASK = "get_cookies_then_get_cart_task";
   public static final String GET_COOKIES_THEN_CREATE_CART_TASK = "get_cookies_then_create_cart_task";
   public static final String GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK = "get_cookies_then_update_line_item_task";

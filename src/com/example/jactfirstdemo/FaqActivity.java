@@ -3,13 +3,9 @@ package com.example.jactfirstdemo;
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
 
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.webkit.WebView;

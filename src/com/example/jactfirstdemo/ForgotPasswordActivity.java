@@ -7,7 +7,6 @@ import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,8 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class ForgotPasswordActivity extends ActionBarActivity implements ProcessUrlResponseCallback {
-  private static final String forgot_password_url_ = "https://us7.jact.com:3081/rest/user/request_new_password";
-  //private static final String forgot_password_url_ = "http://us7.jact.com:3080/rest/user/request_new_password";
+  private static final String forgot_password_url_ = "https://m.jact.com:3081/rest/user/request_new_password";
   private JactDialogFragment dialog_;
   private boolean is_password_reset_;
   private static final String FORGOT_PASSWORD_TASK = "forgot_password_task";

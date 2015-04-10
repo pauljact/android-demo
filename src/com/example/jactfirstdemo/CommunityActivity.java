@@ -3,24 +3,17 @@ package com.example.jactfirstdemo;
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
 
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 public class CommunityActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  //private static final String community_url_ = "https://us7.jact.com:3081/community";
   private static final String community_url_ = "https://m.jact.com:3081/community";
-  //private static final String community_url_ = "http://us7.jact.com:3080/community";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {

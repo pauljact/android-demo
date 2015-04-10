@@ -24,8 +24,7 @@ import com.example.jactfirstdemo.JactLoggedInHomeActivity;
 import com.example.jactfirstdemo.R;
 
 public class JactLoginActivity extends FragmentActivity implements ProcessUrlResponseCallback {
-  private static final String login_url_ = "https://us7.jact.com:3081/rest/user/login";
-  //private static final String login_url_ = "http://us7.jact.com:3080/rest/user/login";
+  private static final String login_url_ = "https://m.jact.com:3081/rest/user/login";
   private String username_;
   private String password_;
   private static boolean require_login_;
