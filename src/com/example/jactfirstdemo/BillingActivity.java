@@ -41,6 +41,7 @@ public class BillingActivity extends JactActionBarActivity implements ProcessUrl
     
   @Override
   protected void onResume() {
+	super.onResume();
     SetCartIcon(this);
     fadeAllViews(num_server_tasks_ > 0);
 	num_checked_addresses_ = 0;
@@ -48,7 +49,6 @@ public class BillingActivity extends JactActionBarActivity implements ProcessUrl
     addresses_ = GetAddresses();
 	adapter_ = new AddressAdapter(this, R.layout.address_item, addresses_);
 	list_.setAdapter(adapter_);
-	super.onResume();
   }
 
   @Override

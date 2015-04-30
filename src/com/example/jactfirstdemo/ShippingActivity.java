@@ -41,6 +41,7 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
     
   @Override
   protected void onResume() {
+	super.onResume();
 	num_checked_addresses_ = 0;
 	selected_address_position_ = -1;
     addresses_ = GetAddresses();
@@ -48,7 +49,6 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
 	list_.setAdapter(adapter_);
 	SetCartIcon(this);
 	fadeAllViews(num_server_tasks_ > 0);
-	super.onResume();
   }
 
   @Override

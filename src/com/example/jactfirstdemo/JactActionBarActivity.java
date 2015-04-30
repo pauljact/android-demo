@@ -1,16 +1,10 @@
 package com.example.jactfirstdemo;
 
-import java.util.ArrayList;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public abstract class JactActionBarActivity extends ActionBarActivity {
+public abstract class JactActionBarActivity extends ActionBarActivity implements ProcessUrlResponseCallback {
   protected Menu menu_bar_;
   protected static final String jact_shopping_cart_url_ = "https://m.jact.com:3081/rest/cart.json";
   protected int num_server_tasks_;
@@ -44,6 +38,12 @@ public abstract class JactActionBarActivity extends ActionBarActivity {
           		                 findViewById(R.id.nav_left_drawer),
           		                 index);
 
+  }
+  
+  @Override
+  protected void onResume() {
+	num_server_tasks_ = 0;
+	super.onResume();
   }
   
   @Override
@@ -136,7 +136,6 @@ public abstract class JactActionBarActivity extends ActionBarActivity {
       editor.putString(getString(R.string.ui_csrf_token), token);
       editor.commit();
   }
-  
   protected void GetCookiesThenGetCart(ProcessUrlResponseCallback callback) {
    	SharedPreferences user_info = getSharedPreferences(
          getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
@@ -144,6 +143,15 @@ public abstract class JactActionBarActivity extends ActionBarActivity {
    	String password = user_info.getString(getString(R.string.ui_password), "");
     ShoppingUtils.RefreshCookies(
         callback, username, password, ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK);  
+  }
+  
+  protected void GetCookiesThenClearCart(ProcessUrlResponseCallback callback) {
+   	SharedPreferences user_info = getSharedPreferences(
+         getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+   	String username = user_info.getString(getString(R.string.ui_username), "");
+   	String password = user_info.getString(getString(R.string.ui_password), "");
+    ShoppingUtils.RefreshCookies(
+        callback, username, password, ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK);  
   }
   
   protected void ProcessCartResponse(ProcessUrlResponseCallback callback,
@@ -173,10 +181,31 @@ public abstract class JactActionBarActivity extends ActionBarActivity {
 	num_server_tasks_--;
 	if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
 	  GetCookiesThenGetCart(callback);
+	} else if (extra_params.indexOf(ShoppingUtils.CLEAR_CART_TASK) == 0) {
+	  GetCookiesThenClearCart(callback);
 	} else {
       Log.e("PHB ERROR", "JactActionBarActivity::ProcessFailedResponse. Status: " + status +
 	                     "; extra_params: " + extra_params);
     }
+  }
+  
+  @Override
+  public void IncrementNumRequestsCounter() {
+	num_server_tasks_++;
+  }
+
+  @Override
+  public void DecrementNumRequestsCounter() {
+	num_server_tasks_--;
+  }
+  
+  @Override
+  public int GetNumRequestsCounter() {
+	return num_server_tasks_;
+  }
+  
+  @Override
+  public void DisplayPopup(String message) {
   }
   
   // Dummy function that each extending class can use to do something.

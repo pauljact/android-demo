@@ -43,15 +43,17 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	private static final String GET_SHIPPING_INFO_TASK = "get_shipping_info_task";
 	private static final String GET_REWARDS_PAGE_TASK = "get_rewards_page_task";
 	private static final String DATE_PREFIX = "Drawing Date: ";
+	private static final String CLEAR_CART_TAG = "clear_cart";
+	private static final int MAX_FAILED_REQUESTS = 5;
 	
 	public static JactAddress shipping_address_;
 	public static JactAddress billing_address_;
 	
 	private static ShoppingUtils.ShoppingCartInfo shopping_cart_;
 	private static ShoppingUtils.ShoppingCartInfo quantity_positive_shopping_cart_;
-	private static boolean hay_active_cart_request_;
 	private static boolean view_has_been_loaded_;
 	private static int num_csrf_requests_;
+	private static int num_failed_requests_;
 	private static int current_cart_icon_pos_;
 	private static ArrayList<String> items_to_remove_;
 	private ListView items_listview_;
@@ -323,13 +325,12 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     if (cookies.isEmpty()) {
       String username = user_info.getString(getString(R.string.ui_username), "");
       String password = user_info.getString(getString(R.string.ui_password), "");
-      num_server_tasks_++;
       ShoppingUtils.RefreshCookies(
           this, username, password, ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK);
       return;
     }
-    
-    num_server_tasks_++;
+
+    IncrementNumRequestsCounter();
     GetUrlTask task = new GetUrlTask(this, GetUrlTask.TargetType.JSON);
 	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
 	params.url_ = jact_shopping_cart_url_;
@@ -346,7 +347,6 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  shopping_cart_.line_items_ = new ArrayList<ShoppingUtils.LineItem>();
 	  quantity_positive_shopping_cart_ = new ShoppingUtils.ShoppingCartInfo();
 	  quantity_positive_shopping_cart_.line_items_ = new ArrayList<ShoppingUtils.LineItem>();
-	  hay_active_cart_request_ = true;
 	}
 	if (items_to_remove_ == null) {
 	  items_to_remove_ = new ArrayList<String>();
@@ -370,33 +370,33 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     super.onCreate(savedInstanceState, R.string.cart_activity_label,
     		       R.layout.checkout_layout,
     		       JactNavigationDrawer.ActivityIndex.CHECKOUT_MAIN);
-    hay_active_cart_request_ = false;
-    if (InitializeOnce()) {
-      GetInitialShoppingCart();
-    }
   }
 
   @Override
   protected void onResume() {
+	  super.onResume();
+	  num_failed_requests_ = 0;
+	  if (InitializeOnce()) {
+	    GetInitialShoppingCart();
+	  }
 	  // Re-enable parent activity before transitioning to the next activity.
 	  // This ensures e.g. that when user hits 'back' button, the screen
 	  // is 'active' (not faded) when the user returns.
 	  view_has_been_loaded_ = false;
 	  ResetNumCsrfRequests();
 	  GetCart(this);
-	  Log.i("PHB TEMP", "SCA::onResume. num_server_tasks_: " + num_server_tasks_);
+	  Log.i("PHB TEMP", "SCA::onResume. num_server_tasks_: " + GetNumRequestsCounter());
 	  if (!ProductsActivity.IsProductsListInitialized()) {
     	new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(
         		rewards_url_, "GET", "", "", GET_REWARDS_PAGE_TASK);
-    	num_server_tasks_++;
+    	IncrementNumRequestsCounter();
 	  }
-	  if (num_server_tasks_ == 0) {
+	  if (GetNumRequestsCounter() == 0) {
 		LoadView();
 	  } else {
 		fadeAllViews(true);
 	  }
-	  Log.i("PHB TEMP", "SCA::onResume. num_server_tasks_: " + num_server_tasks_);
-	  super.onResume();
+	  Log.i("PHB TEMP", "SCA::onResume. num_server_tasks_: " + GetNumRequestsCounter());
   }
   
   @Override
@@ -420,10 +420,13 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
   public void fadeAllViews(boolean should_fade) {
     ProgressBar spinner = (ProgressBar) findViewById(R.id.checkout_progress_bar);
     Button proceed_button = (Button) findViewById(R.id.proceed_to_checkout_button);
+    Button clear_button = (Button) findViewById(R.id.clear_cart_button);
     AlphaAnimation alpha;
     if (should_fade) {
       proceed_button.setEnabled(false);
       proceed_button.setTextColor(getResources().getColor(R.color.translucent_black));
+      clear_button.setEnabled(false);
+      clear_button.setTextColor(getResources().getColor(R.color.translucent_black));
       spinner.setVisibility(View.VISIBLE);
       alpha = new AlphaAnimation(0.5F, 0.5F);
     } else {
@@ -432,9 +435,13 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       if (GetNumberCartItems() == 0) {
         proceed_button.setEnabled(false);
         proceed_button.setTextColor(getResources().getColor(R.color.translucent_black));
+        clear_button.setEnabled(false);
+        clear_button.setTextColor(getResources().getColor(R.color.translucent_black));
       } else {
         proceed_button.setEnabled(true);
         proceed_button.setTextColor(getResources().getColor(R.color.white));
+        clear_button.setEnabled(true);
+        clear_button.setTextColor(getResources().getColor(R.color.white));
       }
     }
     // The AlphaAnimation will make the whole content frame transparent
@@ -452,6 +459,9 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       Button proceed_button = (Button) findViewById(R.id.proceed_to_checkout_button);
       proceed_button.setEnabled(false);
       proceed_button.setTextColor(getResources().getColor(R.color.translucent_black));
+      Button clear_button = (Button) findViewById(R.id.clear_cart_button);
+      clear_button.setEnabled(false);
+      clear_button.setTextColor(getResources().getColor(R.color.translucent_black));
       Log.i("PHB TEMP", "SCA::IsCartEmpty. True.");
       return true;
     } else {
@@ -460,6 +470,9 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       Button proceed_button = (Button) findViewById(R.id.proceed_to_checkout_button);
       proceed_button.setEnabled(true);
       proceed_button.setTextColor(getResources().getColor(R.color.white));
+      Button clear_button = (Button) findViewById(R.id.clear_cart_button);
+      clear_button.setEnabled(true);
+      clear_button.setTextColor(getResources().getColor(R.color.white));
       Log.i("PHB TEMP", "SCA::IsCartEmpty. False.");
       return false;
     }
@@ -469,12 +482,18 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     Button proceed_button = (Button) findViewById(R.id.proceed_to_checkout_button);
     proceed_button.setEnabled(true);
     proceed_button.setTextColor(getResources().getColor(R.color.white));
+    Button clear_button = (Button) findViewById(R.id.clear_cart_button);
+    clear_button.setEnabled(true);
+    clear_button.setTextColor(getResources().getColor(R.color.white));
   }
   
   public void DisableProceedToCheckoutButton() {
     Button proceed_button = (Button) findViewById(R.id.proceed_to_checkout_button);
     proceed_button.setEnabled(false);
     proceed_button.setTextColor(getResources().getColor(R.color.translucent_black));
+    Button clear_button = (Button) findViewById(R.id.clear_cart_button);
+    clear_button.setEnabled(false);
+    clear_button.setTextColor(getResources().getColor(R.color.translucent_black));
   }
   
   public static synchronized void IncrementNumCsrfRequests() {
@@ -655,10 +674,11 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     // be removed from the Cart when ShoppingCartActivity::onPause() is called
     // (e.g. when ShoppingCartActivity loses focus).
     public static synchronized void AddItemToRemove(String product_id) {
-    	if (items_to_remove_ == null) items_to_remove_ = new ArrayList<String>();
-    	if (!items_to_remove_.contains(product_id)) {
-    		items_to_remove_.add(product_id);
-    	}
+      Log.e("PHB TEMP", "SCA:AddItemToRemove. Marking id for removal: " + product_id);
+      if (items_to_remove_ == null) items_to_remove_ = new ArrayList<String>();
+      if (!items_to_remove_.contains(product_id)) {
+    	items_to_remove_.add(product_id);
+      }
     }
     
     public static synchronized void RemoveItemFromToRemoveList(String product_id) {
@@ -699,6 +719,43 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
   	    }
       }
   	  return false;
+    }
+    
+    private synchronized void ClearCart() {
+  	  for (ShoppingUtils.LineItem item : shopping_cart_.line_items_) {
+  		item.quantity_ = 0;
+		AddItemToRemove(Integer.toString(item.pid_));
+  	  }
+      TextView empty_msg = (TextView) findViewById(R.id.checkout_no_items_tv);
+      empty_msg.setVisibility(View.VISIBLE);
+  	  items_listview_.setVisibility(View.GONE);
+      
+	  SetCartIcon(menu_bar_, 0);
+	  DisableProceedToCheckoutButton();
+	  
+      // Need cookies and csrf_token to update server's cart.
+	  SharedPreferences user_info = getSharedPreferences(
+          getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+      String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+      if (cookies.isEmpty()) {
+    	String username = user_info.getString(getString(R.string.ui_username), "");
+    	String password = user_info.getString(getString(R.string.ui_password), "");
+        ShoppingUtils.RefreshCookies(
+            this, username, password, ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK);
+        return;
+      }
+      String csrf_token = user_info.getString(getString(R.string.ui_csrf_token), "");
+      if (csrf_token.isEmpty()) {
+        if (!ShoppingUtils.GetCsrfToken(this, cookies, ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK)) {
+          // Nothing to do.
+        }
+        return;
+      }
+      
+      // Update server's cart.
+      for (ShoppingUtils.LineItem item : shopping_cart_.line_items_) {
+    	ShoppingUtils.UpdateLineItem(this, cookies, csrf_token, item);
+      }
     }
 	
 	private static synchronized void FillExtraProductDetailsFromRewardsPage() {
@@ -818,7 +875,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		billing_address_ = address;
 	}
 	
-	public void DisplayPopup(String title) {
+	public void DisplayPopupTitle(String title) {
 	  dialog_ = new JactDialogFragment(title);
 	  dialog_.show(getSupportFragmentManager(), title);
 	}
@@ -826,6 +883,13 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	public void DisplayPopup(String title, String message) {
 	  dialog_ = new JactDialogFragment(title, message);
 	  dialog_.show(getSupportFragmentManager(), title);
+	}
+	
+	public void doClearCartButtonClick(View view) {
+	  dialog_ = new JactDialogFragment("Are You Sure You Want to Remove All Items From Your Cart?");
+	  dialog_.SetButtonOneText("Cancel");
+	  dialog_.SetButtonTwoText("OK");
+	  dialog_.show(getSupportFragmentManager(), CLEAR_CART_TAG);
 	}
 	
 	public void doProceedToShippingButtonClick(View view) {
@@ -859,8 +923,17 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 		//new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(
 		//		jact_shipping_info_url_, "GET", "", "", GET_SHIPPING_INFO_TASK);
 	}
-
+	
+	public void doDialogCancelClick(View view) {
+	  // Close Dialog window.
+	  dialog_.dismiss();
+	}
+	
 	public void doDialogOkClick(View view) {
+	  // Check to see if this was the "Clear Cart" dialog. If so, clear cart.
+	  if (dialog_.getTag().equals(CLEAR_CART_TAG)) {
+		ClearCart();
+	  }
 	  // Close Dialog window.
 	  dialog_.dismiss();
 	}
@@ -1032,10 +1105,13 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	    return;
 	  }
 	  
-	  hay_active_cart_request_ = true;
 	  // First check that we have an old cart to compare/update.
       if (old_cart == null) {
-    	num_server_tasks_++;
+	  	if (GetNumRequestsCounter() >= ShoppingUtils.MAX_OUTSTANDING_SHOPPING_REQUESTS) {
+		  DisplayPopupTitle("Unable to Reach Jact Server. Please Try Again.");
+		  return;
+		}
+    	IncrementNumRequestsCounter();
 	    Log.e("PHB ERROR", "ShoppingCartActivity::UpdateCart. Null old cart.");
 	    new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(
 			jact_shopping_cart_url_, "GET", "", "", ShoppingUtils.GET_CART_TASK);
@@ -1118,22 +1194,19 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       if (cookies.isEmpty()) {
     	String username = user_info.getString(getString(R.string.ui_username), "");
     	String password = user_info.getString(getString(R.string.ui_password), "");
-        num_server_tasks_++;
         ShoppingUtils.RefreshCookies(
             this, username, password, ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK);
         return;
       }
       String csrf_token = user_info.getString(getString(R.string.ui_csrf_token), "");
       if (csrf_token.isEmpty()) {
-    	num_server_tasks_++;
         if (!ShoppingUtils.GetCsrfToken(this, cookies, ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK)) {
-          num_server_tasks_--;
+          // Nothing to do.
         }
         return;
       }
       
       // Update server's cart.
-      num_server_tasks_++;
   	  ShoppingUtils.UpdateLineItem(this, cookies, csrf_token, line_item_to_update, updated_quantity);
 	}
 	/* TODO(PHB): Remove below function (no longer used)
@@ -1161,7 +1234,6 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	}*/
 	
 	public synchronized void UpdateLineItem(ShoppingUtils.LineItem line_item) {
-      hay_active_cart_request_ = true;
       // Need cookies and csrf_token to update server's cart.
    	  SharedPreferences user_info = getSharedPreferences(
          getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
@@ -1169,7 +1241,6 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       if (cookies.isEmpty()) {
    	    String username = user_info.getString(getString(R.string.ui_username), "");
    	    String password = user_info.getString(getString(R.string.ui_password), "");
-   	    num_server_tasks_++;
         ShoppingUtils.RefreshCookies(
             this, username, password, ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK +
             ShoppingUtils.TASK_CART_SEPARATOR + ShoppingUtils.PrintLineItem(line_item));
@@ -1177,27 +1248,23 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       }
       String csrf_token = user_info.getString(getString(R.string.ui_csrf_token), "");
       if (csrf_token.isEmpty()) {
-    	num_server_tasks_++;
         if (!ShoppingUtils.GetCsrfToken(
         	    this, cookies, ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK +
         	    ShoppingUtils.TASK_CART_SEPARATOR + ShoppingUtils.PrintLineItem(line_item))) {
-          num_server_tasks_--;
+          // Nothing to do.
         }
         return;
       }
       
       // Update line-item in server's cart.
-      num_server_tasks_++;
-   	  if (!ShoppingUtils.UpdateLineItem(
-   			  this, cookies, csrf_token, line_item)) {
-        num_server_tasks_--;
-   		dialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
-   		dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
+   	  if (!ShoppingUtils.UpdateLineItem(this, cookies, csrf_token, line_item)) {
+   		// Nothing to do.
+   		//PHB_OLDdialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
+   		//PHB_OLDdialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
    	  }
 	}
 	
 	public synchronized void CreateEmptyCart() {
-	  hay_active_cart_request_ = true;
       // Need cookies and csrf_token to create server's cart.
    	  SharedPreferences user_info = getSharedPreferences(
          getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
@@ -1205,32 +1272,28 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       if (cookies.isEmpty()) {
    	    String username = user_info.getString(getString(R.string.ui_username), "");
    	    String password = user_info.getString(getString(R.string.ui_password), "");
-   	    num_server_tasks_++;
         ShoppingUtils.RefreshCookies(
             this, username, password, ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK);
         return;
       }
       String csrf_token = user_info.getString(getString(R.string.ui_csrf_token), "");
       if (csrf_token.isEmpty()) {
-    	num_server_tasks_++;
         if (!ShoppingUtils.GetCsrfToken(
         	    this, cookies, ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK)) {
-          num_server_tasks_--;
+          // Nothing to do.
         }
         return;
       }
       
       // Update line-item in server's cart.
-      num_server_tasks_++;
-   	  if (!ShoppingUtils.CreateServerCart(
-   			  this, cookies, csrf_token, null)) {
-   		dialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
-   		dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
+   	  if (!ShoppingUtils.CreateServerCart(this, cookies, csrf_token, null)) {
+   		// Nothing to do.
+   		//PHB_OLDdialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
+   		//PHB_OLDdialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
    	  }
 	}
 	
 	public synchronized void CreateCartWithLineItem(LineItem line_item) {
-      hay_active_cart_request_ = true;
       // Need cookies and csrf_token to update server's cart.
    	  SharedPreferences user_info = getSharedPreferences(
          getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
@@ -1238,7 +1301,6 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       if (cookies.isEmpty()) {
    	    String username = user_info.getString(getString(R.string.ui_username), "");
    	    String password = user_info.getString(getString(R.string.ui_password), "");
-   	    num_server_tasks_++;
         ShoppingUtils.RefreshCookies(
             this, username, password, ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK +
             ShoppingUtils.TASK_CART_SEPARATOR + ShoppingUtils.PrintLineItem(line_item));
@@ -1246,21 +1308,19 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
       }
       String csrf_token = user_info.getString(getString(R.string.ui_csrf_token), "");
       if (csrf_token.isEmpty()) {
-    	num_server_tasks_++;
         if (!ShoppingUtils.GetCsrfToken(
         	    this, cookies, ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK +
         	    ShoppingUtils.TASK_CART_SEPARATOR + ShoppingUtils.PrintLineItem(line_item))) {
-          num_server_tasks_--;
+          // Nothing to do.
         }
         return;
       }
       
       // Update line-item in server's cart.
-      num_server_tasks_++;
-   	  if (!ShoppingUtils.CreateServerCart(
-   			  this, cookies, csrf_token, line_item)) {
-   		dialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
-   		dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
+   	  if (!ShoppingUtils.CreateServerCart(this, cookies, csrf_token, line_item)) {
+   		// Nothing to do.
+   		//PHB_OLDdialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
+   		//PHB_OLDdialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
    	  }
 	}
 
@@ -1269,13 +1329,14 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  // Look for TASK_TASK_SEPARATOR. If present, store token to SharedPreferences, then
       // strip it (and things before it) out of extra_params, and do next task.
 	  Log.d("PHB Temp", "ShoppingCartActivity::ProcessUrlResponse. Response:\n" + webpage);
-	  num_server_tasks_--;
+	  DecrementNumRequestsCounter();
 	  if (extra_params.equalsIgnoreCase(GET_REWARDS_PAGE_TASK)) {
 	    ProductsActivity.SetProductsList(webpage);
 	    AccessCart(CartAccessType.ADD_INFO_FROM_REWARDS);
 	  } else if (extra_params.equalsIgnoreCase(GET_SHIPPING_INFO_TASK)) {
 		ProcessShippingInfoResponse(webpage, cookies);
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CART_TASK)) {
+	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.CLEAR_CART_TASK) ||
+			     extra_params.equalsIgnoreCase(ShoppingUtils.GET_CART_TASK)) {
 		// Parse webpage to a new cart.
 		ShoppingUtils.ShoppingCartInfo temp_cart = new ShoppingUtils.ShoppingCartInfo();
 		if (!ShoppingUtils.ParseCartFromGetCartPage(webpage, temp_cart)) {
@@ -1287,6 +1348,12 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	    if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
 	      UpdateCart(temp_cart, response.cart_);
 	    }
+	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK)) {
+		SaveCookies(cookies);
+		ClearCart();
+	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK)) {
+		SaveCsrfToken(webpage);
+		ClearCart();
 	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK)) {
 		SaveCookies(cookies);
 		GetInitialShoppingCart();
@@ -1385,9 +1452,9 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	    Log.e("PHB ERROR", "ShoppingCartActivity::ProcessUrlResponse. Returning from " +
 	                       "unrecognized task:\n" + extra_params);
 	  }
-	  if (num_server_tasks_ == 0) {
+	  if (GetNumRequestsCounter() == 0) {
 		SetCartIcon(this);
-		if (num_server_tasks_ == 0) {
+		if (GetNumRequestsCounter() == 0) {
 		  LoadView();
 		}
 	  }
@@ -1402,11 +1469,15 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	public void ProcessFailedResponse(FetchStatus status, String extra_params) {
 	  // TODO(PHB): Handle failure cases below by more than just a Log error (e.g. popup
 	  // a dialog? Try query again (depending on status)?).
-      num_server_tasks_--;
-	  if (status == GetUrlTask.FetchStatus.ERROR_CSRF_FAILED) {
+      DecrementNumRequestsCounter();
+      num_failed_requests_++;
+	  if (status == GetUrlTask.FetchStatus.ERROR_CSRF_FAILED ||
+		  status == GetUrlTask.FetchStatus.ERROR_UNSUPPORTED_CONTENT_TYPE) {
     	String task = "";
 	    if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) >= 0) {
 	      task = ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK;
+	    } else if (extra_params.indexOf(ShoppingUtils.CLEAR_CART_TASK) >= 0) {
+		  task = ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK;
 	    } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
 	    		   (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
 	    		    extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0)) {
@@ -1423,16 +1494,55 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     	SharedPreferences user_info = getSharedPreferences(
             getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
         String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
-        num_server_tasks_++;
 	    if (!ShoppingUtils.GetCsrfToken(this, cookies, task)) {
-	      num_server_tasks_--;
+	      // Nothing to do.
 	    }
+	  } else if (status == GetUrlTask.FetchStatus.ERROR_RESPONSE_CODE ||
+			     status == GetUrlTask.FetchStatus.ERROR_UNABLE_TO_CONNECT) {
+		// Failed to Connect with Jact Server. Retry, if we haven't had too many consecutive failures.
+		if (num_failed_requests_ >= MAX_FAILED_REQUESTS) {
+		  DisplayPopup("Unable to Reach Jact", "Your last action may not have been processed.");
+		  return;
+		}
+		if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) >= 0 ||
+			extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) >= 0) {
+		  CreateEmptyCart();
+		} else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) >= 0 ||
+				   extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK) >= 0) {
+		  GetInitialShoppingCart();
+		} else if (extra_params.indexOf(ShoppingUtils.CLEAR_CART_TASK) >= 0 ||
+				   extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK) >= 0) {
+		  ClearCart();
+		} else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
+	    		   (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
+	    		    extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 ||
+	    		    extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) >= 0)) {
+		  String parsed_line_item = extra_params.substring(
+					    extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
+					    ShoppingUtils.TASK_CART_SEPARATOR.length());
+		  UpdateLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
+		} else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) >= 0 ||
+				   extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK) >= 0 ||
+				   extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) >= 0) {
+	      SharedPreferences user_info = getSharedPreferences(
+	          getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+	      String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+	      ShoppingUtils.GetCsrfToken(this, cookies, extra_params);
+		} else {
+		  Log.e("ShoppingCartActivity::ProcessFailedResponse", "Unrecognized task: " + extra_params);
+		}
 	  } else {
 	    Log.w("PHB TEMP", "ShoppingCartActivity::ProcessFailedResponse. Status: " + status +
 		                   "; extra_params: " + extra_params + ". Trying parent resolution.");
 	    // ProcessFailedCartResponse will decrement num_server_tasks_, so re-increment it here so the net is no change.
-	    num_server_tasks_++;
+	    IncrementNumRequestsCounter();
 	    ProcessFailedCartResponse(this, status, extra_params);
 	  }
+	}
+	
+	@Override
+	public void DisplayPopup(String message) {
+	  dialog_ = new JactDialogFragment(message);
+	  dialog_.show(getSupportFragmentManager(), "too_many_server_requests");
 	}
 }

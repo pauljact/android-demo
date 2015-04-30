@@ -260,4 +260,21 @@ public class NewUserActivity extends ActionBarActivity
 	  Log.e("NewUserActivity::ProcessUrlResponse", "Unexpected task: " + extra_params);
 	}
   }
+  
+  @Override
+  public void IncrementNumRequestsCounter() {
+  }
+
+  @Override
+  public void DecrementNumRequestsCounter() {
+  }
+
+  @Override
+  public int GetNumRequestsCounter() {
+	return 0;
+  }
+
+  @Override
+  public void DisplayPopup(String message) {
+  }
 }

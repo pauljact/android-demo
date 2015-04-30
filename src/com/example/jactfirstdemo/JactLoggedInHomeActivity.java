@@ -38,6 +38,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
   
   @Override
   protected void onResume() {
+	super.onResume();
     // Check if the Logged-In State is ready (all user info has already been fetched).
     SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
     String is_logged_off = user_info.getString(getString(R.string.logged_off_key), "");
@@ -71,7 +72,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
     // This ensures e.g. that when user hits 'back' button, the screen
     // is 'active' (not faded) when the user returns.
     fadeAllViews(num_server_tasks_ != 0);
-	super.onResume();
   }
   
   @Override

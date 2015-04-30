@@ -275,4 +275,21 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       ft.commitAllowingStateLoss();*/
     }
   }
+  
+  @Override
+  public void IncrementNumRequestsCounter() {
+  }
+
+  @Override
+  public void DecrementNumRequestsCounter() {
+  }
+
+  @Override
+  public int GetNumRequestsCounter() {
+	return 0;
+  }
+
+  @Override
+  public void DisplayPopup(String message) {
+  }
 }

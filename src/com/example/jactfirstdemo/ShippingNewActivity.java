@@ -42,9 +42,9 @@ public class ShippingNewActivity extends JactActionBarActivity
     
   @Override
   protected void onResume() {
+	super.onResume();
 	SetCartIcon(this);
 	fadeAllViews(num_server_tasks_ > 0);
-	super.onResume();
   }
 
   @Override

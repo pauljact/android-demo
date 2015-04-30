@@ -15,29 +15,30 @@
         android:layout_marginTop="1dp"
    	    android:layout_marginBottom="1dp"
     	android:background="@color/transparent"
-    	android:orientation="vertical"
-        android:layout_centerHorizontal="true">
+    	android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:weightSum="1.0">
         
-    <!--  Product image -->
+    <!--  ListRow Left side Thumbnail image -->
     <LinearLayout android:id="@+id/product_thumbnail"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="0.18"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:padding="1dp"
         android:background="@drawable/products_image_bg"
         android:layout_marginRight="2dp">
         <ImageView
             android:id="@+id/product_image"
-            android:layout_width="70dp"
-            android:layout_height="70dp"/>
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+        />
     </LinearLayout>
-    <!-- END Product image -->
     
     <!-- Title Of Product-->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="0.60"
         android:background="@color/transparent"
-        android:layout_gravity="center_horizontal"
         android:orientation="vertical">
     <TextView
         android:id="@+id/product_drawing_title"
@@ -68,11 +69,14 @@
         android:textStyle="bold"/>
     </LinearLayout>
  
+
+ 
     <!-- Price -->
     <LinearLayout
-	    android:layout_width="wrap_content"
+	    android:layout_width="0dp"
+	    android:layout_weight="0.22"
     	android:orientation="vertical"
-    	android:layout_gravity="center_horizontal">
+	    android:gravity="right">
 	    <TextView
 	        android:id="@+id/product_bux"
 	        android:layout_width="wrap_content"
@@ -82,7 +86,6 @@
 	        android:textSize="10sp"
 	        android:textColor="@color/dark_blue"
 	        android:textStyle="bold"/>
-	    <!-- 
 	    <TextView
 	        android:id="@+id/product_price_seperator"
 	        android:layout_width="match_parent"
@@ -102,11 +105,9 @@
 	        android:layout_marginRight="2dp"
 	        android:textSize="10sp"
 	        android:textColor="@color/dark_blue"
-	        android:textStyle="bold"/> -->
+	        android:textStyle="bold"/>
     </LinearLayout>
-    <!-- END Product Title, Description, Price -->
 </LinearLayout>
-
     <!-- Empty Text Views, to hold Product ID and Summary -->
     <TextView
         android:id="@+id/product_pid"

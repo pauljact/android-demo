@@ -205,6 +205,10 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
         
         return vi;
     }
+	
+	private void SetQuantity(Spinner spinner, int position) {
+	  spinner.setSelection(position);
+	}
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -258,6 +262,7 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 			} else {
 			  Log.e("PHB ERROR", "CheckoutAdapter::onItemSelected. Unrecognized ItemToAddStatus: " + item_status);
 			}
+			SetQuantity((Spinner) parent, item.quantity_);
 			return;
 		  }
 		  

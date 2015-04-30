@@ -235,7 +235,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/products_header_bar"
         android:divider="#b5b5b5"
-        android:dividerHeight="1dp"
+        android:dividerHeight="0dp"
         android:listSelector="@drawable/products_bg_selector"
     />
     <!-- End List of Products -->

@@ -71,6 +71,7 @@
     <string name="cart_items_str">Cart Items:</string>
     <string name="next_str">Next</string>
     <string name="prev_str">Previous</string>
+    <string name="clear_cart">Clear Cart</string>
     <string name="proceed_to_billing">Proceed to Billing</string>
     <string name="proceed_to_shipping">Proceed to Checkout</string>
     <string name="proceed_to_final_review">Review and Submit</string>

@@ -147,4 +147,21 @@ public class ForgotPasswordActivity extends ActionBarActivity implements Process
       dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
 	}
   }
+  
+  @Override
+  public void IncrementNumRequestsCounter() {
+  }
+
+  @Override
+  public void DecrementNumRequestsCounter() {
+  }
+
+  @Override
+  public int GetNumRequestsCounter() {
+	return 0;
+  }
+
+  @Override
+  public void DisplayPopup(String message) {
+  }
 }
