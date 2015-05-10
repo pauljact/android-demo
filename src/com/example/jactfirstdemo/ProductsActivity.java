@@ -724,7 +724,7 @@ public class ProductsActivity extends JactActionBarActivity
   	      response_two.line_item_ = new ShoppingUtils.LineItem();
   	      if (!ShoppingCartActivity.AccessCart(
   	    	      ShoppingCartActivity.CartAccessType.GET_LINE_ITEM, item.pid_, -1, "", response_two)) {
-  	    	Log.e("PHB ERROR", "CheckoutAdapter::onItemSelected. Failed Cart Access.");
+  	    	Log.e("PHB ERROR", "ProductsActivity::onItemSelected. Failed Cart Access.");
   	    	return;
   	      }
   		  ShoppingUtils.LineItem line_item = response_two.line_item_;

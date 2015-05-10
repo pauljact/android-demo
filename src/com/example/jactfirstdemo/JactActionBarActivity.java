@@ -15,13 +15,21 @@ import android.widget.TextView;
 
 public abstract class JactActionBarActivity extends ActionBarActivity implements ProcessUrlResponseCallback {
   protected Menu menu_bar_;
-  protected static final String jact_shopping_cart_url_ = "https://m.jact.com:3081/rest/cart.json";
+  protected static String jact_shopping_cart_url_;
   protected int num_server_tasks_;
   protected JactNavigationDrawer navigation_drawer_;
 	
   protected void onCreate(Bundle savedInstanceState, int activity_id,
 		                  int layout, JactNavigationDrawer.ActivityIndex index) {
     super.onCreate(savedInstanceState);
+
+	if (!IsLoggedOn()) {
+	  Log.w("JactActionBarActivity::onCreate", "Not logged on. Returning to Login Activity...");
+	  onBackPressed();
+	  finish();
+	}
+	
+    jact_shopping_cart_url_ = GetUrlTask.JACT_DOMAIN + "/rest/cart.json";
     num_server_tasks_ = 0;
     setContentView(layout);
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
@@ -42,6 +50,15 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   
   @Override
   protected void onResume() {
+	// There may be ways to get here even when user has 'signed off'; for example, a GCM
+	// Notification may have set a PendingIntent to open this. In that case, make sure we
+	// are logged in; otherwise, return to home screen.
+	if (!IsLoggedOn()) {
+	  Log.w("JactActionBarActivity::onResume", "Not logged on. Returning to Login Activity...");
+	  onBackPressed();
+	  finish();
+	}
+	  
 	num_server_tasks_ = 0;
 	super.onResume();
   }
@@ -73,6 +90,18 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
       return true;
     }
     return super.onOptionsItemSelected(item);
+  }
+  
+  public boolean IsLoggedOn() {
+	SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+    return user_info.getBoolean(getString(R.string.ui_is_logged_in), false);
+  }
+  
+  public void SetLoggedOff() {
+	SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+    SharedPreferences.Editor editor = user_info.edit();
+    editor.putBoolean(getString(R.string.ui_is_logged_in), false);
+    editor.commit();
   }
   
   public abstract void fadeAllViews(boolean should_fade);
@@ -206,6 +235,10 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   
   @Override
   public void DisplayPopup(String message) {
+  }
+  
+  @Override
+  public void DisplayPopup(String title, String message) {
   }
   
   // Dummy function that each extending class can use to do something.

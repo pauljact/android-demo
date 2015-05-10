@@ -71,23 +71,23 @@ public class ShoppingUtils {
   
   // The various GET/POST/PUT target urls and task names.
   // Create new (empty) cart.
-  private static final String cart_url_ = "https://m.jact.com:3081/rest/cart.json";
+  private static String cart_url_ = "/rest/cart.json";
   public static final String GET_CART_TASK = "get_cart_task";
   public static final String CREATE_CART_TASK = "create_cart_task";
   public static final String CLEAR_CART_TASK = "clear_cart_task";
   public static final String TASK_CART_SEPARATOR = "_PHB_TASK_CART_PHB_";
   // Add or Update a line-item (the latter requires the line-item id to be appended to the url).
-  private static final String line_item_url_ = "https://m.jact.com:3081/rest/line-item";
+  private static final String line_item_url_ = "/rest/line-item";
   public static final String ADD_LINE_ITEM_TASK = "add_line_item_task";
   public static final String UPDATE_LINE_ITEM_TASK = "update_line_item_task";
   // Get CSRF Token, and then perform a follow-up task next.
-  public static final String get_csrf_url_ = "https://m.jact.com:3081/services/session/token";
+  public static final String get_csrf_url_ = "/services/session/token";
   public static final String GET_CSRF_THEN_CLEAR_CART_TASK = "get_csrf_then_clear_cart_task";
   public static final String GET_CSRF_THEN_CREATE_CART_TASK = "get_csrf_then_create_cart_task";
   public static final String GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK = "get_csrf_then_update_line_item_task";
   public static final String TASK_TASK_SEPARATOR = "_PHB_TASK_TASK_PHB_";
   // Get Cookies, and then perform a follow-up task next.
-  public static final String get_cookies_url_ = "https://m.jact.com:3081/rest/user/login";
+  public static final String get_cookies_url_ = "/rest/user/login";
   public static final String GET_COOKIES_THEN_CLEAR_CART_TASK = "get_cookies_then_clear_cart_task";
   public static final String GET_COOKIES_THEN_GET_CART_TASK = "get_cookies_then_get_cart_task";
   public static final String GET_COOKIES_THEN_CREATE_CART_TASK = "get_cookies_then_create_cart_task";
@@ -185,7 +185,7 @@ public class ShoppingUtils {
 	parent_class.IncrementNumRequestsCounter();
     GetUrlTask task = new GetUrlTask(parent_class, GetUrlTask.TargetType.JSON);
 	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
-	params.url_ = get_cookies_url_;
+	params.url_ = GetUrlTask.JACT_DOMAIN + get_cookies_url_;
 	params.connection_type_ = "POST";
 	params.extra_info_ = next_task;
   	ArrayList<String> header_info = new ArrayList<String>();
@@ -215,7 +215,7 @@ public class ShoppingUtils {
 	parent_class.IncrementNumRequestsCounter();
 	GetUrlTask task = new GetUrlTask(parent_class, GetUrlTask.TargetType.JSON);
 	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
-	params.url_ = get_csrf_url_;
+	params.url_ = GetUrlTask.JACT_DOMAIN + get_csrf_url_;
 	params.connection_type_ = "GET";
 	params.extra_info_ = next_task;
   	params.cookies_ = cookies;
@@ -275,7 +275,7 @@ public class ShoppingUtils {
 	}
 	
 	// Construct request that will create the cart on the server.
-	params.url_ = cart_url_;
+	params.url_ = GetUrlTask.JACT_DOMAIN + cart_url_;
 	params.connection_type_ = "POST";
 	params.extra_info_ = extra_info;
   	params.cookies_ = cookies;
@@ -313,12 +313,12 @@ public class ShoppingUtils {
 	    return false;
 	  }
 	  // Create new line-item via POSTing to /line-item
-  	  params.url_ = line_item_url_;
+  	  params.url_ = GetUrlTask.JACT_DOMAIN + line_item_url_;
   	  params.connection_type_ = "POST";
   	  extra_info = ADD_LINE_ITEM_TASK;
 	} else {
 	  // Update existing line-item via PUTing to /line-item	  
-  	  params.url_ = line_item_url_ + "/" + Integer.toString(line_item);
+  	  params.url_ = GetUrlTask.JACT_DOMAIN + line_item_url_ + "/" + Integer.toString(line_item);
   	  params.connection_type_ = "PUT";
   	  extra_info = UPDATE_LINE_ITEM_TASK;
 	}
@@ -377,7 +377,7 @@ public class ShoppingUtils {
 	GetUrlTask task = new GetUrlTask(parent_class, GetUrlTask.TargetType.JSON);
   	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
 
-  	params.url_ = cart_url_;
+  	params.url_ = GetUrlTask.JACT_DOMAIN + cart_url_;
   	params.connection_type_ = "POST";
   	params.extra_info_ = CLEAR_CART_TASK;
 	

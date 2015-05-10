@@ -1,9 +1,7 @@
 package com.example.jactfirstdemo;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Locale;
  
 import android.content.Context;
 import android.util.Log;
@@ -12,10 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
  
 public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implements AdapterWithImages {

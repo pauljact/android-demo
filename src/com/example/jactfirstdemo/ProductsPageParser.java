@@ -10,28 +10,28 @@ import android.util.Log;
 
 public class ProductsPageParser {
   // Website node keys.
-  static final String WEBSITE_NID = "nid";
-  static final String WEBSITE_TITLE = "node_title";
-  static final String WEBSITE_SUMMARY_BODY = "Body";
-  static final String WEBSITE_SUMMARY = "summary";
-  static final String WEBSITE_PID = "commerce_product_field_data_field_product_product_id";
-  static final String WEBSITE_NODE_TYPE = "node_type";
-  static final String WEBSITE_DATE = "drawing date";
-  static final String WEBSITE_DRAWING_DATE = "Drawing_Ends";
-  static final String WEBSITE_SKU = "commerce_product_field_data_field_product_sku";
-  static final String WEBSITE_PROMOTE = "Promote";
-  static final String WEBSITE_MAX_QUANTITY_OLD = "Max order quantity";
-  static final String WEBSITE_MAX_QUANTITY = "Max_order_quantity";
-  static final String WEBSITE_VALUE = "value";
-  static final String WEBSITE_IMAGE = "field_product_image";
-  static final String WEBSITE_IMAGE_URI = "uri";
-  static final String WEBSITE_PRICE = "Price";
-  static final String WEBSITE_PRICE_AMOUNT = "amount";
-  static final String WEBSITE_PRICE_CURRENCY = "currency_code";
-  static final String WEBSITE_POINT_PRICE = "Point_Price";
-  static final String WEBSITE_PRODUCT_TYPE = "Product_Type";
+  private static final String WEBSITE_NID = "nid";
+  private static final String WEBSITE_TITLE = "node_title";
+  private static final String WEBSITE_SUMMARY_BODY = "Body";
+  private static final String WEBSITE_SUMMARY = "summary";
+  private static final String WEBSITE_PID = "commerce_product_field_data_field_product_product_id";
+  private static final String WEBSITE_NODE_TYPE = "node_type";
+  private static final String WEBSITE_DATE = "drawing date";
+  private static final String WEBSITE_DRAWING_DATE = "Drawing_Ends";
+  private static final String WEBSITE_SKU = "commerce_product_field_data_field_product_sku";
+  private static final String WEBSITE_PROMOTE = "Promote";
+  private static final String WEBSITE_MAX_QUANTITY_OLD = "Max order quantity";
+  private static final String WEBSITE_MAX_QUANTITY = "Max_order_quantity";
+  private static final String WEBSITE_VALUE = "value";
+  private static final String WEBSITE_IMAGE = "field_product_image";
+  private static final String WEBSITE_IMAGE_URI = "uri";
+  private static final String WEBSITE_PRICE = "Price";
+  private static final String WEBSITE_PRICE_AMOUNT = "amount";
+  private static final String WEBSITE_PRICE_CURRENCY = "currency_code";
+  private static final String WEBSITE_POINT_PRICE = "Point_Price";
+  private static final String WEBSITE_PRODUCT_TYPE = "Product_Type";
 	
-  static final String jact_icons_website_ = "https://m.jact.com:3081/sites/default/files/styles/medium/public/";
+  private static final String jact_icons_website_ = "/sites/default/files/styles/medium/public/";
   
   public static class ProductItem {
     public String nid_;
@@ -215,7 +215,8 @@ public class ProductsPageParser {
         return;
 	  }
 	  String image_url = value.substring(9);  // 9 is the length of prefix "public://" that should be removed.
-	  item.img_url_ = jact_icons_website_ + image_url.replace(" ", "%20");  // Replace whitespace in url with %20.
+	  item.img_url_ = GetUrlTask.JACT_DOMAIN + jact_icons_website_ +
+			          image_url.replace(" ", "%20");  // Replace whitespace in url with %20.
 	} catch (JSONException e) {
       Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsImage. Unable to parse Image tag:\n" + node.toString());
       // TODO(PHB): Handle exception gracefully.

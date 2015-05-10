@@ -37,12 +37,12 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   private static final String FETCH_EARN_PAGE_TASK = "fetch_earn_page_task";
   private static final String FETCH_YOUTUBE_URLS_TASK = "fetch_youtube_urls_task";
   private static final String GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK = "get_cookies_then_youtube_urls_task";
-  private static final String earn_url_ = "https://m.jact.com:3081/rest/earn";
+  private static String earn_url_;
   // DEPRECATED. The following strings are no longer needed.
   //private static final String QUOTE = "\"";
   //private static final String HREF_MARKER = "<a href=" + QUOTE + "earn/";
   //private static final String YOUTUBE_URL_IDENTIFIER =
-  //		      "https://m.jact.com:3081/sites/default/files/styles/product_page/public/video_embed_field_thumbnails/youtube/";
+  //		      "/sites/default/files/styles/product_page/public/video_embed_field_thumbnails/youtube/";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +51,7 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
 		       R.layout.earn_layout,
 		       JactNavigationDrawer.ActivityIndex.EARN);
     should_refresh_earn_items_ = true;
+    earn_url_ = GetUrlTask.JACT_DOMAIN + "/rest/earn";
   }
   
   @Override
@@ -275,7 +276,7 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   
   private void ParseYoutubeUrls(String webpage) {
     earn_activity_urls_ = new ArrayList<EarnSiteAndYoutubeId>();
-	int youtube_marker = webpage.indexOf(YOUTUBE_URL_IDENTIFIER);
+	int youtube_marker = webpage.indexOf(GetUrlTask.JACT_DOMAIN + YOUTUBE_URL_IDENTIFIER);
 	String suffix = webpage;
 	while (youtube_marker != -1) {
 	  // Get Jact Url landing site for a click on this item.
@@ -297,7 +298,7 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
 	  jact_landing_site += relevant_prefix.substring(0, earn_item_end_marker);
 	  
 	  // Get youtube (URL) ID.
-	  suffix = suffix.substring(youtube_marker + YOUTUBE_URL_IDENTIFIER.length());
+	  suffix = suffix.substring(youtube_marker + GetUrlTask.JACT_DOMAIN.length() + YOUTUBE_URL_IDENTIFIER.length());
 	  int youtube_id_end_marker = suffix.indexOf(".jpg?");
 	  // Youtube IDs should be relatively short (~10-15 characters). Choose 100 as sufficiently high.
 	  int max_youtube_id_length = 100;
@@ -315,7 +316,7 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
 	  earn_activity_urls_.add(new_item);
 	
 	  // Proceed to next marker.
-	  youtube_marker = suffix.indexOf(YOUTUBE_URL_IDENTIFIER);
+	  youtube_marker = suffix.indexOf(GetUrlTask.JACT_DOMAIN + YOUTUBE_URL_IDENTIFIER);
 	}
   }
   

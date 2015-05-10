@@ -10,4 +10,5 @@ public interface ProcessUrlResponseCallback {
 	void DecrementNumRequestsCounter();
 	int GetNumRequestsCounter();
 	void DisplayPopup(String message);
+	void DisplayPopup(String title, String message);
 }

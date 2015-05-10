@@ -13,7 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 public class GamesActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private static final String games_url_ = "https://m.jact.com:3081/games";
+  private static String games_url_;
   
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +21,7 @@ public class GamesActivity extends JactActionBarActivity implements ProcessUrlRe
     super.onCreate(savedInstanceState, R.string.games_label,
 		       R.layout.games_layout,
 		       JactNavigationDrawer.ActivityIndex.GAMES);
+    games_url_ = GetUrlTask.JACT_DOMAIN + "/games";
   }
     
   @Override

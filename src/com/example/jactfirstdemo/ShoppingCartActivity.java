@@ -38,8 +38,8 @@ import com.example.jactfirstdemo.ShoppingUtils.ShoppingCartInfo;
 public class ShoppingCartActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
 	private static final int MAX_CART_ITEMS = 10;
 	// TODO(PHB): Update string below with actual target.
-	private static final String rewards_url_ = "https://m.jact.com:3081/rest/rewards.json";
-	private static final String jact_shopping_cart_url_ = "https://m.jact.com:3081/rest/cart.json";
+	private static String rewards_url_;
+	private static String jact_shopping_cart_url_;
 	private static final String GET_SHIPPING_INFO_TASK = "get_shipping_info_task";
 	private static final String GET_REWARDS_PAGE_TASK = "get_rewards_page_task";
 	private static final String DATE_PREFIX = "Drawing Date: ";
@@ -370,6 +370,8 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
     super.onCreate(savedInstanceState, R.string.cart_activity_label,
     		       R.layout.checkout_layout,
     		       JactNavigationDrawer.ActivityIndex.CHECKOUT_MAIN);
+    rewards_url_ = GetUrlTask.JACT_DOMAIN + "/rest/rewards.json";
+    jact_shopping_cart_url_ = GetUrlTask.JACT_DOMAIN + "/rest/cart.json";
   }
 
   @Override

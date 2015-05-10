@@ -1,11 +1,13 @@
 package com.example.jactfirstdemo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -24,7 +26,8 @@ import com.example.jactfirstdemo.JactLoggedInHomeActivity;
 import com.example.jactfirstdemo.R;
 
 public class JactLoginActivity extends FragmentActivity implements ProcessUrlResponseCallback {
-  private static final String login_url_ = "https://m.jact.com:3081/rest/user/login";
+  public static final String USERNAME_SEPERATOR = "PHB_NAME_SEP_PHB";
+  private static String login_url_;
   private String username_;
   private String password_;
   private static boolean require_login_;
@@ -35,6 +38,7 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    login_url_ = GetUrlTask.JACT_DOMAIN + "/rest/user/login";
     require_login_ = false;
   }
   
@@ -49,7 +53,7 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
 	// Check to see if 'logged_off' was passed in; if so, log-off (delete
 	// login credentials from SharedPreferences).
     SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
-    String is_logged_off = getIntent().getStringExtra(getString(R.string.logged_off_key));
+    String is_logged_off = getIntent().getStringExtra(getString(R.string.was_logged_off_key));
     if (is_logged_off != null && is_logged_off.equalsIgnoreCase("true")) {
       SharedPreferences.Editor editor = user_info.edit();
       editor.remove(getString(R.string.ui_username));
@@ -162,7 +166,8 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   private void StoreUserInfo(SharedPreferences.Editor editor, String user_info) {
     try {
       JSONObject response_json = new JSONObject(user_info);
-      editor.putString(getString(R.string.logged_off_key), "true");
+      editor.putString(getString(R.string.was_logged_off_key), "true");
+      editor.putBoolean(getString(R.string.ui_is_logged_in), true);
       editor.putString(getString(R.string.ui_session_name), response_json.getString("session_name"));
       editor.putString(getString(R.string.ui_session_id), response_json.getString("sessid"));
       editor.putString(getString(R.string.ui_token), response_json.getString("token"));
@@ -219,6 +224,25 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       editor.putString(getString(R.string.ui_username), username_);
       editor.putString(getString(R.string.ui_password), password_);
       editor.putString(getString(R.string.ui_session_cookies), cookies);
+      // Add username_ to the set of all usernames ever used.
+      String usernames = user_info.getString(getString(R.string.ui_usernames), "");
+      if (usernames == null || usernames.isEmpty()) {
+    	usernames = username_;
+      } else {
+        ArrayList<String> names = new ArrayList<String>(Arrays.asList(usernames.split(USERNAME_SEPERATOR)));
+        boolean has_username = false;
+        for (String name : names) {
+          if (name.equals(username_)) {
+        	has_username = true;
+        	break;
+          }
+        }
+        if (!has_username) {
+          names.add(username_);
+        }
+        usernames = TextUtils.join(USERNAME_SEPERATOR, names);
+      }
+      editor.putString(getString(R.string.ui_usernames), usernames);
       // Process response for user info, and store to file.
       StoreUserInfo(editor, webpage);
       editor.commit();
@@ -291,5 +315,9 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
 
   @Override
   public void DisplayPopup(String message) {
+  }
+  
+  @Override
+  public void DisplayPopup(String title, String message) {
   }
 }

@@ -27,7 +27,7 @@ public class OnProductClickListener implements OnItemClickListener {
 	  public TextView summary_;
 	  public TextView date_;
 	  public TextView bux_;
-	  public TextView points_;
+	  //PHB_OLDpublic TextView points_;
 	  public TextView pid_;
 	  public ImageView img_;	  	
 	}
@@ -256,6 +256,7 @@ public class OnProductClickListener implements OnItemClickListener {
 			return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 		  }
 		
+		  /* PHB_OLD
 		  // There can be a second price line, for products that have combined price in
 		  // Points and USD or Points and BUX. Check visibility of 2nd price line in Popup, and if present,
 		  // populate details.points_ with it (when present, 2nd line always represents Points).
@@ -285,7 +286,7 @@ public class OnProductClickListener implements OnItemClickListener {
 			                       price + " with points: " + points);
 				return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 			}
-		  } 
+		  }*/
 		} catch (NumberFormatException e) {
 			Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. NumberFormatException. " +
 		                       "Error Msg: " + err_msg + ", Item:\n" + ShoppingUtils.PrintLineItem(item));

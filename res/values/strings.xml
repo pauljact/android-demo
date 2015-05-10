@@ -17,7 +17,7 @@
     <!-- EnD Activity Labels -->
     
     <!-- SharedPreferences Keys -->
-    <string name="logged_off_key">logged_off</string>
+    <string name="was_logged_off_key">logged_off</string>
     <string name="webview_url_key">webview_url_key</string>
     <string name="webview_title_key">webview_title_key</string>
     <string name="earn_url_key">earn_url_key</string>
@@ -45,7 +45,9 @@
     <!-- User Profile Info Keys -->
     <string name="ui_master_file">master_file</string>
     <string name="ui_username">username</string>
+    <string name="ui_usernames">usernames</string>
     <string name="ui_password">password</string>
+    <string name="ui_is_logged_in">is_logged_in</string>
     <string name="ui_session_cookies">session_cookies</string>
     <string name="ui_csrf_token">csrf_token</string>
     <string name="ui_session_name">session_name</string>
@@ -112,6 +114,8 @@
     <string name="password_confirm">Confirm Password</string>
     <string name="select_icon">Select User Icon</string>
     <string name="register_button_str">Create New Account</string>
+    <string name="new_user_icon_prompt">Select Jact Avatar</string>
+    <string name="choose_photo_from_phone">...Or choose photo from device</string>
     <!-- END New User Layout -->
     
     <!-- Miscellaneous -->
@@ -128,7 +132,7 @@
     <string name="jact_login">LOG IN</string>
     <string name="youtube_id">youtube_id</string>
     <string name="earn_now">Earn Now</string>
-    <string name="forgot_password_str">Username or Email Address</string>
+    <string name="forgot_password_str">Username</string>
     <string name="email_password_str">E-Mail New Password</string>
     <!-- End Miscellaneous -->
     

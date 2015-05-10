@@ -20,12 +20,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class JactNavigationDrawer implements ProcessUrlResponseCallback {
-  private static final String rewards_url_ = "https://m.jact.com:3081/rest/rewards.json";
-  private static final String faq_url_ = "https://m.jact.com:3081/faq-page";
-  private static final String contact_us_url_ = "https://m.jact.com:3081/contact";
-  private static final String privacy_policy_url_ = "https://m.jact.com:3081/privacy-policy";
-  private static final String user_agreement_url_ = "https://m.jact.com:3081/user-agreement";
-  private static final String about_jact_url_ = "https://m.jact.com:3081/about-jact";
+  private static String rewards_url_;
+  private static String faq_url_;
+  private static String contact_us_url_;
+  private static String privacy_policy_url_;
+  private static String user_agreement_url_;
+  private static String about_jact_url_;
   
   public enum ActivityIndex {
     PROFILE,
@@ -62,6 +62,13 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 		                      View drawer_layout,
 		                      View left_drawer,
 		                      ActivityIndex parent_activity_index) {
+    rewards_url_ = GetUrlTask.JACT_DOMAIN + "/rest/rewards.json";
+    faq_url_ = GetUrlTask.JACT_DOMAIN + "/faq-page";
+    contact_us_url_ = GetUrlTask.JACT_DOMAIN + "/contact";
+    privacy_policy_url_ = GetUrlTask.JACT_DOMAIN + "/privacy-policy";
+    user_agreement_url_ = GetUrlTask.JACT_DOMAIN + "/user-agreement";
+    about_jact_url_ = GetUrlTask.JACT_DOMAIN + "/about-jact";
+    
     parent_activity_ = a;
     parent_activity_index_ = parent_activity_index;
     drawer_click_pos_ = -1;
@@ -248,9 +255,14 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   }
   
   private void startLogoffActivity() {
+	// Stop the GCM Service running in the background (should not get updates if not
+	// logged in.
+	parent_activity_.stopService(new Intent(parent_activity_, GcmIntentService.class));
+	parent_activity_.SetLoggedOff();
+	  
     Intent login_intent =
         new Intent(parent_activity_, JactLoginActivity.class);
-    login_intent.putExtra(parent_activity_.getString(R.string.logged_off_key), "true");
+    login_intent.putExtra(parent_activity_.getString(R.string.was_logged_off_key), "true");
     parent_activity_.startActivity(login_intent);
   }
  
@@ -411,7 +423,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	      }
 	    }
 	  }
-
+	
 	@Override
 	public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
 	  ProcessDrawerClickResponse(webpage, cookies);
@@ -429,6 +441,10 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	  Log.e("PHB ERROR", "JactNavigationDrawer.ProcessUrlResponse: " +
                          "Failed to fetch URL. Status: " + status);
 	  parent_activity_.fadeAllViews(false);
+	  if (status == FetchStatus.ERROR_UNABLE_TO_CONNECT) {
+		parent_activity_.DisplayPopup("Unable to Reach Jact",
+				                      "Check internet connection, and try again.");
+	  }
 	}
 	  
 	@Override
@@ -446,5 +462,9 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 
 	@Override
 	public void DisplayPopup(String message) {
+	}
+	
+	@Override
+	public void DisplayPopup(String title, String message) {
 	}
 }
