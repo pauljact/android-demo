@@ -10,6 +10,7 @@
     <string name="games_label">Games</string>
     <string name="community_label">Community</string>
     <string name="forgot_password_label">Forgot Password</string>
+    <string name="forgot_username">Forgot Username</string>
     <string name="new_user_label">Register</string>
     <string name="checkout_label">Checkout</string>
     <string name="rewards_label">Rewards</string>
@@ -73,6 +74,8 @@
     <string name="cart_items_str">Cart Items:</string>
     <string name="next_str">Next</string>
     <string name="prev_str">Previous</string>
+    <string name="drawing">Drawing</string>
+    <string name="add_to_cart">Add to Cart</string>
     <string name="clear_cart">Clear Cart</string>
     <string name="proceed_to_billing">Proceed to Billing</string>
     <string name="proceed_to_shipping">Proceed to Checkout</string>
@@ -126,14 +129,17 @@
     <string name="hello_world">Hello world!</string>
     <string name="jact_simple_name">JACT</string>
     <string name="jact_motto">Play With Purpose</string>
-    <string name="jact_register">SIGN UP</string>
-    <string name="jact_username">USERNAME</string>
-    <string name="jact_password">PASSWORD</string>
-    <string name="jact_login">LOG IN</string>
+    <string name="jact_register">Register</string>
+    <string name="jact_username">Username</string>
+    <string name="jact_password">Password</string>
+    <string name="jact_login">Login</string>
     <string name="youtube_id">youtube_id</string>
     <string name="earn_now">Earn Now</string>
     <string name="forgot_password_str">Username</string>
-    <string name="email_password_str">E-Mail New Password</string>
+    <string name="email_password_str">Email New Password</string>
+    <string name="wrong_username">Wrong username or password</string>
+    <string name="unknown_user">Welcome Unknown User</string>
+    <string name="user_points_dots">User Points: &#8230;</string>
     <!-- End Miscellaneous -->
     
     <!-- Quantity 0-10 -->

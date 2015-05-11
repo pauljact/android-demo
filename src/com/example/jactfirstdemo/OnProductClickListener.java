@@ -8,7 +8,7 @@ import com.example.jactfirstdemo.ProductsAdapter.ProductViewHolder;
 import com.example.jactfirstdemo.ShoppingUtils.Amount;
 
 import android.graphics.Bitmap;
-import android.net.ParseException;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -43,6 +43,7 @@ public class OnProductClickListener implements OnItemClickListener {
         view_holder_.drawing_ = (TextView) vi.findViewById(R.id.product_popup_text_drawing);
         view_holder_.title_ = (TextView) vi.findViewById(R.id.product_popup_text_title);
         view_holder_.summary_ = (TextView) vi.findViewById(R.id.product_popup_text_summary);
+        view_holder_.summary_.setMovementMethod(ScrollingMovementMethod.getInstance());
         view_holder_.date_ = (TextView) vi.findViewById(R.id.product_popup_text_date);
         view_holder_.bux_ = (TextView) vi.findViewById(R.id.product_popup_text_bux);
         //PHB_OLDview_holder_.points_ = (TextView) vi.findViewById(R.id.product_popup_text_points);

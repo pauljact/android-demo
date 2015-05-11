@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -34,6 +36,8 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   private boolean logging_in_;
   private boolean requires_user_input_;
   private JactDialogFragment dialog_;
+  private ArrayList<String> usernames_;
+  AutoCompleteTextView autocomplete_tv_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +77,29 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       // Reset require login.
       require_login_ = false;
       setContentView(R.layout.jact_welcome_screen);
+      
+  	  // Size Jact Motto so text stretches to fill the Icon and Title.
+      // Can't set it here, because views haven't been inflated yet.
+      // Instead, assign a listener that will detect when sizes have been
+      // set, and reassign widths there.
+  	  JactLinearLayout title_ll = (JactLinearLayout) findViewById(R.id.login_icon_and_name);
+  	  JactTextView motto_tv = (JactTextView) findViewById(R.id.jact_motto_tv);
+  	  motto_tv.SetLinearLayoutToMatch(title_ll);
+  	  title_ll.SetTextViewToMatch(motto_tv);
+  	  
+  	  // Set Autocomplete array to have a list of all previously used user names
+  	  GetUsernames();
+      autocomplete_tv_ = (AutoCompleteTextView) findViewById(R.id.username_autocomplete_tv);
+      ArrayAdapter<String> adapter = 
+              new ArrayAdapter<String>(this, R.layout.drop_down_layout, R.id.dropdown_textview, usernames_);
+      autocomplete_tv_.setAdapter(adapter);
+      // Hack to get drop down to show suggestions even on zero-length query.
+      autocomplete_tv_.setOnClickListener(new View.OnClickListener() {
+  		@Override
+  		public void onClick(View v) {
+    	      ShowDropDown();
+  		}
+  	  });
     } else {
       requires_user_input_ = false;
       setContentView(R.layout.jact_empty_welcome_screen);
@@ -80,6 +107,22 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     }
   }
   
+  private void ShowDropDown() {
+	if (!usernames_.isEmpty()) {
+	  autocomplete_tv_.showDropDown();
+	}
+  }
+  
+  private void GetUsernames() {
+	SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+	String usernames = user_info.getString(getString(R.string.ui_usernames), "");
+    if (usernames != null && !usernames.isEmpty()) {
+      usernames_ = new ArrayList<String>(Arrays.asList(usernames.split(JactLoginActivity.USERNAME_SEPERATOR)));
+    } else {
+      usernames_ = new ArrayList<String>();
+    }
+  }
+
   public static void SetRequireLogin(boolean value) {
 	require_login_ = value;
   }
@@ -94,19 +137,23 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     if (!requires_user_input_) {
       requires_user_input_ = true;
       setContentView(R.layout.jact_welcome_screen);
-      EditText username_box = (EditText) findViewById(R.id.username_edittext);
-      username_box.setText(username_);
+  	  autocomplete_tv_.setText(username_);
+      //PHB_OLDEditText username_box = (EditText) findViewById(R.id.username_edittext);
+      //PHB_OLDusername_box.setText(username_);
       EditText password_box = (EditText) findViewById(R.id.jact_password);
       password_box.setText(password_);
     }
     Button login_button = (Button) findViewById(R.id.jact_login_button);
     login_button.setEnabled(!logging_in_);
-    Button register_button = (Button) findViewById(R.id.jact_register_button);
-    register_button.setEnabled(!logging_in_);
+    TextView register_tv = (TextView) findViewById(R.id.jact_register_tv);
+    register_tv.setEnabled(!logging_in_);
+    TextView forgot_tv = (TextView) findViewById(R.id.forgot_password_textview);
+    forgot_tv.setEnabled(!logging_in_);
     TextView forgot_password = (TextView) findViewById(R.id.forgot_password_textview);
     forgot_password.setEnabled(!logging_in_);
-    EditText username_box = (EditText) findViewById(R.id.username_edittext);
-    username_box.setEnabled(!logging_in_);
+    autocomplete_tv_.setEnabled(!logging_in_);
+    //PHB_OLDEditText username_box = (EditText) findViewById(R.id.username_edittext);
+    //PHB_OLDusername_box.setEnabled(!logging_in_);
     EditText password_box = (EditText) findViewById(R.id.jact_password);
     password_box.setEnabled(!logging_in_);
     ProgressBar spinner = (ProgressBar) findViewById(R.id.login_progress_bar);
@@ -154,9 +201,10 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   }
   
   public void doLoginButtonClick(View view) {
-	EditText username = (EditText) findViewById(R.id.username_edittext);
+	//PHB_OLDEditText username = (EditText) findViewById(R.id.username_edittext);
+	String username = autocomplete_tv_.getText().toString();
     EditText password = (EditText) findViewById(R.id.jact_password);
-    Login(username.getText().toString().trim(), password.getText().toString().trim());
+    Login(username, password.getText().toString());
   }
   
   public void doLoginScreenClick(View view) {
@@ -212,8 +260,9 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       // Fetch username/password from the EditText fields, if they were not
       // already retrieved from Preferences file.
       if (username_ == null || username_.isEmpty()) {
-    	EditText username_from_edit = (EditText) findViewById(R.id.username_edittext);
-        username_ = username_from_edit.getText().toString().trim();
+    	//PHB_OLDEditText username_from_edit = (EditText) findViewById(R.id.username_edittext);
+    	String username = autocomplete_tv_.getText().toString();
+        username_ = username;
       }
       if (password_ == null || password_.isEmpty()) {
         EditText password_from_edit = (EditText) findViewById(R.id.jact_password);

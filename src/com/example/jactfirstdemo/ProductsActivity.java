@@ -17,14 +17,10 @@ import com.example.jactfirstdemo.ShoppingCartActivity.ItemToAddStatus;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.AdapterView;
@@ -36,7 +32,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 public class ProductsActivity extends JactActionBarActivity
                               implements OnItemSelectedListener, ProcessUrlResponseCallback {	

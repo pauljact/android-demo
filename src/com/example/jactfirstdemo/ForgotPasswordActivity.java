@@ -8,6 +8,7 @@ import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -88,6 +89,12 @@ public class ForgotPasswordActivity extends ActionBarActivity
       return;
     }
     SendRequest(username);
+  }
+  
+  public void doGoToJactClick(View view) {
+    Uri uri_url = Uri.parse(GetUrlTask.JACT_DOMAIN + "/user/password");
+    Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uri_url);
+    startActivity(launchBrowser);
   }
   
   private void SendRequest(String username) {
