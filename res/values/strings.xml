@@ -138,7 +138,7 @@
     <string name="forgot_password_str">Username</string>
     <string name="email_password_str">Email New Password</string>
     <string name="wrong_username">Wrong username or password</string>
-    <string name="unknown_user">Welcome Unknown User</string>
+    <string name="unknown_user">Welcome to Jact</string>
     <string name="user_points_dots">User Points: &#8230;</string>
     <!-- End Miscellaneous -->
     
