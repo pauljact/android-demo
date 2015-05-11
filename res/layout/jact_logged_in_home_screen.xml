@@ -41,8 +41,9 @@
         android:id="@+id/userpoints_pic"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_alignBottom="@+id/user_profile_pic"
+    	android:layout_below="@id/logged_in_home_welcome_textview"
         android:layout_alignLeft="@+id/logged_in_home_welcome_textview"
+        android:layout_marginTop="10dp"
     	android:background="@color/transparent"
         android:src="@drawable/ic_launcher_transparent" />
 
