@@ -137,9 +137,10 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     if (!requires_user_input_) {
       requires_user_input_ = true;
       setContentView(R.layout.jact_welcome_screen);
+      if (autocomplete_tv_ == null) {
+    	autocomplete_tv_ = (AutoCompleteTextView) findViewById(R.id.username_autocomplete_tv);
+      }
   	  autocomplete_tv_.setText(username_);
-      //PHB_OLDEditText username_box = (EditText) findViewById(R.id.username_edittext);
-      //PHB_OLDusername_box.setText(username_);
       EditText password_box = (EditText) findViewById(R.id.jact_password);
       password_box.setText(password_);
     }
@@ -149,11 +150,10 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     register_tv.setEnabled(!logging_in_);
     TextView forgot_tv = (TextView) findViewById(R.id.forgot_password_textview);
     forgot_tv.setEnabled(!logging_in_);
-    TextView forgot_password = (TextView) findViewById(R.id.forgot_password_textview);
-    forgot_password.setEnabled(!logging_in_);
+    if (autocomplete_tv_ == null) {
+      autocomplete_tv_ = (AutoCompleteTextView) findViewById(R.id.username_autocomplete_tv);
+    }
     autocomplete_tv_.setEnabled(!logging_in_);
-    //PHB_OLDEditText username_box = (EditText) findViewById(R.id.username_edittext);
-    //PHB_OLDusername_box.setEnabled(!logging_in_);
     EditText password_box = (EditText) findViewById(R.id.jact_password);
     password_box.setEnabled(!logging_in_);
     ProgressBar spinner = (ProgressBar) findViewById(R.id.login_progress_bar);
@@ -201,7 +201,6 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   }
   
   public void doLoginButtonClick(View view) {
-	//PHB_OLDEditText username = (EditText) findViewById(R.id.username_edittext);
 	String username = autocomplete_tv_.getText().toString();
     EditText password = (EditText) findViewById(R.id.jact_password);
     Login(username, password.getText().toString());
@@ -260,7 +259,6 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       // Fetch username/password from the EditText fields, if they were not
       // already retrieved from Preferences file.
       if (username_ == null || username_.isEmpty()) {
-    	//PHB_OLDEditText username_from_edit = (EditText) findViewById(R.id.username_edittext);
     	String username = autocomplete_tv_.getText().toString();
         username_ = username;
       }

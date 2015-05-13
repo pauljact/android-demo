@@ -12,8 +12,8 @@
    	    android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="1dp"
-   	    android:layout_marginBottom="1dp"
+        android:layout_marginTop="15dp"
+   	    android:layout_marginBottom="15dp"
     	android:background="@color/transparent"
     	android:orientation="vertical"
         android:layout_centerHorizontal="true">
@@ -28,8 +28,8 @@
         android:layout_marginRight="2dp">
         <ImageView
             android:id="@+id/product_image"
-            android:layout_width="70dp"
-            android:layout_height="70dp"/>
+            android:layout_width="180dp"
+            android:layout_height="200dp"/>
     </LinearLayout>
     <!-- END Product image -->
     

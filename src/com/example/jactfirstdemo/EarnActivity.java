@@ -153,6 +153,27 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
       StartYoutubeActivity(youtube_url, nid);
     }
   }
+  
+  public void doEarnNowVideoClick(View view) {
+    TextView nid_tv = (TextView) ((LinearLayout) view.getParent().getParent()).findViewById(R.id.earn_nid);
+    String nid_str = nid_tv.getText().toString();
+	int nid = -1;
+	try {
+	  nid = Integer.parseInt(nid_str);
+	} catch (NumberFormatException e) {
+	  Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to parse nid " + nid_str + ":" + e.getMessage());
+      Popup("Unable to find Video", "Try again later.");
+	  return;
+	}
+	
+    String youtube_url = GetYoutubeUrlViaNodeId(nid);
+    if (youtube_url.isEmpty()) {
+      Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to find nid " + nid + " in earn_list_");
+      Popup("Unable to find Video", "Try again later.");
+    } else {
+      StartYoutubeActivity(youtube_url, nid);
+    }
+  }
 
   @Override
   public void fadeAllViews(boolean should_fade) {

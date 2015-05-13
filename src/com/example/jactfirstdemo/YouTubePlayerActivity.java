@@ -147,7 +147,6 @@ public class YouTubePlayerActivity extends JactActionBarActivity
     Intent intent = new Intent(this, EarnRedeemActivity.class);
     intent.putExtra(getString(R.string.earn_url_key),
     		        GetUrlTask.JACT_DOMAIN + EARN_REDEEM_URL_BASE + Integer.toString(earn_id_));
-    Log.w("PHB TEMP", "Starting Earn redeem activity.");
     startActivity(intent);
   }
   

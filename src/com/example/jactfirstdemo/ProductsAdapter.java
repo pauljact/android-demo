@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.Locale;
  
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -221,4 +224,14 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         
         return vi;
     }
+
+	@Override
+	public Drawable GetDrawable(int resource_id) {
+		return parent_activity_.getResources().getDrawable(resource_id);
+	}
+
+	@Override
+	public Drawable GetDrawable(Bitmap bitmap) {
+	  return new BitmapDrawable(parent_activity_.getResources(), bitmap);
+	}
 }

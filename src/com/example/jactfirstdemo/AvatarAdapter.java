@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -145,4 +148,14 @@ public class AvatarAdapter extends ArrayAdapter<NewUserActivity.AvatarItem>
         }
         return vi;
     }
+
+	@Override
+	public Drawable GetDrawable(int resource_id) {
+	  return parent_activity_.getResources().getDrawable(resource_id);
+	}
+
+	@Override
+	public Drawable GetDrawable(Bitmap bitmap) {
+	  return new BitmapDrawable(parent_activity_.getResources(), bitmap);
+	}
 }

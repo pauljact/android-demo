@@ -15,7 +15,7 @@
     android:id="@+id/login_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:onClick="doLoginScreenClick"                
+    android:onClick="doLoginScreenClick"              
     android:clickable="true"
     android:background="@drawable/jact_background">
     <com.example.jactfirstdemo.JactLinearLayout

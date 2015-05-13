@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
  
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -122,10 +125,20 @@ public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implement
         
         // Set Image.
         if (earn_item.img_url_ != null &&
-            !image_loader_.DisplayImage(earn_item.img_url_, holder.img_, position)) {
+            !image_loader_.DisplayImage(earn_item.img_url_, holder.img_, position, true)) {
           unfinished_list_elements_[position] = true;
         }
         
         return vi;
     }
+
+	@Override
+	public Drawable GetDrawable(int resource_id) {
+	  return parent_activity_.getResources().getDrawable(resource_id);
+	}
+
+	@Override
+	public Drawable GetDrawable(Bitmap bitmap) {
+      return new BitmapDrawable(parent_activity_.getResources(), bitmap);
+	}
 }

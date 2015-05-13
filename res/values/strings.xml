@@ -140,6 +140,7 @@
     <string name="wrong_username">Wrong username or password</string>
     <string name="unknown_user">Welcome to Jact</string>
     <string name="user_points_dots">User Points: &#8230;</string>
+    <string name="go_to_earn_main_page">go_to_earn_main_page</string>
     <!-- End Miscellaneous -->
     
     <!-- Quantity 0-10 -->

@@ -10,6 +10,9 @@ import com.example.jactfirstdemo.ShoppingCartActivity.CartAccessResponse;
 import com.example.jactfirstdemo.ShoppingUtils.Amount;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -316,5 +319,15 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Drawable GetDrawable(int resource_id) {
+      return parent_activity_.getResources().getDrawable(resource_id);
+	}
+
+	@Override
+	public Drawable GetDrawable(Bitmap bitmap) {
+	  return new BitmapDrawable(parent_activity_.getResources(), bitmap);
 	}
 }

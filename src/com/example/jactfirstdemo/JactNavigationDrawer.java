@@ -45,6 +45,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     BILLING_NEW,
     REVIEW_ORDER,
     EARN,
+    EARN_REDEEMED,
     BUX,
     ABOUT_JACT,
     FORGOT_PASSWORD,
@@ -276,7 +277,9 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   
   private void startEarnActivity() {
 	EarnActivity.SetShouldRefreshEarnItems(true);
-    parent_activity_.startActivity(new Intent(parent_activity_, EarnActivity.class));
+	Intent earn_intent = new Intent(parent_activity_, EarnActivity.class);
+	earn_intent.putExtra(parent_activity_.getString(R.string.go_to_earn_main_page), "true");
+    parent_activity_.startActivity(earn_intent);
   }
   
   //PHB_GAMESprivate void startGamesActivity() {
