@@ -6,7 +6,11 @@ import java.util.HashSet;
 import java.util.Locale;
  
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +35,8 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
 	  public TextView summary_;
 	  public TextView date_;
 	  public TextView bux_;
-	  public TextView price_and_;
-	  public TextView points_;
+	  //PHB_OLDpublic TextView price_and_;
+	  //PHB_OLDpublic TextView points_;
 	  public TextView pid_;
 	  public ImageView img_;
 	}
@@ -112,8 +116,8 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
             viewHolder.summary_ = (TextView) vi.findViewById(R.id.product_summary);
             viewHolder.date_ = (TextView) vi.findViewById(R.id.product_date);
             viewHolder.bux_ = (TextView) vi.findViewById(R.id.product_bux);
-            viewHolder.price_and_ = (TextView) vi.findViewById(R.id.product_price_seperator);
-            viewHolder.points_ = (TextView) vi.findViewById(R.id.product_points);
+            //PHB_OLDviewHolder.price_and_ = (TextView) vi.findViewById(R.id.product_price_seperator);
+            //PHB_OLDviewHolder.points_ = (TextView) vi.findViewById(R.id.product_points);
             viewHolder.pid_ = (TextView) vi.findViewById(R.id.product_pid);
             viewHolder.img_ = (ImageView) vi.findViewById(R.id.product_image);
             vi.setTag(viewHolder);
@@ -137,6 +141,7 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         if (product.date_ != null && !product.date_.isEmpty()) {
           holder.date_.setVisibility(View.VISIBLE);
           holder.date_.setText(product.date_);
+      	  holder.date_.setGravity(Gravity.CENTER_HORIZONTAL);
         } else {
           holder.date_.setVisibility(View.GONE);
         }
@@ -160,33 +165,41 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         		Log.e("PHB ERROR", "ProductsAdapter::getView. Product has both USD and BUX:\n" + product.toString());
         	} else if (!points.isEmpty()) {
         		// Product has a combination of Points and USD.
-        		holder.bux_.setText("$" + NumberFormat.getNumberInstance(Locale.US).format(Double.parseDouble(usd)) + " USD");
-        		holder.points_.setText(NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(points)) + " Points");
-        		holder.points_.setVisibility(View.VISIBLE);
-        		holder.price_and_.setVisibility(View.VISIBLE);
+        		holder.bux_.setText("$" + NumberFormat.getNumberInstance(Locale.US).format(Double.parseDouble(usd)) +
+        				            " USD  +  " + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(points)) +
+        				            " Points");
+        		// PHB_OLD: The following views are no longer used, as all price info is put into a single textview.
+        		//holder.bux_.setText("$" + NumberFormat.getNumberInstance(Locale.US).format(Double.parseDouble(usd)) + " USD");
+        		//holder.points_.setText(NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(points)) + " Points");
+        		//holder.points_.setVisibility(View.VISIBLE);
+        		//holder.price_and_.setVisibility(View.VISIBLE);
         	} else {
         		holder.bux_.setText("$" + NumberFormat.getNumberInstance(Locale.US).format(Double.parseDouble(usd)) + " USD");
-        		holder.points_.setVisibility(View.INVISIBLE);
-        		holder.price_and_.setVisibility(View.INVISIBLE);
+        		//PHB_OLDholder.points_.setVisibility(View.INVISIBLE);
+        		//PHB_OLDholder.price_and_.setVisibility(View.INVISIBLE);
         	}
         } else if (!bux.isEmpty()) {
         	if (!points.isEmpty()) {
         		// Product has a combination of Points and BUX.
-        		holder.bux_.setText("J" + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(bux)) + " BUX");
-        		holder.points_.setText(NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(points)) + " Points");
-        		holder.points_.setVisibility(View.VISIBLE);
-        		holder.price_and_.setVisibility(View.VISIBLE);
+        		holder.bux_.setText("J" + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(bux)) +
+        				            " BUX  +  " + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(points)) +
+        				            " Points");
+        		// PHB_OLD: The following views are no longer used, as all price info is put into a single textview.
+        		//holder.bux_.setText("J" + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(bux)) + " BUX");
+        		//holder.points_.setText(NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(points)) + " Points");
+        		//holder.points_.setVisibility(View.VISIBLE);
+        		//holder.price_and_.setVisibility(View.VISIBLE);
         	} else {
         		// BUX only Product.
         		holder.bux_.setText("J" + NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(bux)) + " BUX");
-        		holder.points_.setVisibility(View.INVISIBLE);
-        		holder.price_and_.setVisibility(View.INVISIBLE);
+        		//PHB_OLDholder.points_.setVisibility(View.INVISIBLE);
+        		//PHB_OLDholder.price_and_.setVisibility(View.INVISIBLE);
         	}
         } else if (!points.isEmpty()) {
         	// Points Only Product.
         	holder.bux_.setText(NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(points)) + " Points");
-    		holder.points_.setVisibility(View.INVISIBLE);
-    		holder.price_and_.setVisibility(View.INVISIBLE);
+    		//PHB_OLDholder.points_.setVisibility(View.INVISIBLE);
+    		//PHB_OLDholder.price_and_.setVisibility(View.INVISIBLE);
         } else {
         	Log.e("PHB ERROR", "ProductsAdapter::getView. Product has no price:\n" + product.toString());
         }
@@ -203,6 +216,7 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         if (node_type.equalsIgnoreCase("jact_prize_drawing")) {
         	holder.layout_.setBackgroundResource(R.drawable.products_drawing_bg_selector);
         	holder.drawing_.setVisibility(View.VISIBLE);
+        	holder.drawing_.setGravity(Gravity.CENTER_HORIZONTAL);
         } else {
         	holder.layout_.setBackgroundResource(R.drawable.products_bg_selector);
         	holder.drawing_.setVisibility(View.GONE);
@@ -210,4 +224,14 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         
         return vi;
     }
+
+	@Override
+	public Drawable GetDrawable(int resource_id) {
+		return parent_activity_.getResources().getDrawable(resource_id);
+	}
+
+	@Override
+	public Drawable GetDrawable(Bitmap bitmap) {
+	  return new BitmapDrawable(parent_activity_.getResources(), bitmap);
+	}
 }

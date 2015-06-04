@@ -234,7 +234,7 @@
 	</LinearLayout>
     <!-- End List of Products -->
     
-    <!-- Proceed to Checkout Button -->
+    <!-- "Clear Cart" and "Proceed to Checkout" Buttons -->
     <LinearLayout
         android:id="@+id/checkout_button_layout"
         android:layout_alignParentBottom="true"
@@ -243,24 +243,36 @@
         android:layout_marginTop="1dp"
    	    android:layout_marginBottom="1dp"
     	android:background="@color/transparent"
-    	android:orientation="horizontal"
-	   	android:gravity="center"
-        android:layout_centerHorizontal="true"
-        android:weightSum="1.0">
+    	android:orientation="horizontal">
    	    <!-- android:layout_below="@id/checkout_list" -->
+	    <Button
+	   	    android:id="@+id/clear_cart_button"
+	   	    android:background="@drawable/button_selector_yellow"
+	   	    android:layout_width="wrap_content"
+	   	    android:layout_height="30dp"
+	   	    android:paddingLeft="5dp"
+	   	    android:paddingRight="5dp"
+	   	    android:layout_marginLeft="10dp"
+	   	    android:layout_marginRight="10dp"
+	   	    android:layout_marginBottom="10dp"
+	   	    android:onClick="doClearCartButtonClick"
+	   	    android:text="@string/clear_cart"
+	   	    android:textColor="@color/white"/>
 	    <Button
 	   	    android:id="@+id/proceed_to_checkout_button"
 	   	    android:background="@drawable/button_selector_yellow"
 	   	    android:layout_width="wrap_content"
 	   	    android:layout_height="30dp"
-	   	    android:gravity="center"
-	   	    android:paddingLeft="10dp"
-	   	    android:paddingRight="10dp"
+	   	    android:paddingLeft="5dp"
+	   	    android:paddingRight="5dp"
+	   	    android:layout_marginBottom="10dp"
+	   	    android:layout_marginLeft="5dp"
+	   	    android:layout_marginRight="10dp"
 	   	    android:onClick="doProceedToShippingButtonClick"
 	   	    android:text="@string/proceed_to_shipping"
 	   	    android:textColor="@color/white"/>
 	</LinearLayout>
-    <!-- End Proceed to Checkout Button -->
+    <!-- End "Clear Cart" and "Proceed to Checkout" Buttons -->
 
     <ProgressBar
    	    android:id="@+id/checkout_progress_bar"

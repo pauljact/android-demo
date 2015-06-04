@@ -25,7 +25,7 @@ import android.widget.RelativeLayout;
 public class CheckoutActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   public static Cookie cookie_ = null;
   private static int order_id_;
-  private static final String checkout_url_ = "https://m.jact.com:3081/checkout/";
+  private static String checkout_url_;
 
   public static synchronized void SetOrderId(int order_id) {
     order_id_ = order_id;
@@ -37,6 +37,7 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
     super.onCreate(savedInstanceState, R.string.checkout_label,
     		       R.layout.checkout_mobile_layout,
     		       JactNavigationDrawer.ActivityIndex.CHECKOUT_VIA_MOBILE_SITE);
+    checkout_url_ = GetUrlTask.JACT_DOMAIN + "/checkout/";
   }
     
   @Override

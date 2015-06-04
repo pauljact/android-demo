@@ -23,7 +23,6 @@ public class EarnPageParser {
   private static final String POINTS_SUFFIX = " Points";
   private static final String YOUTUBE_URL_PREFIX = "https://www.youtube.com/watch?v=";
   private static final String YOUTUBE_URL_PREFIX_TWO = "http://www.youtube.com/watch?v=";
-  static final String jact_icons_website_ = "https://m.jact.com:3081/sites/default/files/styles/product_page/public/";
 
   public static class EarnItem {
 	String title_;
@@ -93,7 +92,8 @@ public class EarnPageParser {
       return false;
 	}
     String image_url = url.substring(9);  // 9 is the length of prefix "public://" that should be removed.
-	item.img_url_ = jact_icons_website_ + image_url.replace(" ", "%20");  // Replace whitespace in url with %20.
+	item.img_url_ = GetUrlTask.JACT_DOMAIN + "/sites/default/files/styles/product_page/public/" +
+                    image_url.replace(" ", "%20");  // Replace whitespace in url with %20.
     return true;
   }
   

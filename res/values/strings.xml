@@ -10,6 +10,7 @@
     <string name="games_label">Games</string>
     <string name="community_label">Community</string>
     <string name="forgot_password_label">Forgot Password</string>
+    <string name="forgot_username">Forgot Username</string>
     <string name="new_user_label">Register</string>
     <string name="checkout_label">Checkout</string>
     <string name="rewards_label">Rewards</string>
@@ -17,7 +18,7 @@
     <!-- EnD Activity Labels -->
     
     <!-- SharedPreferences Keys -->
-    <string name="logged_off_key">logged_off</string>
+    <string name="was_logged_off_key">logged_off</string>
     <string name="webview_url_key">webview_url_key</string>
     <string name="webview_title_key">webview_title_key</string>
     <string name="earn_url_key">earn_url_key</string>
@@ -45,7 +46,9 @@
     <!-- User Profile Info Keys -->
     <string name="ui_master_file">master_file</string>
     <string name="ui_username">username</string>
+    <string name="ui_usernames">usernames</string>
     <string name="ui_password">password</string>
+    <string name="ui_is_logged_in">is_logged_in</string>
     <string name="ui_session_cookies">session_cookies</string>
     <string name="ui_csrf_token">csrf_token</string>
     <string name="ui_session_name">session_name</string>
@@ -71,6 +74,9 @@
     <string name="cart_items_str">Cart Items:</string>
     <string name="next_str">Next</string>
     <string name="prev_str">Previous</string>
+    <string name="drawing">Drawing</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="clear_cart">Clear Cart</string>
     <string name="proceed_to_billing">Proceed to Billing</string>
     <string name="proceed_to_shipping">Proceed to Checkout</string>
     <string name="proceed_to_final_review">Review and Submit</string>
@@ -111,6 +117,8 @@
     <string name="password_confirm">Confirm Password</string>
     <string name="select_icon">Select User Icon</string>
     <string name="register_button_str">Create New Account</string>
+    <string name="new_user_icon_prompt">Select Jact Avatar</string>
+    <string name="choose_photo_from_phone">...Or choose photo from device</string>
     <!-- END New User Layout -->
     
     <!-- Miscellaneous -->
@@ -121,14 +129,18 @@
     <string name="hello_world">Hello world!</string>
     <string name="jact_simple_name">JACT</string>
     <string name="jact_motto">Play With Purpose</string>
-    <string name="jact_register">SIGN UP</string>
-    <string name="jact_username">USERNAME</string>
-    <string name="jact_password">PASSWORD</string>
-    <string name="jact_login">LOG IN</string>
+    <string name="jact_register">Register</string>
+    <string name="jact_username">Username</string>
+    <string name="jact_password">Password</string>
+    <string name="jact_login">Login</string>
     <string name="youtube_id">youtube_id</string>
     <string name="earn_now">Earn Now</string>
-    <string name="forgot_password_str">Username or Email Address</string>
-    <string name="email_password_str">E-Mail New Password</string>
+    <string name="forgot_password_str">Username</string>
+    <string name="email_password_str">Email New Password</string>
+    <string name="wrong_username">Wrong username or password</string>
+    <string name="unknown_user">Welcome to Jact</string>
+    <string name="user_points_dots">User Points: &#8230;</string>
+    <string name="go_to_earn_main_page">go_to_earn_main_page</string>
     <!-- End Miscellaneous -->
     
     <!-- Quantity 0-10 -->

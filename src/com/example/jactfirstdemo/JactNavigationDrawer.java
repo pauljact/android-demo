@@ -20,29 +20,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class JactNavigationDrawer implements ProcessUrlResponseCallback {
-  /* Non-SSL sites.
-  private static final String rewards_url_ = "http://us7.jact.com:3080/rest/rewards.json";
-  private static final String faq_url_ = "http://us7.jact.com:3080/faq-page";
-  private static final String privacy_policy_url_ = "http://us7.jact.com:3080/privacy-policy";
-  private static final String user_agreement_url_ = "http://us7.jact.com:3080/user-agreement";
-  private static final String about_jact_url_ = "http://us7.jact.com:3080/about-jact";
-  */
-  /* Mobile sites */
-  private static final String rewards_url_ = "https://m.jact.com:3081/rest/rewards.json";
-  private static final String faq_url_ = "https://m.jact.com:3081/faq-page";
-  private static final String contact_us_url_ = "https://m.jact.com:3081/contact";
-  private static final String privacy_policy_url_ = "https://m.jact.com:3081/privacy-policy";
-  private static final String user_agreement_url_ = "https://m.jact.com:3081/user-agreement";
-  private static final String about_jact_url_ = "https://m.jact.com:3081/about-jact";
-  /**/
-  /* SSL, non-mobile sites
-  private static final String rewards_url_ = "https://us7.jact.com:3081/rest/rewards.json";
-  private static final String faq_url_ = "https://us7.jact.com:3081/faq-page";
-  private static final String contact_us_url_ = "https://us7.jact.com:3081/contact";
-  private static final String privacy_policy_url_ = "https://us7.jact.com:3081/privacy-policy";
-  private static final String user_agreement_url_ = "https://us7.jact.com:3081/user-agreement";
-  private static final String about_jact_url_ = "https://us7.jact.com:3081/about-jact";
-  */
+  private static String rewards_url_;
+  private static String faq_url_;
+  private static String contact_us_url_;
+  private static String privacy_policy_url_;
+  private static String user_agreement_url_;
+  private static String about_jact_url_;
+  
   public enum ActivityIndex {
     PROFILE,
     GAMES,
@@ -61,6 +45,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     BILLING_NEW,
     REVIEW_ORDER,
     EARN,
+    EARN_REDEEMED,
     BUX,
     ABOUT_JACT,
     FORGOT_PASSWORD,
@@ -78,6 +63,13 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 		                      View drawer_layout,
 		                      View left_drawer,
 		                      ActivityIndex parent_activity_index) {
+    rewards_url_ = GetUrlTask.JACT_DOMAIN + "/rest/rewards.json";
+    faq_url_ = GetUrlTask.JACT_DOMAIN + "/faq-page";
+    contact_us_url_ = GetUrlTask.JACT_DOMAIN + "/contact";
+    privacy_policy_url_ = GetUrlTask.JACT_DOMAIN + "/privacy-policy";
+    user_agreement_url_ = GetUrlTask.JACT_DOMAIN + "/user-agreement";
+    about_jact_url_ = GetUrlTask.JACT_DOMAIN + "/about-jact";
+    
     parent_activity_ = a;
     parent_activity_index_ = parent_activity_index;
     drawer_click_pos_ = -1;
@@ -105,7 +97,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
         new IconAndText(R.drawable.trophy_transparent, "Rewards"),
         //PHB_BUXnew IconAndText(R.drawable.jact_transparent, "Purchase BUX"),
         new IconAndText(R.drawable.earn_transparent, "Earn"),
-        new IconAndText(R.drawable.games_transparent, "Games"),
+        //PHB_GAMESnew IconAndText(R.drawable.games_transparent, "Games"),
         new IconAndText(R.drawable.community2_transparent, "Community"),
         new IconAndText(R.drawable.cart_white_transparent, "Shopping Cart")
     };
@@ -136,12 +128,12 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     //PHB_BUX  return 2;
     case EARN:
       return 2;
-    case GAMES:
-      return 3;
+    //PHB_GAMEScase GAMES:
+    //PHB_GAMES  return 3;
     case COMMUNITY:
-      return 4;
+      return 3;
     case CHECKOUT_MAIN:
-      return 5;
+      return 4;
     default:
       return -1;
     }
@@ -264,9 +256,14 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   }
   
   private void startLogoffActivity() {
+	// Stop the GCM Service running in the background (should not get updates if not
+	// logged in.
+	parent_activity_.stopService(new Intent(parent_activity_, GcmIntentService.class));
+	parent_activity_.SetLoggedOff();
+	  
     Intent login_intent =
         new Intent(parent_activity_, JactLoginActivity.class);
-    login_intent.putExtra(parent_activity_.getString(R.string.logged_off_key), "true");
+    login_intent.putExtra(parent_activity_.getString(R.string.was_logged_off_key), "true");
     parent_activity_.startActivity(login_intent);
   }
  
@@ -280,12 +277,14 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   
   private void startEarnActivity() {
 	EarnActivity.SetShouldRefreshEarnItems(true);
-    parent_activity_.startActivity(new Intent(parent_activity_, EarnActivity.class));
+	Intent earn_intent = new Intent(parent_activity_, EarnActivity.class);
+	earn_intent.putExtra(parent_activity_.getString(R.string.go_to_earn_main_page), "true");
+    parent_activity_.startActivity(earn_intent);
   }
   
-  private void startGamesActivity() {
-    parent_activity_.startActivity(new Intent(parent_activity_, GamesActivity.class));
-  }
+  //PHB_GAMESprivate void startGamesActivity() {
+//PHB_GAMESparent_activity_.startActivity(new Intent(parent_activity_, GamesActivity.class));
+//PHB_GAMES}
   
   private void startCommunityActivity() {
     parent_activity_.startActivity(new Intent(parent_activity_, CommunityActivity.class));
@@ -315,13 +314,13 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
       // EarnActivity should have been started directly).
       // TODO(PHB): Handle the error of being here.
       Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Earn'.");
-    } else if (drawer_click_pos_ == 3) {
+    //PHB_GAMES} else if (drawer_click_pos_ == 3) {
       // Position 3 corresponds to 'Games'. We should never be here, as a click on this
       // drawer position should not have sent a request to the server here (rather,
       // GamesActivity should have been started directly).
       // TODO(PHB): Handle the error of being here.
-      Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Games'.");
-    } else if (drawer_click_pos_ == 4) {
+    //PHB_GAMES  Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Games'.");
+    } else if (drawer_click_pos_ == 3) {
       // Position 4 corresponds to 'Community'. We should never be here, as a click on this
       // drawer position should not have sent a request to the server here (rather,
       // CommunityActivity should have been started directly).
@@ -409,15 +408,15 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
             // Position '2' is for Earn. Start that activity.
 	    	parent_class_.parent_activity_.fadeAllViews(true);
 	    	parent_class_.startEarnActivity();
-	      } else if (position == 3) {
+	      //PHB_GAMES} else if (position == 3) {
 	        // Position '3' is for Games. Start that activity.
-		    parent_class_.parent_activity_.fadeAllViews(true);
-		    parent_class_.startGamesActivity();
-	      } else if (position == 4) {
+		  //PHB_GAMES  parent_class_.parent_activity_.fadeAllViews(true);
+		  //PHB_GAMES  parent_class_.startGamesActivity();
+	      } else if (position == 3) {
 	        // Position '4' is for Community. Start that activity.
 		    parent_class_.parent_activity_.fadeAllViews(true);
 		    parent_class_.startCommunityActivity();
-	      } else if (position == 5) {
+	      } else if (position == 4) {
 	    	// Position '5' is for Shopping Cart. Start that activity.
 	        parent_class_.startCheckoutActivity();
 	    	parent_class_.parent_activity_.fadeAllViews(true);
@@ -427,7 +426,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	      }
 	    }
 	  }
-
+	
 	@Override
 	public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
 	  ProcessDrawerClickResponse(webpage, cookies);
@@ -445,5 +444,30 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	  Log.e("PHB ERROR", "JactNavigationDrawer.ProcessUrlResponse: " +
                          "Failed to fetch URL. Status: " + status);
 	  parent_activity_.fadeAllViews(false);
+	  if (status == FetchStatus.ERROR_UNABLE_TO_CONNECT) {
+		parent_activity_.DisplayPopup("Unable to Reach Jact",
+				                      "Check internet connection, and try again.");
+	  }
+	}
+	  
+	@Override
+	public void IncrementNumRequestsCounter() {
+	}
+
+	@Override
+	public void DecrementNumRequestsCounter() {
+	}
+
+	@Override
+	public int GetNumRequestsCounter() {
+	  return 0;
+	}
+
+	@Override
+	public void DisplayPopup(String message) {
+	}
+	
+	@Override
+	public void DisplayPopup(String title, String message) {
 	}
 }

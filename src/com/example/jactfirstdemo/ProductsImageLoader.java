@@ -20,6 +20,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -29,6 +32,7 @@ public class ProductsImageLoader {
     private MemoryCache memory_cache_;
     private FileCache file_cache_;
     private final int stub_id_ = R.drawable.no_image;
+    private final int play_video_icon_id_ = R.drawable.play_button;
     private ExecutorService executor_service_;
     private AdapterWithImages parent_adapter_;
     private Map<ImageView, String> image_views_;
@@ -44,9 +48,11 @@ public class ProductsImageLoader {
         urls_being_fetched_  =
                 Collections.synchronizedMap(new HashMap<String, HashSet<Integer>>());
     }
+    public boolean DisplayImage(String url, ImageView image_view, int position) {
+      return DisplayImage(url, image_view, position, false);
+    }
     
-    public boolean DisplayImage(String url, ImageView image_view, int position)
-    {
+    public boolean DisplayImage(String url, ImageView image_view, int position, boolean display_play_icon) {
     	// Every time DisplayImage is called, the image_view that
     	// is passed in IS THE SAME, (even when DisplayImage is
     	// called for different List Elements; i.e. all the time).
@@ -63,7 +69,27 @@ public class ProductsImageLoader {
     	Bitmap bitmap = memory_cache_.get(url);
         if (bitmap != null) {
         	// Image already exists, display it from cache.
-            image_view.setImageBitmap(bitmap);
+            if (!display_play_icon) {
+        	  image_view.setImageBitmap(bitmap);
+            } else {
+              Drawable[] layers = new Drawable[2];
+              layers[0] = parent_adapter_.GetDrawable(bitmap);
+              layers[1] = parent_adapter_.GetDrawable(play_video_icon_id_);
+              /* TODO(PHB): Resizing overlaid play button icon (to be smaller) below didn't work
+                 (all values are 0 at this point).
+              Rect r = layers[1].getBounds();
+              Log.e("PHB TEMP", "ProductsImageLoader::DisplayImage. Old bounds: " +
+                    r.top + ", " + r.left + ", " + r.bottom + ", " + r.right +
+                    ". Image width: " + image_view.getWidth() + ", height: " + image_view.getHeight());
+              int top = image_view.getHeight() / 4;
+              int bottom = 3 * image_view.getHeight() / 4;
+              int left = image_view.getWidth() / 4;
+              int right = 3 * image_view.getWidth() / 4;
+              layers[1].setBounds(left, top, right, bottom);
+               */
+              LayerDrawable layerDrawable = new LayerDrawable(layers);
+              image_view.setImageDrawable(layerDrawable);
+            }
             return true;
         } else {
         	// Image does not exist in cache, fetch it; in the

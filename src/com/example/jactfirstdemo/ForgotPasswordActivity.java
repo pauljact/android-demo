@@ -1,31 +1,41 @@
 package com.example.jactfirstdemo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.widget.EditText;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemSelectedListener;
 
-public class ForgotPasswordActivity extends ActionBarActivity implements ProcessUrlResponseCallback {
-  private static final String forgot_password_url_ = "https://m.jact.com:3081/rest/user/request_new_password";
+public class ForgotPasswordActivity extends ActionBarActivity 
+                                    implements OnItemSelectedListener, ProcessUrlResponseCallback {
+  private static String forgot_password_url_;
   private JactDialogFragment dialog_;
+  private ArrayList<String> usernames_;
+  AutoCompleteTextView autocomplete_tv_;
   private boolean is_password_reset_;
   private static final String FORGOT_PASSWORD_TASK = "forgot_password_task";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    forgot_password_url_ = GetUrlTask.JACT_DOMAIN + "/rest/user/request_new_password";
 	setContentView(R.layout.forgot_password_layout);
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
     TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
@@ -37,16 +47,54 @@ public class ForgotPasswordActivity extends ActionBarActivity implements Process
   protected void onResume() {
 	super.onResume();
 	is_password_reset_ = false;
+	GetUsernames();
+    
+    // Get a reference to the AutoCompleteTextView in the layout.
+    autocomplete_tv_ = (AutoCompleteTextView) findViewById(R.id.username_autocomplete_tv);
+    ArrayAdapter<String> adapter = 
+            new ArrayAdapter<String>(this, R.layout.drop_down_layout, R.id.dropdown_textview, usernames_);
+    autocomplete_tv_.setAdapter(adapter);
+    autocomplete_tv_.setHint("Start typing to see old usernames");
+    // Hack to get drop down to show suggestions even on zero-length query.
+    autocomplete_tv_.setOnClickListener(new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+  	      ShowDropDown();
+		}
+	});
+    autocomplete_tv_.setText("");
+	fadeAllViews(false);
+  }
+  
+  private void ShowDropDown() {
+	if (!usernames_.isEmpty()) {
+	  autocomplete_tv_.showDropDown();
+	}
+  }
+  
+  private void GetUsernames() {
+	SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+	String usernames = user_info.getString(getString(R.string.ui_usernames), "");
+    if (usernames != null && !usernames.isEmpty()) {
+      usernames_ = new ArrayList<String>(Arrays.asList(usernames.split(JactLoginActivity.USERNAME_SEPERATOR)));
+    } else {
+      usernames_ = new ArrayList<String>();
+    }
   }
 
   public void doForgotPasswordClick(View view) {
-	EditText username_et = (EditText) findViewById(R.id.forgot_password_et);
-    String username = username_et.getText().toString().trim();
-    if (username.isEmpty()) {
+	String username = autocomplete_tv_.getText().toString();
+    if (username.isEmpty() || username.trim().length() == 0) {
       EmptyEditTextWarning();
       return;
     }
     SendRequest(username);
+  }
+  
+  public void doGoToJactClick(View view) {
+    Uri uri_url = Uri.parse(GetUrlTask.JACT_DOMAIN + "/user/password");
+    Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uri_url);
+    startActivity(launchBrowser);
   }
   
   private void SendRequest(String username) {
@@ -61,7 +109,6 @@ public class ForgotPasswordActivity extends ActionBarActivity implements Process
     form_info.add(GetUrlTask.CreateFormInfo("name", username));
   	params.post_string_ = GetUrlTask.CreatePostString(header_info, form_info);
   	fadeAllViews(true);
-  	Log.e("PHB TEMP", "ForgotPasswordActivity::SendRequest. post string: " + params.post_string_);
 	task.execute(params);
   }
   
@@ -71,14 +118,13 @@ public class ForgotPasswordActivity extends ActionBarActivity implements Process
   }
   
   private void UnrecognizedUsernameWarning() {
-	EditText username_et = (EditText) findViewById(R.id.forgot_password_et);
-    String username = username_et.getText().toString().trim();
-    if (username.isEmpty()) {
+    String username = autocomplete_tv_.getText().toString();
+    if (username.isEmpty() || username.trim().length() == 0) {
       EmptyEditTextWarning();
       return;
     }
-	dialog_ = new JactDialogFragment("Jact has no username/email '" + username + "'",
-			                         "Re-enter valid username or email, Or sign up as new  user.");
+	dialog_ = new JactDialogFragment("Username '" + username + "' Does Not Exist",
+			                         "Enter valid username, or sign up as a new user");
 	dialog_.show(getSupportFragmentManager(), "Bad_username");
   }
   
@@ -93,22 +139,20 @@ public class ForgotPasswordActivity extends ActionBarActivity implements Process
 
   @Override
   public void onBackPressed() {
-    Log.e("PHB TEMP", "ForgotPassword::onBackPressed");
     JactLoginActivity.SetRequireLogin(true);
     super.onBackPressed();
   }
   
   public void fadeAllViews(boolean should_fade) {
     ProgressBar spinner = (ProgressBar) findViewById(R.id.forgot_password_progress_bar);
-    EditText textbox = (EditText) findViewById(R.id.forgot_password_et);
     AlphaAnimation alpha;
     if (should_fade) {
       spinner.setVisibility(View.VISIBLE);
-      textbox.setEnabled(false);
+      autocomplete_tv_.setEnabled(false);
       alpha = new AlphaAnimation(0.5F, 0.5F);
     } else {
       spinner.setVisibility(View.INVISIBLE);
-      textbox.setEnabled(true);
+      autocomplete_tv_.setEnabled(true);
       alpha = new AlphaAnimation(1.0F, 1.0F);
     }
     // The AlphaAnimation will make the whole content frame transparent
@@ -146,5 +190,34 @@ public class ForgotPasswordActivity extends ActionBarActivity implements Process
                                        "Check internet connection, and try again.");
       dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
 	}
+  }
+  
+  @Override
+  public void IncrementNumRequestsCounter() {
+  }
+
+  @Override
+  public void DecrementNumRequestsCounter() {
+  }
+
+  @Override
+  public int GetNumRequestsCounter() {
+	return 0;
+  }
+
+  @Override
+  public void DisplayPopup(String message) {
+  }
+  
+  @Override
+  public void DisplayPopup(String title, String message) {
+  }
+
+  @Override
+  public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+  }
+
+  @Override
+  public void onNothingSelected(AdapterView<?> parent) {
   }
 }

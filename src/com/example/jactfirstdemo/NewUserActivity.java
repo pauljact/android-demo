@@ -1,5 +1,6 @@
 package com.example.jactfirstdemo;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
@@ -7,6 +8,8 @@ import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,22 +17,27 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class NewUserActivity extends ActionBarActivity
-                             implements OnItemClickListener, ProcessUrlResponseCallback {
-  private static final String new_user_url_ = "https://m.jact.com:3081/rest/user/register";
+                             implements OnItemSelectedListener, ProcessUrlResponseCallback {
+  private static String new_user_url_;
   private JactDialogFragment dialog_;
   private static ArrayList<AvatarItem> avatars_list_;
-  private ListView list_;
   private AvatarAdapter adapter_;
   private String avatar_id_;
   private static final String REGISTER_NEW_USER_TASK = "register_new_user_task";
+  private String image_uri_;
+  private boolean should_clear_form_on_resume_;
+  
+  ImageView user_img_;
+  Spinner jact_avatar_spinner_;
   
   public static class AvatarItem {
     public String id_;
@@ -37,42 +45,117 @@ public class NewUserActivity extends ActionBarActivity
     public Bitmap icon_;
   }
   
-  // TODO(PHB): Update this once I can fetch avatar images from phone; and/or
-  // when we have a rest view for avatar images.
-  private void SetAvatars() {
-	avatars_list_ = new ArrayList<AvatarItem>();
-	// TODO(PHB): Current populating of avatars_list_ is a hack/temporary. Populate it for real.
-	AvatarItem item_one = new AvatarItem();
-	item_one.id_ = "222";  // blue
-	item_one.img_url_ = "http://m.jact.com:3080/sites/default/files/avatar_selection/avatars-blue.jpg";
-	avatars_list_.add(item_one);
-	AvatarItem item_two = new AvatarItem();
-	item_two.id_ = "223";  // green
-	item_two.img_url_ = "http://m.jact.com:3080/sites/default/files/avatar_selection/avatars-green.jpg";
-	avatars_list_.add(item_two);
-	AvatarItem item_three = new AvatarItem();
-	item_three.id_ = "224";  // red
-	item_three.img_url_ = "http://m.jact.com:3080/sites/default/files/avatar_selection/avatars-red.jpg";
-	avatars_list_.add(item_three);
-	
-    list_ = (ListView) findViewById(R.id.avatar_list);
-
-    // Getting adapter by passing xml data ArrayList.
-    adapter_ = new AvatarAdapter(this, R.layout.avatar_item_layout, avatars_list_);
-    list_.setAdapter(adapter_);
-
-    // Click event on Avatar.
-    list_.setOnItemClickListener(this);
-  }
-  
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    new_user_url_ = GetUrlTask.JACT_DOMAIN + "/rest/user/register";
     setContentView(R.layout.new_user_layout);
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
     TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
     ab_title.setText(R.string.new_user_label);
     setSupportActionBar(toolbar);
+
+    should_clear_form_on_resume_ = true;
+    image_uri_ = "";
+    user_img_ = (ImageView) findViewById(R.id.new_user_temp_img);
+    jact_avatar_spinner_ = (Spinner) findViewById(R.id.new_user_default_icon_spinner);
+  }
+    
+  @Override
+  protected void onResume() {
+	super.onResume();
+	SetAvatars();
+	if (should_clear_form_on_resume_) {
+	  ClearForm();
+	}
+	should_clear_form_on_resume_ = true;
+	fadeAllViews(false);
+	avatar_id_ = "";
+  }
+
+  @Override
+  public void onBackPressed() {
+    Log.e("PHB TEMP", "ForgotPassword::onBackPressed");
+    JactLoginActivity.SetRequireLogin(true);
+    super.onBackPressed();
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+
+    if (resultCode == RESULT_OK) {
+      Uri img_uri = data.getData();
+      Bitmap bitmap;
+      try {
+        bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(img_uri));
+        if (bitmap.getHeight() < 2000 && bitmap.getWidth() < 2000) {
+          user_img_.setImageBitmap(bitmap);
+        } else {
+          user_img_.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 120, 120, false));        	
+        }
+        ToggleImageAndSelector(true);
+        image_uri_ = img_uri.toString();
+        /* TODO(PHB): Can uncomment below to convert bitmap to a jpeg/output stream that
+         * can be sent to jact server.
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        int quality = 50; // quality is an int from 0 (compress for small size) to 100 (max quality)
+		bitmap.compress(Bitmap.CompressFormat.JPEG, quality, os);
+		byte[] array = os.toByteArray();
+         */
+      } catch (FileNotFoundException e) {
+    	Log.e("NewUserActivity::onActivityResult", "FNF Bitmap exception: " + e.getMessage());
+      }
+    }
+  }
+  
+  private void ToggleImageAndSelector(boolean focus_image) {
+    AlphaAnimation alpha;
+    if (focus_image) {
+      avatar_id_ = "";
+      user_img_.setVisibility(View.VISIBLE);
+      alpha = new AlphaAnimation(0.5F, 0.5F);
+    } else {
+      image_uri_ = "";
+      user_img_.setVisibility(View.INVISIBLE);
+      alpha = new AlphaAnimation(1.0F, 1.0F);
+    }
+    // The AlphaAnimation will make the whole content frame transparent
+    // (so that none of the views show).
+    alpha.setDuration(0); // Make animation instant
+    alpha.setFillAfter(true); // Tell it to persist after the animation ends
+    jact_avatar_spinner_.startAnimation(alpha); // Add animation to the layout.
+  }
+  
+  // TODO(PHB): Update this once I can fetch avatar images from phone; and/or
+  // when we have a rest view for avatar images.
+  private void SetAvatars() {
+	avatars_list_ = new ArrayList<AvatarItem>();
+	// TODO(PHB): Current populating of avatars_list_ is a hack/temporary. Populate it for real.
+	AvatarItem item_zero = new AvatarItem();
+	item_zero.id_ = "foo";
+	avatars_list_.add(item_zero);
+	AvatarItem item_one = new AvatarItem();
+	item_one.id_ = "222";  // blue
+	item_one.img_url_ = GetUrlTask.JACT_DOMAIN + "/sites/default/files/avatar_selection/avatars-blue.jpg";
+	avatars_list_.add(item_one);
+	AvatarItem item_two = new AvatarItem();
+	item_two.id_ = "223";  // green
+	item_two.img_url_ = GetUrlTask.JACT_DOMAIN + "/sites/default/files/avatar_selection/avatars-green.jpg";
+	avatars_list_.add(item_two);
+	AvatarItem item_three = new AvatarItem();
+	item_three.id_ = "224";  // red
+	item_three.img_url_ = GetUrlTask.JACT_DOMAIN + "/sites/default/files/avatar_selection/avatars-red.jpg";
+	avatars_list_.add(item_three);
+	
+    //PHB_OLDlist_ = (ListView) findViewById(R.id.avatar_list);
+
+    // Getting adapter by passing xml data ArrayList.
+	adapter_ = new AvatarAdapter(this, R.layout.avatar_item_layout, avatars_list_);
+    jact_avatar_spinner_.setAdapter(adapter_);
+
+    // Click event on Avatar.
+    jact_avatar_spinner_.setOnItemSelectedListener(this);
   }
   
   private void ClearForm() {
@@ -86,28 +169,24 @@ public class NewUserActivity extends ActionBarActivity
     pass2_et.setText("");
     // TODO(PHB): Unselect avatar too, once Selection of Avatars has been implemented
   }
-    
-  @Override
-  protected void onResume() {
-	super.onResume();
-	SetAvatars();
-	ClearForm();
-	fadeAllViews(false);
-	avatar_id_ = "";
+  
+  public void doGetPhonePhotoClick(View view) {
+	// After coming back from selecting a photo, onResume() is called. We don't want to clear
+	// the form though.
+	should_clear_form_on_resume_ = false;
+    Intent intent = new Intent(Intent.ACTION_PICK,
+    		                   android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+    startActivityForResult(intent, 0);
   }
 
-  @Override
-  public void onBackPressed() {
-    Log.e("PHB TEMP", "ForgotPassword::onBackPressed");
-    JactLoginActivity.SetRequireLogin(true);
-    super.onBackPressed();
-  }
-  
   public void doRegisterClick(View view) {
 	EditText username_et = (EditText) findViewById(R.id.new_user_name_et);
     String username = username_et.getText().toString().trim();
     if (username.isEmpty()) {
       EmptyEditTextWarning("Must Enter a Username");
+      return;
+    } else if (username.contains(" ")) {
+      EmptyEditTextWarning("Invalid Username: Spaces not allowed");
       return;
     }
 	EditText email_et = (EditText) findViewById(R.id.new_user_email_et);
@@ -115,11 +194,17 @@ public class NewUserActivity extends ActionBarActivity
     if (email.isEmpty()) {
       EmptyEditTextWarning("Must Enter an Email Address");
       return;
+    } else if (email.contains(" ")) {
+      EmptyEditTextWarning("Invalid Email: Spaces not allowed");
+      return;
     }
 	EditText password_et = (EditText) findViewById(R.id.new_user_password_et);
     String password = password_et.getText().toString().trim();
     if (password.isEmpty()) {
       EmptyEditTextWarning("Must Enter a Password");
+      return;
+    } else if (password.contains(" ")) {
+      EmptyEditTextWarning("Invalid Password: Spaces not allowed");
       return;
     }
 	EditText pass2_et = (EditText) findViewById(R.id.new_user_password_confirm_et);
@@ -129,13 +214,14 @@ public class NewUserActivity extends ActionBarActivity
       return;
     }
     // TODO(PHB): Update this when we handle avatars for real.
-    if (avatar_id_.isEmpty()) {
-      EmptyEditTextWarning("You Must Select an Avatar");
+    String avatar_id = avatar_id_.isEmpty() ? image_uri_ : avatar_id_;
+    if (avatar_id.isEmpty()) {
+      EmptyEditTextWarning("You Must Select an Avatar or a Photo");
       return;
     }
     
-    // TODO(PHB): Add avatar selection.
-    SendRequest(username, email, password, pass2, avatar_id_);
+    // TODO(PHB): Add avatar selection.   
+    SendRequest(username, email, password, pass2, avatar_id);
   }
   
   private void SendRequest(String username, String email, String password, String pass2, String avatar_id) {
@@ -165,6 +251,11 @@ public class NewUserActivity extends ActionBarActivity
 	dialog_.show(getSupportFragmentManager(), warning);
   }
   
+  private void EmptyEditTextWarning(String title, String warning) {
+	dialog_ = new JactDialogFragment(title, warning);
+	dialog_.show(getSupportFragmentManager(), title);
+  }
+ 
   public void doDialogOkClick(View view) {
     // Close Dialog window.
     dialog_.dismiss();
@@ -206,14 +297,8 @@ public class NewUserActivity extends ActionBarActivity
     // (so that none of the views show).
     alpha.setDuration(0); // Make animation instant
     alpha.setFillAfter(true); // Tell it to persist after the animation ends
-    RelativeLayout layout = (RelativeLayout) findViewById(R.id.new_user_content_frame);
+    RelativeLayout layout = (RelativeLayout) findViewById(R.id.new_user_main_rl);
     layout.startAnimation(alpha); // Add animation to the layout.
-  }
-  
-  @Override
-  public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-	AvatarAdapter.AvatarViewHolder holder = (AvatarAdapter.AvatarViewHolder) view.getTag();
-	avatar_id_ = holder.id_.getText().toString().trim();
   }
   
   @Override
@@ -253,11 +338,48 @@ public class NewUserActivity extends ActionBarActivity
 	  } else if (status == FetchStatus.ERROR_UNKNOWN_406) {
 		Log.e("NewUserActivity::ProcessFailedResponse", "Unknown 406 error");
 	  } else {
-		EmptyEditTextWarning("Unknown Error");
+		EmptyEditTextWarning("Unknown Error", "Please Try Again");
 		Log.e("NewUserActivity::ProcessFailedResponse", "Unknown status: " + status);
 	  }
 	} else {
 	  Log.e("NewUserActivity::ProcessUrlResponse", "Unexpected task: " + extra_params);
 	}
+  }
+  
+  @Override
+  public void IncrementNumRequestsCounter() {
+  }
+
+  @Override
+  public void DecrementNumRequestsCounter() {
+  }
+
+  @Override
+  public int GetNumRequestsCounter() {
+	return 0;
+  }
+
+  @Override
+  public void DisplayPopup(String message) {
+  }
+  
+  @Override
+  public void DisplayPopup(String title, String message) {
+  }
+
+  @Override
+  public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+	if (position != 0) {
+	  ToggleImageAndSelector(false);
+	  AvatarAdapter.AvatarViewHolder holder = (AvatarAdapter.AvatarViewHolder) view.getTag();
+	  avatar_id_ = holder.id_.getText().toString().trim();
+	} else {
+	  avatar_id_ = "";	
+	}
+  }
+
+  @Override
+  public void onNothingSelected(AdapterView<?> parent) {
+		Log.e("PHB tEMP", "NewUserActivity::onNothingSelected.");
   }
 }

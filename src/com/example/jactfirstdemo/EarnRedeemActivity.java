@@ -27,7 +27,7 @@ public class EarnRedeemActivity extends JactActionBarActivity implements Process
     // Set layout.
     super.onCreate(savedInstanceState, R.string.earn_label,
 		       R.layout.earn_redeem_layout,
-		       JactNavigationDrawer.ActivityIndex.EARN);
+		       JactNavigationDrawer.ActivityIndex.EARN_REDEEMED);
     
     // Initialize url_ and title_ to dummy values if necessary (they should get re-written
     // to valid values before they are actually used).

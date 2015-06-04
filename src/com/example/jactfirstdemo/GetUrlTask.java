@@ -93,6 +93,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  ERROR_NEW_USER_DUPLICATE_EMAIL,
   }
   
+  static public final String JACT_DOMAIN = "https://m.jact.com:3081";
   static final String COOKIES_HEADER = "Set-Cookie";
   static private final String HEADER_NAME_VALUE_SEPERATOR = "_PHB_HEADER_NAME_VALUE_PHB_";
   static private final String FORM_NAME_VALUE_SEPERATOR = "_PHB_FORM_NAME_VALUE_PHB_";
@@ -100,6 +101,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
   static private final String FORM_SEPERATOR = "_PHB_FORM_PHB_";
   static private final String HEADER_FORM_SEPERATOR = "_PHB_HEADER_FORM_PHB_";
   static public final String COOKIES_SEPERATOR = "_PHB_COOKIE_PHB_";
+  static public final String READ_TIMED_OUT = "READ_TIME_OUT";
   private ProcessUrlResponseCallback callback_;
   private TargetType type_;
   private Bitmap picture_;
@@ -360,6 +362,13 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
       status_ = GetStatusForFailedResponse(response, is, input_stream, error_stream);
       return null;
     }
+    
+    // Handle special input_stream: Hack: ParseResultAsString returns READ_TIMED_OUT, since
+    // for some reason this gets a response code of 200...not sure why.
+    if (input_stream.equals(READ_TIMED_OUT)) {
+      status_ = FetchStatus.ERROR_UNABLE_TO_CONNECT;
+      return null;
+    }
   	  
     if (input_stream.isEmpty() && picture_ == null) {
       status_ = FetchStatus.ERROR_EMPTY_WEBPAGE;
@@ -557,7 +566,9 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
       return webPage;
     } catch (IOException e) {
       Log.e("PHB ERROR", "GetUrlTask::ParseResultAsString. Error reading returned webpage:\n" + e.getMessage());
-  	  // TODO(PHB): Handle exception
+  	  if (e.getMessage().indexOf("Read timed out") >= 0) {
+  		return READ_TIMED_OUT;
+  	  }
   	  return "";
     }
   }

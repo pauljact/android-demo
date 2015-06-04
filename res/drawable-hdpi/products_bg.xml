@@ -19,8 +19,8 @@
        thus you do maintain a consistent gradient experience
        across the whole list item. -->
   <gradient
-      android:startColor="#f1f1f2"
-      android:centerColor="#e7e7e8"
-      android:endColor="#cfcfcf"
+      android:startColor="#FFFFFF"
+      android:centerColor="#FFFFFF"
+      android:endColor="#FFFFFF"
       android:angle="270" />
 </shape>

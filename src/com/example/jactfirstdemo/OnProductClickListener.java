@@ -8,7 +8,7 @@ import com.example.jactfirstdemo.ProductsAdapter.ProductViewHolder;
 import com.example.jactfirstdemo.ShoppingUtils.Amount;
 
 import android.graphics.Bitmap;
-import android.net.ParseException;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -27,7 +27,7 @@ public class OnProductClickListener implements OnItemClickListener {
 	  public TextView summary_;
 	  public TextView date_;
 	  public TextView bux_;
-	  public TextView points_;
+	  //PHB_OLDpublic TextView points_;
 	  public TextView pid_;
 	  public ImageView img_;	  	
 	}
@@ -43,9 +43,10 @@ public class OnProductClickListener implements OnItemClickListener {
         view_holder_.drawing_ = (TextView) vi.findViewById(R.id.product_popup_text_drawing);
         view_holder_.title_ = (TextView) vi.findViewById(R.id.product_popup_text_title);
         view_holder_.summary_ = (TextView) vi.findViewById(R.id.product_popup_text_summary);
+        view_holder_.summary_.setMovementMethod(ScrollingMovementMethod.getInstance());
         view_holder_.date_ = (TextView) vi.findViewById(R.id.product_popup_text_date);
         view_holder_.bux_ = (TextView) vi.findViewById(R.id.product_popup_text_bux);
-        view_holder_.points_ = (TextView) vi.findViewById(R.id.product_popup_text_points);
+        //PHB_OLDview_holder_.points_ = (TextView) vi.findViewById(R.id.product_popup_text_points);
         view_holder_.pid_ = (TextView) vi.findViewById(R.id.product_popup_text_pid);
         view_holder_.img_ = (ImageView) vi.findViewById(R.id.product_popup_img);
         vi.setTag(view_holder_);
@@ -74,32 +75,41 @@ public class OnProductClickListener implements OnItemClickListener {
 	}
 	
 	private void SetPopupHeight(AdapterView<?> parent, View view) {
-		// No need to do anything if height alread had been set.
-		if (popup_height_ != 0) return;
+		// PHB_OLD (Want to set popup height after every click, since some products have
+		// bigger height (e.g. from long product description)
+		// PHB_OLD No need to do anything if height already had been set.
+		//PHB_OLDif (popup_height_ != 0) return;
 		int parent_height = parent.getHeight();
 		int list_item_height = view.getHeight();
-		if (parent_height >= 4 * list_item_height) {
+		if (parent_height >= 3 * list_item_height) {
 			popup_height_ = 3 * list_item_height;
 		} else if (parent_height >= 2 * list_item_height) {
 			popup_height_ = 2 * list_item_height;
+		} else if (parent_height >= list_item_height + (list_item_height / 2)) {
+			popup_height_ = list_item_height + (list_item_height / 2);
+		} else if (parent_height >= list_item_height + (list_item_height / 4)) {
+			popup_height_ = list_item_height + (list_item_height / 4);
 		} else {
 			// Screen is so small that having a popup can't display any extra useful
 			// information. Skip popup and go directly to purchase screen.
 			// Hopefully, this will never happen in practice.
-			popup_height_ = -1;
-			return;
+			// UPDATE: It breaks flow not to have a popup, so just have one that is the same
+			// height as the list item itself.
+			popup_height_ = list_item_height;
 		}
 		product_popup_.setHeight(popup_height_);
 	}
 	
 	private int GetYOffset(AdapterView<?> parent, View view) {
-		if (popup_height_ <= 0 || popup_height_ < 2 * view.getHeight()) {
+		if (popup_height_ <= 0 || popup_height_ < view.getHeight()) {
 			// TODO(PHB): This will happen if popup_height_ never got 
 			// updated from its default value of zero (which is an error),
 			// or if it was set to -1 due to not enough space on the screen,
 			// or if somehow SetPopupHeight failed to work right (also an error).
 			// In the middle case, need to implement going straight to
 			// "Product Purchase" page.
+			Log.e("PHB ERROR", "OnProductClickListener::GetYOffset. popup_height_: " +
+				  popup_height_ + ", view.getHeight(): " + view.getHeight());
 			return 1;
 		}
 		int y_offset = 1;
@@ -140,12 +150,12 @@ public class OnProductClickListener implements OnItemClickListener {
 		  popup_holder.date_.setVisibility(View.GONE);
 		}
         popup_holder.bux_.setText(orig_holder.bux_.getText());
-        if (orig_holder.points_.isShown()) {
-        	popup_holder.points_.setText("+ " + orig_holder.points_.getText());
-        	popup_holder.points_.setVisibility(View.VISIBLE);
-        } else {
-        	popup_holder.points_.setVisibility(View.INVISIBLE);
-        }
+        //PHB_OLDif (orig_holder.points_.isShown()) {
+        //PHB_OLD	popup_holder.points_.setText("+ " + orig_holder.points_.getText());
+        //PHB_OLD	popup_holder.points_.setVisibility(View.VISIBLE);
+        //PHB_OLD} else {
+        //PHB_OLD	popup_holder.points_.setVisibility(View.INVISIBLE);
+        //PHB_OLD}
         popup_holder.pid_.setText(orig_holder.pid_.getText());
         popup_holder.img_.setImageDrawable(orig_holder.img_.getDrawable());
 	}
@@ -247,6 +257,7 @@ public class OnProductClickListener implements OnItemClickListener {
 			return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 		  }
 		
+		  /* PHB_OLD
 		  // There can be a second price line, for products that have combined price in
 		  // Points and USD or Points and BUX. Check visibility of 2nd price line in Popup, and if present,
 		  // populate details.points_ with it (when present, 2nd line always represents Points).
@@ -276,7 +287,7 @@ public class OnProductClickListener implements OnItemClickListener {
 			                       price + " with points: " + points);
 				return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 			}
-		  } 
+		  }*/
 		} catch (NumberFormatException e) {
 			Log.e("PHB ERROR", "OnProductClickListener::GetProductDetails. NumberFormatException. " +
 		                       "Error Msg: " + err_msg + ", Item:\n" + ShoppingUtils.PrintLineItem(item));

@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 public class FaqActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   private static String url_;
-  private static final String faq_url_ = "https://m.jact.com:3081/faq-page";
+  private static String faq_url_;
   private static String title_;
   
   public static synchronized void SetUrlAndTitle(String url, String title) {
@@ -30,6 +30,7 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
     super.onCreate(savedInstanceState, R.string.faq_label,
 		       R.layout.faq_layout,
 		       JactNavigationDrawer.ActivityIndex.FAQ);
+    faq_url_ = GetUrlTask.JACT_DOMAIN + "/faq-page";
     
     // Initialize url_ and title_ to dummy values if necessary (they should get re-written
     // to valid values before they are actually used).

@@ -30,6 +30,7 @@ public class ReviewCartActivity extends JactActionBarActivity implements Process
     
   @Override
   protected void onResume() {
+	super.onResume();
 	ShoppingCartActivity.JactAddress shipping_address = ShoppingCartActivity.GetShippingAddress();
 	if (shipping_address != null) {
 	  String name = "";
@@ -161,7 +162,6 @@ public class ReviewCartActivity extends JactActionBarActivity implements Process
 	}
     SetCartIcon(this);
     fadeAllViews(num_server_tasks_ > 0);
-	super.onResume();
   }
 
   @Override

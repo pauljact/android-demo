@@ -1,21 +1,20 @@
 package com.example.jactfirstdemo;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Locale;
  
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
  
 public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implements AdapterWithImages {
@@ -126,10 +125,20 @@ public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implement
         
         // Set Image.
         if (earn_item.img_url_ != null &&
-            !image_loader_.DisplayImage(earn_item.img_url_, holder.img_, position)) {
+            !image_loader_.DisplayImage(earn_item.img_url_, holder.img_, position, true)) {
           unfinished_list_elements_[position] = true;
         }
         
         return vi;
     }
+
+	@Override
+	public Drawable GetDrawable(int resource_id) {
+	  return parent_activity_.getResources().getDrawable(resource_id);
+	}
+
+	@Override
+	public Drawable GetDrawable(Bitmap bitmap) {
+      return new BitmapDrawable(parent_activity_.getResources(), bitmap);
+	}
 }

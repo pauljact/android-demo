@@ -10,6 +10,9 @@ import com.example.jactfirstdemo.ShoppingCartActivity.CartAccessResponse;
 import com.example.jactfirstdemo.ShoppingUtils.Amount;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -205,6 +208,10 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
         
         return vi;
     }
+	
+	private void SetQuantity(Spinner spinner, int position) {
+	  spinner.setSelection(position);
+	}
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -258,6 +265,7 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 			} else {
 			  Log.e("PHB ERROR", "CheckoutAdapter::onItemSelected. Unrecognized ItemToAddStatus: " + item_status);
 			}
+			SetQuantity((Spinner) parent, item.quantity_);
 			return;
 		  }
 		  
@@ -311,5 +319,15 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Drawable GetDrawable(int resource_id) {
+      return parent_activity_.getResources().getDrawable(resource_id);
+	}
+
+	@Override
+	public Drawable GetDrawable(Bitmap bitmap) {
+	  return new BitmapDrawable(parent_activity_.getResources(), bitmap);
 	}
 }

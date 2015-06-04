@@ -1,2 +1,7 @@
 /bin
+/bin/*
 /gen
+bin/AndroidManifest.xml
+bin/classes.dex
+bin/AndroidManifest.xml
+bin/resources.ap_

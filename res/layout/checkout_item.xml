@@ -112,7 +112,7 @@
   			android:id="@+id/cart_quantity_spinner"
    	    	android:layout_width="wrap_content"
   	    	android:layout_height="wrap_content"
-  			android:dropDownWidth="wrap_content"
+  			android:dropDownWidth="45dp"
   	    	android:popupBackground="@color/white"
     		android:gravity="right"
             android:paddingLeft="2dp"

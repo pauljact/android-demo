@@ -5,8 +5,12 @@
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:minHeight="?attr/actionBarSize"
-    android:background="?attr/colorPrimary"
-    app:theme="@style/JactMainTheme">
+    app:theme="@style/JactMainTheme"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Dark">
+    <!-- android:background="?attr/colorPrimary"
+         android:background="@color/background_material_dark"
+         app:theme="@style/JactCustomActionBarTheme"
+         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" -->
 
    <!-- Below will add your text in the center of toolbar -->
    <TextView

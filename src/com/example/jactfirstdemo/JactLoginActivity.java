@@ -1,12 +1,16 @@
 package com.example.jactfirstdemo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -24,17 +28,21 @@ import com.example.jactfirstdemo.JactLoggedInHomeActivity;
 import com.example.jactfirstdemo.R;
 
 public class JactLoginActivity extends FragmentActivity implements ProcessUrlResponseCallback {
-  private static final String login_url_ = "https://m.jact.com:3081/rest/user/login";
+  public static final String USERNAME_SEPERATOR = "PHB_NAME_SEP_PHB";
+  private static String login_url_;
   private String username_;
   private String password_;
   private static boolean require_login_;
   private boolean logging_in_;
   private boolean requires_user_input_;
   private JactDialogFragment dialog_;
+  private ArrayList<String> usernames_;
+  AutoCompleteTextView autocomplete_tv_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    login_url_ = GetUrlTask.JACT_DOMAIN + "/rest/user/login";
     require_login_ = false;
   }
   
@@ -49,7 +57,7 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
 	// Check to see if 'logged_off' was passed in; if so, log-off (delete
 	// login credentials from SharedPreferences).
     SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
-    String is_logged_off = getIntent().getStringExtra(getString(R.string.logged_off_key));
+    String is_logged_off = getIntent().getStringExtra(getString(R.string.was_logged_off_key));
     if (is_logged_off != null && is_logged_off.equalsIgnoreCase("true")) {
       SharedPreferences.Editor editor = user_info.edit();
       editor.remove(getString(R.string.ui_username));
@@ -69,6 +77,29 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       // Reset require login.
       require_login_ = false;
       setContentView(R.layout.jact_welcome_screen);
+      
+  	  // Size Jact Motto so text stretches to fill the Icon and Title.
+      // Can't set it here, because views haven't been inflated yet.
+      // Instead, assign a listener that will detect when sizes have been
+      // set, and reassign widths there.
+  	  JactLinearLayout title_ll = (JactLinearLayout) findViewById(R.id.login_icon_and_name);
+  	  JactTextView motto_tv = (JactTextView) findViewById(R.id.jact_motto_tv);
+  	  motto_tv.SetLinearLayoutToMatch(title_ll);
+  	  title_ll.SetTextViewToMatch(motto_tv);
+  	  
+  	  // Set Autocomplete array to have a list of all previously used user names
+  	  GetUsernames();
+      autocomplete_tv_ = (AutoCompleteTextView) findViewById(R.id.username_autocomplete_tv);
+      ArrayAdapter<String> adapter = 
+              new ArrayAdapter<String>(this, R.layout.drop_down_layout, R.id.dropdown_textview, usernames_);
+      autocomplete_tv_.setAdapter(adapter);
+      // Hack to get drop down to show suggestions even on zero-length query.
+      autocomplete_tv_.setOnClickListener(new View.OnClickListener() {
+  		@Override
+  		public void onClick(View v) {
+    	      ShowDropDown();
+  		}
+  	  });
     } else {
       requires_user_input_ = false;
       setContentView(R.layout.jact_empty_welcome_screen);
@@ -76,6 +107,22 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     }
   }
   
+  private void ShowDropDown() {
+	if (!usernames_.isEmpty()) {
+	  autocomplete_tv_.showDropDown();
+	}
+  }
+  
+  private void GetUsernames() {
+	SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+	String usernames = user_info.getString(getString(R.string.ui_usernames), "");
+    if (usernames != null && !usernames.isEmpty()) {
+      usernames_ = new ArrayList<String>(Arrays.asList(usernames.split(JactLoginActivity.USERNAME_SEPERATOR)));
+    } else {
+      usernames_ = new ArrayList<String>();
+    }
+  }
+
   public static void SetRequireLogin(boolean value) {
 	require_login_ = value;
   }
@@ -90,19 +137,23 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     if (!requires_user_input_) {
       requires_user_input_ = true;
       setContentView(R.layout.jact_welcome_screen);
-      EditText username_box = (EditText) findViewById(R.id.username_edittext);
-      username_box.setText(username_);
+      if (autocomplete_tv_ == null) {
+    	autocomplete_tv_ = (AutoCompleteTextView) findViewById(R.id.username_autocomplete_tv);
+      }
+  	  autocomplete_tv_.setText(username_);
       EditText password_box = (EditText) findViewById(R.id.jact_password);
       password_box.setText(password_);
     }
     Button login_button = (Button) findViewById(R.id.jact_login_button);
     login_button.setEnabled(!logging_in_);
-    Button register_button = (Button) findViewById(R.id.jact_register_button);
-    register_button.setEnabled(!logging_in_);
-    TextView forgot_password = (TextView) findViewById(R.id.forgot_password_textview);
-    forgot_password.setEnabled(!logging_in_);
-    EditText username_box = (EditText) findViewById(R.id.username_edittext);
-    username_box.setEnabled(!logging_in_);
+    TextView register_tv = (TextView) findViewById(R.id.jact_register_tv);
+    register_tv.setEnabled(!logging_in_);
+    TextView forgot_tv = (TextView) findViewById(R.id.forgot_password_textview);
+    forgot_tv.setEnabled(!logging_in_);
+    if (autocomplete_tv_ == null) {
+      autocomplete_tv_ = (AutoCompleteTextView) findViewById(R.id.username_autocomplete_tv);
+    }
+    autocomplete_tv_.setEnabled(!logging_in_);
     EditText password_box = (EditText) findViewById(R.id.jact_password);
     password_box.setEnabled(!logging_in_);
     ProgressBar spinner = (ProgressBar) findViewById(R.id.login_progress_bar);
@@ -150,9 +201,9 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   }
   
   public void doLoginButtonClick(View view) {
-	EditText username = (EditText) findViewById(R.id.username_edittext);
+	String username = autocomplete_tv_.getText().toString();
     EditText password = (EditText) findViewById(R.id.jact_password);
-    Login(username.getText().toString().trim(), password.getText().toString().trim());
+    Login(username, password.getText().toString());
   }
   
   public void doLoginScreenClick(View view) {
@@ -162,7 +213,8 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   private void StoreUserInfo(SharedPreferences.Editor editor, String user_info) {
     try {
       JSONObject response_json = new JSONObject(user_info);
-      editor.putString(getString(R.string.logged_off_key), "true");
+      editor.putString(getString(R.string.was_logged_off_key), "true");
+      editor.putBoolean(getString(R.string.ui_is_logged_in), true);
       editor.putString(getString(R.string.ui_session_name), response_json.getString("session_name"));
       editor.putString(getString(R.string.ui_session_id), response_json.getString("sessid"));
       editor.putString(getString(R.string.ui_token), response_json.getString("token"));
@@ -207,8 +259,8 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       // Fetch username/password from the EditText fields, if they were not
       // already retrieved from Preferences file.
       if (username_ == null || username_.isEmpty()) {
-    	EditText username_from_edit = (EditText) findViewById(R.id.username_edittext);
-        username_ = username_from_edit.getText().toString().trim();
+    	String username = autocomplete_tv_.getText().toString();
+        username_ = username;
       }
       if (password_ == null || password_.isEmpty()) {
         EditText password_from_edit = (EditText) findViewById(R.id.jact_password);
@@ -219,6 +271,25 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       editor.putString(getString(R.string.ui_username), username_);
       editor.putString(getString(R.string.ui_password), password_);
       editor.putString(getString(R.string.ui_session_cookies), cookies);
+      // Add username_ to the set of all usernames ever used.
+      String usernames = user_info.getString(getString(R.string.ui_usernames), "");
+      if (usernames == null || usernames.isEmpty()) {
+    	usernames = username_;
+      } else {
+        ArrayList<String> names = new ArrayList<String>(Arrays.asList(usernames.split(USERNAME_SEPERATOR)));
+        boolean has_username = false;
+        for (String name : names) {
+          if (name.equals(username_)) {
+        	has_username = true;
+        	break;
+          }
+        }
+        if (!has_username) {
+          names.add(username_);
+        }
+        usernames = TextUtils.join(USERNAME_SEPERATOR, names);
+      }
+      editor.putString(getString(R.string.ui_usernames), usernames);
       // Process response for user info, and store to file.
       StoreUserInfo(editor, webpage);
       editor.commit();
@@ -274,5 +345,26 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       ft.add(dialog_, null);
       ft.commitAllowingStateLoss();*/
     }
+  }
+  
+  @Override
+  public void IncrementNumRequestsCounter() {
+  }
+
+  @Override
+  public void DecrementNumRequestsCounter() {
+  }
+
+  @Override
+  public int GetNumRequestsCounter() {
+	return 0;
+  }
+
+  @Override
+  public void DisplayPopup(String message) {
+  }
+  
+  @Override
+  public void DisplayPopup(String title, String message) {
   }
 }

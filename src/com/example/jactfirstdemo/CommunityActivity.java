@@ -13,7 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 public class CommunityActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private static final String community_url_ = "https://m.jact.com:3081/community";
+  private static String community_url_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +21,7 @@ public class CommunityActivity extends JactActionBarActivity implements ProcessU
     super.onCreate(savedInstanceState, R.string.community_label,
 		       R.layout.community_layout,
 		       JactNavigationDrawer.ActivityIndex.COMMUNITY);
+    community_url_ = GetUrlTask.JACT_DOMAIN + "/community";
   }
     
   @Override
