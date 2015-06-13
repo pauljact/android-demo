@@ -18,7 +18,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class ReviewCartActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
-  private JactDialogFragment dialog_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -183,11 +182,6 @@ public class ReviewCartActivity extends JactActionBarActivity implements Process
     layout.startAnimation(alpha); // Add animation to the layout.
   }
   
-  public void doDialogOkClick(View view) {
-	// Close Dialog window.
-	dialog_.dismiss();
-  }
-  
   public void doReviewOrderPrevButtonClick(View view) {
 	  fadeAllViews(true);
 	  startActivity(new Intent(this, BillingActivity.class));
@@ -195,8 +189,7 @@ public class ReviewCartActivity extends JactActionBarActivity implements Process
   
   public void doReviewOrderPlaceOrderButtonClick(View view) {
 	  // TODO(PHB): Implement this.
-	  dialog_ = new JactDialogFragment("Place Order Not Yet Implemented");
-	  dialog_.show(getSupportFragmentManager(), "place_order_not_implemented");
+	  DisplayPopupFragment("Place Order Not Yet Implemented", "place_order_not_implemented");
   }
   
   @Override

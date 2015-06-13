@@ -204,7 +204,7 @@ public class ShoppingUtils {
       // TODO(PHB): Handle this.
 	  // Do not execute another CSRF request if the previous ones have failed (avoids
 	  // infinite loop to server for CSRF requests.
-	  Log.e("PHB ERROR", "ShoppingUtils::GetCsrfToken. Abandoning request: too many failed attempts: " +
+	  Log.e("ShoppingUtils::GetCsrfToken", "Abandoning request: too many failed attempts: " +
 			             ShoppingCartActivity.GetNumCsrfRequests());
 	  return false;
 	}
@@ -247,7 +247,7 @@ public class ShoppingUtils {
     		(first.entity_id_ == second.entity_id_) && (first.is_drawing_ == second.is_drawing_) &&
     		first.type_.equals(second.type_) && first.label_.equals(second.label_) &&
     		first.title_.equals(second.title_));
-	Log.w("PHB TEMP", "ShoppingUtils::LineItemsAreEquivalent: " + to_return + "; first:\n" +
+	Log.w("ShoppingUtils::LineItemsAreEquivalent", "Returning: " + to_return + "; first:\n" +
 	          PrintLineItemHumanReadable(first) + ";\nSecond: " +
 	          PrintLineItemHumanReadable(second));
     return to_return;
@@ -283,7 +283,6 @@ public class ShoppingUtils {
     //PHBheader_info.add(GetUrlTask.CreateHeaderInfo("Content-Type", "application/json"));
     header_info.add(GetUrlTask.CreateHeaderInfo("X-CSRF-Token", csrf_token));
   	params.post_string_ = GetUrlTask.CreatePostString(header_info, null);
-  	Log.e("PHB TEMP", "ShoppingUtils::CreateCart. post string: " + params.post_string_);
 	task.execute(params);
 	return true;
   }
@@ -308,7 +307,7 @@ public class ShoppingUtils {
   	if (line_item <= 0) {
 	  // For new line-items, we must specify order_id, pid, type, and node_id. Make sure these are all set.
 	  if (order_id < 0 || pid < 0 || node_id < 0 || type == null || type.isEmpty()) {
-	    Log.e("PHB ERROR", "ShoppingUtils::UpdateServerCart. New line item must specify order_id (" + order_id +
+	    Log.e("ShoppingUtils::UpdateServerCart", "New line item must specify order_id (" + order_id +
 	    		           "), pid (" + pid + "), type (" + type + "), and node_id (" + node_id + ").");
 	    return false;
 	  }
@@ -466,7 +465,7 @@ public class ShoppingUtils {
         } else if (status.equals("PHB foo")) {
           cart.status_ = CheckoutStatus.COMPLETE;
         } else {
-          Log.e("PHB ERROR", "ShoppingUtils::ParseCart. Unrecognized status: " + status);
+          Log.e("ShoppingUtils::ParseCart", "Unrecognized status: " + status);
           //return PrintErrorAndAbort("Unable to parse status: " + status);
         }
 	  } else if (key.equals(LINE_ITEMS_BLOCK)) {
@@ -519,14 +518,18 @@ public class ShoppingUtils {
   }
   
   public static boolean ParseCartFromGetCartPage(String webpage, ShoppingCartInfo cart) {
-    Log.d("PHB TEMP", "ShoppingUtils::ParseCartFromGetCartPage. Webpage: " + webpage);
-    if (webpage.trim().isEmpty() || webpage.trim().equalsIgnoreCase("[]")) return true;
+    if (webpage.trim().isEmpty() || webpage.trim().equalsIgnoreCase("[]")) {
+      cart.line_items_ = new ArrayList<LineItem>();
+      cart.order_id_ = 0;
+      cart.status_ = CheckoutStatus.EMPTY;
+      return true;
+    }
     try {
       // Make sure webpage can be parsed as a list of cart items.
       JSONArray cart_items = new JSONArray(webpage);
       if (cart_items == null || cart_items.length() != 1) {
         String message = cart_items == null ? "Null cart_items" : Integer.toString(cart_items.length());
-        Log.w("PHB Warning", "ShoppingUtils::ParseCartPage. Unexpected number of cart items. " +
+        Log.w("ShoppingUtils::ParseCartPage", "Unexpected number of cart items. " +
                              "Webpage|" + webpage + "| length: " + webpage.length());
         return PrintErrorAndAbort("Unexpected number of cart items: " + message);
       }
@@ -658,8 +661,8 @@ public class ShoppingUtils {
 		    try {
 		      new_item.entity_id_ = Integer.parseInt(entity_id.substring(5));
 		    } catch (NumberFormatException e) {
-		      Log.e("PHB ERROR", "ShoppingUtils::GetBillingInfo. Skipping line item: " +
-			                     "Unable to parse line item with entity id: " + entity_id);
+		      Log.e("ShoppingUtils::GetBillingInfo",
+		    		"Skipping line item: Unable to parse line item with entity id: " + entity_id);
 		      continue;
 		    }
 		  }
@@ -675,7 +678,7 @@ public class ShoppingUtils {
   	      }
   	      return true;
   	    } catch (JSONException js_ex) {
-  	      Log.e("PHB ERROR", "ShoppingUtils::ParseAddLineItemPage. Failed to dig a level deeper. Error: " +
+  	      Log.e("ShoppingUtils::ParseAddLineItemPage", "Failed to dig a level deeper. Error: " +
   	                         js_ex.getMessage());
   	      return false;
   	    }
@@ -683,7 +686,7 @@ public class ShoppingUtils {
       line_items.add(new_item);
   	  return true;
     } catch (JSONException e) {
-	  Log.e("PHB ERROR", "ShoppingUtils::ParseAddLineItemPage. JSON Error: " + e.getMessage());
+	  Log.e("ShoppingUtils::ParseAddLineItemPage", "JSON Error: " + e.getMessage());
 	  return false;
     }
   }
@@ -695,7 +698,7 @@ public class ShoppingUtils {
       String line_items_block = cart_item.getString(LINE_ITEMS_BLOCK);
       error_msg = "first";
       if (line_items_block == null) {
-    	Log.e("PHB ERROR", "ShoppingUtils::GetLineItems. Unexpected null line_items block. cart_item: " + cart_item.toString());
+    	Log.e("ShoppingUtils::GetLineItems", "Unexpected null line_items block. cart_item: " + cart_item.toString());
     	return false;
       }
       JSONArray line_items = new JSONArray(line_items_block);
@@ -710,7 +713,7 @@ public class ShoppingUtils {
       for (int i = 0; i < line_items.length(); i++) {
         JSONObject item = line_items.getJSONObject(i);
         if (!ParseLineItemFromAddLineItemPage(item, cart.line_items_)) {
-          Log.e("PHB ERROR", "ShoppingUtils::GetLineItems. Error caused by line item: " + i);
+          Log.e("ShoppingUtils::GetLineItems", "Error caused by line item: " + i);
           return false;
         }
       }
@@ -720,7 +723,7 @@ public class ShoppingUtils {
         JSONObject l_item = new JSONObject(cart_item.getString(LINE_ITEMS_BLOCK));
         cart.line_items_ = new ArrayList<LineItem>(1);
         if (!ParseLineItemFromAddLineItemPage(l_item, cart.line_items_)) {
-            Log.e("PHB ERROR", "ShoppingUtils::GetLineItems. Error caused by line item: " + l_item.toString());
+            Log.e("ShoppingUtils::GetLineItems", "Error caused by line item: " + l_item.toString());
             return false;
         }
         return true;
@@ -773,7 +776,7 @@ public class ShoppingUtils {
 	      error_msg = key;
           if (key.equals(STATUS) && !addr_item.getString(key).equals("1")) {
             // Make sure status indicates this is a valid address.
-            Log.e("PHB ERROR", "ShoppingUtils::GetAdressInfo. Skipping shipping item " +
+            Log.e("ShoppingUtils::GetAdressInfo", "Skipping shipping item " +
                                "with status: " + addr_item.getString(STATUS));
             return false;
           } else if (key.equals(PROFILE_ID)) {
@@ -860,7 +863,7 @@ public class ShoppingUtils {
       } else if (a.type_ == CurrencyCode.USD) {
         type = "USD";
       } else {
-        Log.e("PHB ERROR", "ShoppingUtils::ParseCost. Unrecognized CurrencyCode: " + a.type_);
+        Log.e("ShoppingUtils::ParseCost", "Unrecognized CurrencyCode: " + a.type_);
         return "";
       }
       to_return += " (" + type + ", " + Double.toString(a.price_) + ")";
@@ -881,7 +884,7 @@ public class ShoppingUtils {
       } else if (a.type_ == CurrencyCode.USD) {
         type = "USD";
       } else {
-        Log.e("PHB ERROR", "ShoppingUtils::ParseCost. Unrecognized CurrencyCode: " + a.type_);
+        Log.e("ShoppingUtils::ParseCost", "Unrecognized CurrencyCode: " + a.type_);
         return "";
       }
       to_return += "price" + COST_VALUE_SEPARATOR + Double.toString(a.price_) +
@@ -899,7 +902,7 @@ public class ShoppingUtils {
       for (String field : fields) {
         ArrayList<String> name_value = new ArrayList<String>(Arrays.asList(field.split(COST_VALUE_SEPARATOR)));
         if (name_value.size() != 2) {
-          Log.e("PHB ERROR", "ShoppingUtils::ParseCost. Unexpected format for header. " +
+          Log.e("ShoppingUtils::ParseCost", "Unexpected format for header. " +
                              "size=" + name_value.size() + ", field: " + field);
           return null;
         }
@@ -915,16 +918,16 @@ public class ShoppingUtils {
             } else if (value.equals("USD")) {
               amount.type_ = CurrencyCode.USD;
             } else {
-              Log.e("PHB ERROR", "ShoppingUtils::ParseLineItem. Unrecognized currency type: " + value);
+              Log.e("ShoppingUtils::ParseLineItem", "Unrecognized currency type: " + value);
       	      return null;
             }
           } else {
-  	        Log.e("PHB ERROR", "ShoppingUtils::ParseLineItem. Unidentifiable cost field|" +
+  	        Log.e("ShoppingUtils::ParseLineItem", "Unidentifiable cost field|" +
                                name_value.get(0) + "|value|" + value + "|");
   	        return null;
           }
         } catch (NumberFormatException e) {
-  	      Log.e("PHB ERROR", "ShoppingUtils::ParseLineItem. Unable to parse one of the cost fields as a double: " +
+  	      Log.e("ShoppingUtils::ParseLineItem", "Unable to parse one of the cost fields as a double: " +
                              field);
   	      return null;
         }
@@ -977,7 +980,7 @@ public class ShoppingUtils {
     for (String field : fields) {
       ArrayList<String> name_value = new ArrayList<String>(Arrays.asList(field.split(LINE_ITEM_VALUE_SEPARATOR)));
       if (name_value.size() != 2) {
-        Log.e("PHB ERROR", "ShoppingUtils::ParseLineItem. Unexpected format for header. " +
+        Log.e("ShoppingUtils::ParseLineItem", "Unexpected format for header. " +
                            "size=" + name_value.size() + ", field: " + field);
         return null;
       }
@@ -1005,16 +1008,16 @@ public class ShoppingUtils {
           to_return.cost_ = ParseCost(value);
           // PHB TEMP.
           if (to_return.cost_ == null) { 
-        	  Log.e("PHB ERROR", "ShoppingUtils::ParseLineItem. ParseCost fn is returning null cost.");
+        	Log.e("ShoppingUtils::ParseLineItem", "ParseCost fn is returning null cost.");
           }
         } else {
-    	  Log.e("PHB ERROR", "ShoppingUtils::ParseLineItem. Unidentifiable line item field|" +
+    	  Log.e("ShoppingUtils::ParseLineItem", "Unidentifiable line item field|" +
                              name_value.get(0) + "|value|" + value + "|");
     	  return null;
         }
       } catch (NumberFormatException e) {
-    	  Log.e("PHB ERROR", "ShoppingUtils::ParseLineItem. Unable to parse one of the line item fields as an int: " +
-                             field);
+    	  Log.e("ShoppingUtils::ParseLineItem",
+    			"Unable to parse one of the line item fields as an int: " + field);
     	  return null;
       }
     }
@@ -1038,7 +1041,7 @@ public class ShoppingUtils {
   }
   
   private static boolean PrintErrorAndAbort(String message) {
-	Log.e("PHB ERROR", "ShoppingUtils::ParseCartPage. " + message); 
+	Log.e("ShoppingUtils::ParseCartPage", message); 
 	return false;  
   }
 }

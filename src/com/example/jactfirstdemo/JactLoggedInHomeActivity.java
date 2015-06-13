@@ -131,15 +131,12 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements P
   }
   
   private void GetAvatar() {
-	Log.e("PHB TEMP", "JLIHA::GetAvatar");
     if (jact_profile_pic_url_.isEmpty() ||
     	jact_profile_pic_url_.equalsIgnoreCase(getString(R.string.null_str))) {
-      Log.e("PHB TEMP", "JLIHA::GetAvatar. empty pic url");
       Log.i("PHB", "JLIHA::GetAvatar. Empty pic, displaying default");
       ImageView image = (ImageView) this.findViewById(R.id.user_profile_pic);
       image.setImageResource(R.drawable.ic_launcher_transparent);
     } else {
-      Log.e("PHB TEMP", "JLIHA::GetAvatar. pic url: " + jact_profile_pic_url_);
       num_server_tasks_++;
       ImageView image = (ImageView) this.findViewById(R.id.user_profile_pic);
       image.setImageResource(R.drawable.no_image);

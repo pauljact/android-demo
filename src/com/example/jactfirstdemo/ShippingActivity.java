@@ -25,7 +25,6 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
   private ListView list_;
   private ArrayList<ShoppingCartActivity.JactAddress> addresses_;
   private AddressAdapter adapter_;
-  private JactDialogFragment dialog_;
   private int num_checked_addresses_;
   private int selected_address_position_;
 
@@ -69,12 +68,7 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
     RelativeLayout layout = (RelativeLayout) findViewById(R.id.shipping_content_frame);
     layout.startAnimation(alpha); // Add animation to the layout.
   }
-  
-  public void doDialogOkClick(View view) {
-	// Close Dialog window.
-	dialog_.dismiss();
-  }
-  
+    
   public void doShippingAddNewAddressButtonClick(View view) {
     fadeAllViews(true);
 	startActivity(new Intent(this, ShippingNewActivity.class));
@@ -96,11 +90,13 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
 	    startActivity(new Intent(this, BillingNewActivity.class));
 	  }
     } else if (num_checked_addresses_ == 0 ){
-	  dialog_ = new JactDialogFragment("Missing Shipping Address", "Select an Address From the List, or Add a New One");
-	  dialog_.show(getSupportFragmentManager(), "no_shipping_addr_selected");
+      DisplayPopupFragment("Missing Shipping Address",
+    		               "Select an Address From the List, or Add a New One",
+    		               "no_shipping_addr_selected");
     } else if (num_checked_addresses_ > 1) {
-  	  dialog_ = new JactDialogFragment("Too Many Shipping Addresses", "Select At Most One From the List, or Add a New One");
-  	  dialog_.show(getSupportFragmentManager(), "too_many_shipping_addr_selected");
+      DisplayPopupFragment("Too Many Shipping Addresses",
+    		               "Select At Most One From the List, or Add a New One",
+    		               "too_many_shipping_addr_selected");
     } else {
       Log.e("PHB ERROR", "ShippingActivity::doShippingNextButtonClick. Unexpected value for num_checked_addresses_: " +
                          num_checked_addresses_ + ", selected_address_position_: " + selected_address_position_);
@@ -126,8 +122,7 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
   
   public void doAddressItemDeleteAddressClick(View view) {
     // TODO(PHB): Implement this.
-	dialog_ = new JactDialogFragment("Remove Address Not Implemented Yet");
-	dialog_.show(getSupportFragmentManager(), "remove_addr_not_yet_implemented");
+	DisplayPopupFragment("Remove Address Not Implemented Yet", "remove_addr_not_yet_implemented");
   }
   
   public static void WriteAddresses(ArrayList<ShoppingCartActivity.JactAddress> addresses) {

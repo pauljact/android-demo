@@ -66,7 +66,6 @@ public class ProductsActivity extends JactActionBarActivity
     private int num_failed_requests_;
 	private static final int MAX_FAILED_REQUESTS = 5;
     
-    private JactDialogFragment dialog_;
     private enum SortState {
 		  NONE,
 		  ASC,
@@ -563,15 +562,15 @@ public class ProductsActivity extends JactActionBarActivity
           // Update line-item in server's cart.
      	  if (!ShoppingUtils.UpdateLineItem(this, cookies, csrf_token, line_item)) {
      		// Nothing to do.
-     		//PHB_OLDdialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
-     		//PHB_OLDdialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
+     		//PHB_OLDDisplayPopupFragment("Unable to update cart on server. Check connection and try again.",
+     		//PHB_OLD                     "Unable_to_update_cart");
      	  }
         } else {
           // Create new cart, and add line-item to it.
      	  if (!ShoppingUtils.CreateServerCart(this, cookies, csrf_token, line_item)) {
      		// Nothing to do.
-     		//PHB_OLDdialog_ = new JactDialogFragment("Unable to update cart on server. Check connection and try again.");
-     		//PHB_OLDdialog_.show(getSupportFragmentManager(), "Unable_to_update_cart_two");
+     		//PHB_OLDDisplayPopupFragment("Unable to update cart on server. Check connection and try again.",
+     		//PHB_OLD                     "Unable_to_update_cart_two");
      	  }
         }
     }
@@ -640,11 +639,6 @@ public class ProductsActivity extends JactActionBarActivity
       product_listener_.DismissClick();
     }
     
-    public void doDialogOkClick(View view) {
-  	  // Close Dialog window.
-  	  dialog_.dismiss();
-    }
-    
     public void doAddToCartClick(View view) {
     	// Add item to cart.
     	ShoppingUtils.LineItem item = new ShoppingUtils.LineItem();
@@ -666,8 +660,7 @@ public class ProductsActivity extends JactActionBarActivity
 	      product_listener_.DismissClick();
   		  Log.e("PHB ERROR", "ProductsActivity::doAddToCartClick. Unable to add item to cart: " +
                 "Item Status: " + item_status + "\nLine Item: " + ShoppingUtils.PrintLineItem(item));
-	      dialog_ = new JactDialogFragment("Unable to Add Item: " + message);
-	      dialog_.show(getSupportFragmentManager(), "Bad_Add_Product_Dialog");
+  		  DisplayPopupFragment("Unable to Add Item: " + message, "Bad_Add_Product_Dialog");
 	      return;
     	}
     	
@@ -768,8 +761,7 @@ public class ProductsActivity extends JactActionBarActivity
     	  Log.w("PHB ERROR", "ProductsActivity::doAddToCartClick. Unable to add item to cart. " +
     	                     "Title of Error: " + title + ", message: " + message +
     	                     "\nLine Item: " + ShoppingUtils.PrintLineItem(item));
-    	  dialog_ = new JactDialogFragment(title, message);
-    	  dialog_.show(getSupportFragmentManager(), "Bad_Add_Product_Dialog");
+    	  DisplayPopupFragment(title, message, "Bad_Add_Product_Dialog");
     	} else if (title.equals("Item Added to Cart")) {
       	  fadeAllViews(true);
     	}
@@ -841,8 +833,7 @@ public class ProductsActivity extends JactActionBarActivity
 		  // PHB Temp.
 		  //Log.w("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Updated line item. Now shopping cart is: " +
 		  //                  ShoppingCartActivity.PrintCart());
-    	  dialog_ = new JactDialogFragment("Added Item to Cart");
-    	  dialog_.show(getSupportFragmentManager(), "Finally_added_item");
+		  DisplayPopupFragment("Added Item to Cart", "Finally_added_item");
     	  SetCartIcon(this);
     	  fadeAllViews(false);
 		} catch (JSONException e) {
@@ -926,11 +917,13 @@ public class ProductsActivity extends JactActionBarActivity
                             "; extra_params: " + extra_params);
 		}
 	  } else if (status == GetUrlTask.FetchStatus.ERROR_RESPONSE_CODE ||
+			     status == GetUrlTask.FetchStatus.ERROR_OUTPUT_STREAM_ERROR ||
 			     status == GetUrlTask.FetchStatus.ERROR_UNABLE_TO_CONNECT) {
 		// Failed to Connect with Jact Server. Retry, if we haven't had too many consecutive failures.
 		if (num_failed_requests_ >= MAX_FAILED_REQUESTS) {
-		  dialog_ = new JactDialogFragment("Unable to Reach Jact", "Your last action may not have been processed.");
-		  dialog_.show(getSupportFragmentManager(), "Failed_server_connection");
+		  DisplayPopupFragment("Unable to Reach Jact",
+			  	               "Your last action may not have been processed.",
+					           "Failed_server_connection");
 		}
 		if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) >= 0 ||
 				   extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK) >= 0) {
@@ -960,12 +953,17 @@ public class ProductsActivity extends JactActionBarActivity
 	    IncrementNumRequestsCounter();
 	    ProcessFailedCartResponse(this, status, extra_params);
 	  }
+	  if (GetNumRequestsCounter() == 0) {
+		SetCartIcon(this);
+		if (GetNumRequestsCounter() == 0) {
+		  fadeAllViews(false);
+		}
+	  }
 	}
 	
 	@Override
 	public void DisplayPopup(String message) {
-	  dialog_ = new JactDialogFragment(message);
-	  dialog_.show(getSupportFragmentManager(), "too_many_server_requests");
+	  DisplayPopupFragment(message, "too_many_server_requests");
 	}
 	
 }

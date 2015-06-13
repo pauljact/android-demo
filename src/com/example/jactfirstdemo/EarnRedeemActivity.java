@@ -1,23 +1,26 @@
 package com.example.jactfirstdemo;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
-import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
+import java.net.HttpCookie;
+import java.util.Arrays;
+import java.util.List;
 
+import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
+
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.webkit.CookieManager;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 public class EarnRedeemActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   private static String url_;
@@ -42,7 +45,23 @@ public class EarnRedeemActivity extends JactActionBarActivity implements Process
   @Override
   protected void onResume() {
 	super.onResume();
-    
+
+    // Set cookies for WebView.
+	SharedPreferences user_info = getSharedPreferences(
+        getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+    String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+    List<String> cookie_headers = Arrays.asList(cookies.split(GetUrlTask.COOKIES_SEPERATOR));
+    HttpCookie cookie = null;
+    for (String cookie_str : cookie_headers) {
+      cookie = HttpCookie.parse(cookie_str).get(0);
+    }
+    if (cookie != null) {
+      CookieManager cookie_manager = CookieManager.getInstance();
+      cookie_manager.setCookie(
+    		  url_,
+    		  cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain());
+    }
+
     // Get url, and set webview from it.
     WebView web_view = (WebView) findViewById(R.id.earn_redeem_webview);
     web_view.loadUrl(url_);
@@ -52,6 +71,11 @@ public class EarnRedeemActivity extends JactActionBarActivity implements Process
     		fadeAllViews(false);
     	}
     });
+    // Enable javascript, to display video.
+    // UPDATE: Enabling javascript below still didn't allow the video to display. 
+    //WebSettings ws = web_view.getSettings();
+    //ws.setJavaScriptEnabled(true);
+    
     // Set spinner (and hide WebView) until page has finished loading.
     SetCartIcon(this);
     fadeAllViews(num_server_tasks_ > 0);

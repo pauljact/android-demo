@@ -34,8 +34,18 @@ class JactDialogFragment extends DialogFragment {
 	}
 	
 	public void SetButtonTwoText(String text) {
-	  button_two_text_ = text; 
+	  button_two_text_ = text;
 	}
+	
+	/* PHB attempting to fix a bug that happened when an Error Dialog tried to be launched when 
+	 * the activity that called for it was no longer active. Instead, this bug was addressed
+	 * by Overriding onActivityResult and onPostResume, and via boolean show_dialog_.
+	@Override
+	public void show(FragmentManager manager, String message) {
+	  if (!StartActivity.this.isFinishing()) {
+	    this.show(manager, message);
+	  }
+	}*/
 	
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

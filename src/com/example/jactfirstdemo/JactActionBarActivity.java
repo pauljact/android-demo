@@ -3,6 +3,7 @@ package com.example.jactfirstdemo;
 import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 public abstract class JactActionBarActivity extends ActionBarActivity implements ProcessUrlResponseCallback {
@@ -18,11 +20,14 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   protected static String jact_shopping_cart_url_;
   protected int num_server_tasks_;
   protected JactNavigationDrawer navigation_drawer_;
+  protected boolean can_show_dialog_;
+  protected JactDialogFragment dialog_;
 	
   protected void onCreate(Bundle savedInstanceState, int activity_id,
 		                  int layout, JactNavigationDrawer.ActivityIndex index) {
     super.onCreate(savedInstanceState);
 
+    can_show_dialog_ = false;
 	if (!IsLoggedOn()) {
 	  Log.w("JactActionBarActivity::onCreate", "Not logged on. Returning to Login Activity...");
 	  onBackPressed();
@@ -61,8 +66,15 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
 	  
 	num_server_tasks_ = 0;
 	super.onResume();
+    can_show_dialog_ = true;
   }
   
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    can_show_dialog_ = true;
+  }
+
   @Override
   protected void onPostCreate(Bundle savedInstanceState) {
     super.onPostCreate(savedInstanceState);
@@ -90,6 +102,12 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
       return true;
     }
     return super.onOptionsItemSelected(item);
+  }
+  
+  @Override
+  protected void onPause() {
+    super.onPause();
+    can_show_dialog_ = false;
   }
   
   public boolean IsLoggedOn() {
@@ -213,11 +231,38 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
 	} else if (extra_params.indexOf(ShoppingUtils.CLEAR_CART_TASK) == 0) {
 	  GetCookiesThenClearCart(callback);
 	} else {
-      Log.e("PHB ERROR", "JactActionBarActivity::ProcessFailedResponse. Status: " + status +
-	                     "; extra_params: " + extra_params);
+	  // TODO(PHB): Handle this: should do the right thing for all cases we get here; in
+	  // particular, should never get here (all cases should be accounted for in the 'else if'
+	  // statements above.
+      Log.e("JactActionBarActivity::ProcessFailedResponse",
+    		"Status: " + status + "; extra_params: " + extra_params);
     }
   }
+
+  protected void DisplayPopupFragment(String title, String message, String id) {
+	if (can_show_dialog_) {
+  	  dialog_ = new JactDialogFragment(title, message);
+  	  dialog_.show(getSupportFragmentManager(), id);
+	} else {
+	  Log.e("JactActionBarActivity::DisplayPopupFragment",
+			"Unable to show Popup with title: " + title + " and message: " + message);	
+	}
+  }
   
+  protected void DisplayPopupFragment(String title, String id) {
+	if (can_show_dialog_) {
+  	  dialog_ = new JactDialogFragment(title);
+  	  dialog_.show(getSupportFragmentManager(), id);
+	} else {
+	  Log.e("JactActionBarActivity::DisplayPopupFragment", "Unable to show Popup with title: " + title);	
+	}
+  }
+  
+  public void doDialogOkClick(View view) {
+	  // Close Dialog window.
+	  dialog_.dismiss();
+  }
+
   @Override
   public void IncrementNumRequestsCounter() {
 	num_server_tasks_++;
@@ -235,12 +280,14 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   
   @Override
   public void DisplayPopup(String message) {
+	DisplayPopupFragment(message, message);
   }
   
   @Override
   public void DisplayPopup(String title, String message) {
+	DisplayPopupFragment(title, message, title);
   }
   
   // Dummy function that each extending class can use to do something.
-  public void doSomething(String info) {}
+  public boolean doSomething(String info) { return true; }
   }

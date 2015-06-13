@@ -208,6 +208,17 @@
         </activity>
         
         <activity
+            android:name="com.example.jactfirstdemo.ViewOrdersActivity"
+        	android:icon="@drawable/ic_launcher"
+        	android:label="@string/empty_string"
+        	android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        
+        <activity
             android:name="com.example.jactfirstdemo.NewUserActivity"
         	android:icon="@drawable/ic_launcher"
         	android:label="@string/empty_string"
