@@ -35,13 +35,15 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
   private static boolean require_login_;
   private boolean logging_in_;
   private boolean requires_user_input_;
-  private JactDialogFragment dialog_;
   private ArrayList<String> usernames_;
   AutoCompleteTextView autocomplete_tv_;
+  private boolean can_show_dialog_;
+  private JactDialogFragment dialog_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    can_show_dialog_ = false;
     login_url_ = GetUrlTask.JACT_DOMAIN + "/rest/user/login";
     require_login_ = false;
   }
@@ -53,6 +55,7 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
 	// is 'active' (not faded) when the user returns.
 	//PHB fadeAllViews(num_server_tasks_ != 0);
 	super.onResume();
+    can_show_dialog_ = true;
 	
 	// Check to see if 'logged_off' was passed in; if so, log-off (delete
 	// login credentials from SharedPreferences).
@@ -105,6 +108,12 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
       setContentView(R.layout.jact_empty_welcome_screen);
       Login(username_, password_);
     }
+  }
+  
+  @Override
+  protected void onPause() {
+    super.onPause();
+    can_show_dialog_ = false;
   }
   
   private void ShowDropDown() {
@@ -195,11 +204,6 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
 	  startActivity(new Intent(this, NewUserActivity.class));
   }
   
-  public void doDialogOkClick(View view) {
-	  // Close Dialog window.
-	  dialog_.dismiss();
-  }
-  
   public void doLoginButtonClick(View view) {
 	String username = autocomplete_tv_.getText().toString();
     EditText password = (EditText) findViewById(R.id.jact_password);
@@ -238,6 +242,11 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     	Log.e("PHB ERROR", "JactLoginActivity::StoreUserInfo. Unable to parse Login JSON:\n" + user_info);
       // TODO(PHB): Handle exception gracefully.
     }
+  }
+  
+  public void doDialogOkClick(View view) {
+	  // Close Dialog window.
+	  dialog_.dismiss();
   }
   
   @Override
@@ -325,22 +334,28 @@ public class JactLoginActivity extends FragmentActivity implements ProcessUrlRes
     // Handle failed POST
     if (status == GetUrlTask.FetchStatus.ERROR_403 ||
     	status == GetUrlTask.FetchStatus.ERROR_BAD_USERNAME_OR_PASSWORD) {
+      if (can_show_dialog_) {
     	dialog_ = new JactDialogFragment("Wrong Username or Password");
     	dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog_403");
-        TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
-        tv.setVisibility(View.INVISIBLE);
-        tv.setVisibility(View.VISIBLE);
+      }
+      TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
+      tv.setVisibility(View.INVISIBLE);
+      tv.setVisibility(View.VISIBLE);
     } else if (status == GetUrlTask.FetchStatus.ERROR_BAD_POST_PARAMS) {
+      if (can_show_dialog_) {
     	dialog_ = new JactDialogFragment("Must Enter Username and Password");
     	dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog_Post_Params");
-        TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
-        tv.setVisibility(View.INVISIBLE);
-        tv.setVisibility(View.VISIBLE);
+      }
+      TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
+      tv.setVisibility(View.INVISIBLE);
+      tv.setVisibility(View.VISIBLE);
     } else {
-      dialog_ = new JactDialogFragment(
-          "Unable to Reach Jact",
-          "Check internet connection, and try again.");
-      dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
+      if (can_show_dialog_) {
+        dialog_ = new JactDialogFragment(
+            "Unable to Reach Jact",
+            "Check internet connection, and try again.");
+        dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
+      }
       /*FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
       ft.add(dialog_, null);
       ft.commitAllowingStateLoss();*/

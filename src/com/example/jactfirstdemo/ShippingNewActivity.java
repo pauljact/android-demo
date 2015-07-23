@@ -22,7 +22,6 @@ import android.widget.TextView;
 
 public class ShippingNewActivity extends JactActionBarActivity
                                  implements OnItemSelectedListener, ProcessUrlResponseCallback {
-  private JactDialogFragment dialog_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -81,10 +80,6 @@ public class ShippingNewActivity extends JactActionBarActivity
 	// TODO Auto-generated method stub
   }
   
-  public void doDialogOkClick(View view) {
-	// Close Dialog window.
-	dialog_.dismiss();
-  }
   public void doShippingNewPrevButtonClick(View view) {
       fadeAllViews(true);
 	  startActivity(new Intent(this, ShoppingCartActivity.class));
@@ -125,33 +120,27 @@ public class ShippingNewActivity extends JactActionBarActivity
 	// Otherwise, popup dialog warning about missing/incorrect information.
 	ShoppingCartActivity.JactAddress address = GetAddressFromEditTexts();
 	if (address.first_name_ == null || address.first_name_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter First Name");
-	  dialog_.show(getSupportFragmentManager(), "No_first_name");
+	  DisplayPopupFragment("Must Enter First Name", "No_first_name");
 	  return;
 	}
 	if (address.last_name_ == null || address.last_name_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter Last Name");
-	  dialog_.show(getSupportFragmentManager(), "No_last_name");
+	  DisplayPopupFragment("Must Enter Last Name", "No_last_name");
 	  return;
 	}
 	if (address.street_addr_ == null || address.street_addr_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter Street Address");
-	  dialog_.show(getSupportFragmentManager(), "No_street");
+	  DisplayPopupFragment("Must Enter Street Address", "No_street");
 	  return;
 	}
 	if (address.city_ == null || address.city_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter City");
-	  dialog_.show(getSupportFragmentManager(), "No_city");
+	  DisplayPopupFragment("Must Enter City", "No_city");
 	  return;
 	}
 	if (address.state_ == null || address.state_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter State");
-	  dialog_.show(getSupportFragmentManager(), "No_state");
+	  DisplayPopupFragment("Must Enter State", "No_state");
 	  return;
 	}
     if (address.zip_ == null || address.zip_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter Valid Zip Code");
-	  dialog_.show(getSupportFragmentManager(), "No_zip");
+      DisplayPopupFragment("Must Enter Valid Zip Code", "No_zip");
 	  return;
 	}
     ShoppingCartActivity.SetShippingAddress(address);

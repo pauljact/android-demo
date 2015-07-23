@@ -29,6 +29,7 @@ public class NewUserActivity extends ActionBarActivity
                              implements OnItemSelectedListener, ProcessUrlResponseCallback {
   private static String new_user_url_;
   private JactDialogFragment dialog_;
+  private boolean can_show_dialog_;
   private static ArrayList<AvatarItem> avatars_list_;
   private AvatarAdapter adapter_;
   private String avatar_id_;
@@ -48,6 +49,7 @@ public class NewUserActivity extends ActionBarActivity
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    can_show_dialog_ = false;
     new_user_url_ = GetUrlTask.JACT_DOMAIN + "/rest/user/register";
     setContentView(R.layout.new_user_layout);
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
@@ -64,6 +66,7 @@ public class NewUserActivity extends ActionBarActivity
   @Override
   protected void onResume() {
 	super.onResume();
+	can_show_dialog_ = true;
 	SetAvatars();
 	if (should_clear_form_on_resume_) {
 	  ClearForm();
@@ -83,6 +86,7 @@ public class NewUserActivity extends ActionBarActivity
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
+    can_show_dialog_ = true;
 
     if (resultCode == RESULT_OK) {
       Uri img_uri = data.getData();
@@ -107,6 +111,12 @@ public class NewUserActivity extends ActionBarActivity
     	Log.e("NewUserActivity::onActivityResult", "FNF Bitmap exception: " + e.getMessage());
       }
     }
+  }
+  
+  @Override
+  protected void onPause() {
+    super.onPause();
+    can_show_dialog_ = false;
   }
   
   private void ToggleImageAndSelector(boolean focus_image) {
@@ -247,13 +257,17 @@ public class NewUserActivity extends ActionBarActivity
   }
   
   private void EmptyEditTextWarning(String warning) {
-	dialog_ = new JactDialogFragment(warning);
-	dialog_.show(getSupportFragmentManager(), warning);
+	if (can_show_dialog_) {
+	  dialog_ = new JactDialogFragment(warning);
+	  dialog_.show(getSupportFragmentManager(), warning);
+	}
   }
   
   private void EmptyEditTextWarning(String title, String warning) {
-	dialog_ = new JactDialogFragment(title, warning);
-	dialog_.show(getSupportFragmentManager(), title);
+	if (can_show_dialog_) {
+	  dialog_ = new JactDialogFragment(title, warning);
+	  dialog_.show(getSupportFragmentManager(), title);
+	}
   }
  
   public void doDialogOkClick(View view) {

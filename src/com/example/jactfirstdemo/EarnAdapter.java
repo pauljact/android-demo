@@ -2,6 +2,8 @@ package com.example.jactfirstdemo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+
+import com.example.jactfirstdemo.JactImageView.UseCase;
  
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -31,7 +33,7 @@ public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implement
 	  public TextView points_;
 	  public TextView nid_;
 	  public Button earn_now_;
-	  public ImageView img_;
+	  public JactImageView img_;
 	}
 	
 	public EarnAdapter(
@@ -103,7 +105,7 @@ public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implement
             viewHolder.earn_now_ = (Button) vi.findViewById(R.id.earn_now_button);
             viewHolder.points_ = (TextView) vi.findViewById(R.id.earn_points);
             viewHolder.nid_ = (TextView) vi.findViewById(R.id.earn_nid);
-            viewHolder.img_ = (ImageView) vi.findViewById(R.id.earn_image);
+            viewHolder.img_ = (JactImageView) vi.findViewById(R.id.earn_image);
             vi.setTag(viewHolder);
         } else {
         	vi = convertView;
@@ -128,6 +130,7 @@ public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implement
             !image_loader_.DisplayImage(earn_item.img_url_, holder.img_, position, true)) {
           unfinished_list_elements_[position] = true;
         }
+        holder.img_.SetUseCase(UseCase.EARN_IMAGE_THUMBNAIL);
         
         return vi;
     }

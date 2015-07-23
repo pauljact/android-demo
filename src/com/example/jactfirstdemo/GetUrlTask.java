@@ -94,6 +94,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
   }
   
   static public final String JACT_DOMAIN = "https://m.jact.com:3081";
+  //static public final String JACT_DOMAIN = "https://uatm.jact.com:443";
   static final String COOKIES_HEADER = "Set-Cookie";
   static private final String HEADER_NAME_VALUE_SEPERATOR = "_PHB_HEADER_NAME_VALUE_PHB_";
   static private final String FORM_NAME_VALUE_SEPERATOR = "_PHB_FORM_NAME_VALUE_PHB_";

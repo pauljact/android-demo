@@ -75,18 +75,6 @@ public class ProductsImageLoader {
               Drawable[] layers = new Drawable[2];
               layers[0] = parent_adapter_.GetDrawable(bitmap);
               layers[1] = parent_adapter_.GetDrawable(play_video_icon_id_);
-              /* TODO(PHB): Resizing overlaid play button icon (to be smaller) below didn't work
-                 (all values are 0 at this point).
-              Rect r = layers[1].getBounds();
-              Log.e("PHB TEMP", "ProductsImageLoader::DisplayImage. Old bounds: " +
-                    r.top + ", " + r.left + ", " + r.bottom + ", " + r.right +
-                    ". Image width: " + image_view.getWidth() + ", height: " + image_view.getHeight());
-              int top = image_view.getHeight() / 4;
-              int bottom = 3 * image_view.getHeight() / 4;
-              int left = image_view.getWidth() / 4;
-              int right = 3 * image_view.getWidth() / 4;
-              layers[1].setBounds(left, top, right, bottom);
-               */
               LayerDrawable layerDrawable = new LayerDrawable(layers);
               image_view.setImageDrawable(layerDrawable);
             }

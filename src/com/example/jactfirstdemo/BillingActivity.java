@@ -25,7 +25,6 @@ public class BillingActivity extends JactActionBarActivity implements ProcessUrl
   private ListView list_;
   private ArrayList<ShoppingCartActivity.JactAddress> addresses_;
   private AddressAdapter adapter_;
-  private JactDialogFragment dialog_;
   private int num_checked_addresses_;
   private int selected_address_position_;
 
@@ -69,12 +68,7 @@ public class BillingActivity extends JactActionBarActivity implements ProcessUrl
     RelativeLayout layout = (RelativeLayout) findViewById(R.id.credit_card_content_frame);
     layout.startAnimation(alpha); // Add animation to the layout.
   }
-  
-  public void doDialogOkClick(View view) {
-	// Close Dialog window.
-	dialog_.dismiss();
-  }
-  
+
   public void doCreditCardAddNewButtonClick(View view) {
     fadeAllViews(true);
     startActivity(new Intent(this, BillingNewActivity.class));
@@ -99,8 +93,7 @@ public class BillingActivity extends JactActionBarActivity implements ProcessUrl
   
   public void doAddressItemDeleteAddressClick(View view) {
     // TODO(PHB): Implement this.
-	dialog_ = new JactDialogFragment("Remove Credit Cart Not Implemented Yet");
-	dialog_.show(getSupportFragmentManager(), "remove_cc_not_yet_implemented");
+	DisplayPopupFragment("Remove Credit Cart Not Implemented Yet", "remove_cc_not_yet_implemented");
   }
   
   public void doBillingPrevButtonClick(View view) {
@@ -115,11 +108,13 @@ public class BillingActivity extends JactActionBarActivity implements ProcessUrl
       ShoppingCartActivity.SetBillingAddress(addresses_.get(selected_address_position_));
   	  startActivity(new Intent(this, ReviewCartActivity.class));
     } else if (num_checked_addresses_ == 0 ){
-      dialog_ = new JactDialogFragment("Missing Billing Information", "Select a Credit Card From the List, or Add a New One");
-      dialog_.show(getSupportFragmentManager(), "no_billing_addr_selected");
+      DisplayPopupFragment("Missing Billing Information",
+    		               "Select a Credit Card From the List, or Add a New One",
+                           "no_billing_addr_selected");
     } else if (num_checked_addresses_ > 1) {
-	  dialog_ = new JactDialogFragment("Too Many Credit Cards", "Select At Most One From the List, or Add a New One");
-	  dialog_.show(getSupportFragmentManager(), "too_many_billing_addr_selected");
+      DisplayPopupFragment("Too Many Credit Cards",
+    		               "Select At Most One From the List, or Add a New One",
+	                       "too_many_billing_addr_selected");
     } else {
       Log.e("PHB ERROR", "BillingActivity::doBillingNextButtonClick. Unexpected value for num_checked_addresses_: " + num_checked_addresses_);
     }

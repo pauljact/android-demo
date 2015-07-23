@@ -26,7 +26,6 @@ public class YouTubePlayerActivity extends JactActionBarActivity
   private String youtube_id_;
   private static int earn_id_;
   private boolean has_skipped_ahead_;
-  private JactDialogFragment dialog_;
   private static final String EARN_REDEEM_URL_BASE = "/node/";
   public static final String DEVELOPER_KEY = "AIzaSyBoJypQxKePzlnt_4kVbRbAez64hbULcqI";
   private EarnPlayerStateChangeListener player_state_change_listener_;
@@ -137,10 +136,12 @@ public class YouTubePlayerActivity extends JactActionBarActivity
   }
 
   private void PopupWarning() {
-	dialog_ = new JactDialogFragment("Warning", "You won't earn points if you skip ahead");
-	dialog_.SetButtonOneText("Cancel");
-	dialog_.SetButtonTwoText("Ok");
-	dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
+	if (can_show_dialog_) {
+	  dialog_ = new JactDialogFragment("Warning", "You won't earn points if you skip ahead");
+	  dialog_.SetButtonOneText("Cancel");
+	  dialog_.SetButtonTwoText("Ok");
+	  dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
+	}
   }
   
   protected void StartRedeemActivity() {

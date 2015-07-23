@@ -29,7 +29,6 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   }
   private ArrayList<EarnSiteAndYoutubeId> earn_activity_urls_;
   private static boolean should_refresh_earn_items_;
-  private JactDialogFragment dialog_;
   private ListView list_;
   private EarnAdapter adapter_;
   private static ArrayList<EarnPageParser.EarnItem> earn_list_;
@@ -108,15 +107,9 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   }
 
   private void Popup(String title, String message) {
-	dialog_ = new JactDialogFragment(title, message);
-	dialog_.show(getSupportFragmentManager(), title);
+	DisplayPopupFragment(title, message, title);
   }
-  
-  public void doDialogOkClick(View view) {
-    // Close Dialog window.
-    dialog_.dismiss();
-  }
-  
+
   private String GetYoutubeUrlViaNodeId(int nid) {
 	if (earn_list_ == null) {
 	  Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Null nid");

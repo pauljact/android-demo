@@ -39,6 +39,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     USER_AGREEMENT,
     CHECKOUT_VIA_MOBILE_SITE,
     CHECKOUT_MAIN,
+    VIEW_ORDERS,
     SHIPPING,
     SHIPPING_NEW,
     BILLING,

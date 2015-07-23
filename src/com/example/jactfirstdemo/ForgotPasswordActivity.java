@@ -27,6 +27,7 @@ public class ForgotPasswordActivity extends ActionBarActivity
                                     implements OnItemSelectedListener, ProcessUrlResponseCallback {
   private static String forgot_password_url_;
   private JactDialogFragment dialog_;
+  private boolean can_show_dialog_;
   private ArrayList<String> usernames_;
   AutoCompleteTextView autocomplete_tv_;
   private boolean is_password_reset_;
@@ -35,6 +36,7 @@ public class ForgotPasswordActivity extends ActionBarActivity
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    can_show_dialog_ = false;
     forgot_password_url_ = GetUrlTask.JACT_DOMAIN + "/rest/user/request_new_password";
 	setContentView(R.layout.forgot_password_layout);
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
@@ -46,6 +48,7 @@ public class ForgotPasswordActivity extends ActionBarActivity
   @Override
   protected void onResume() {
 	super.onResume();
+	can_show_dialog_ = true;
 	is_password_reset_ = false;
 	GetUsernames();
     
@@ -64,6 +67,18 @@ public class ForgotPasswordActivity extends ActionBarActivity
 	});
     autocomplete_tv_.setText("");
 	fadeAllViews(false);
+  }
+  
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    can_show_dialog_ = true;
+  }
+  
+  @Override
+  protected void onPause() {
+    super.onPause();
+    can_show_dialog_ = false;
   }
   
   private void ShowDropDown() {
@@ -113,8 +128,10 @@ public class ForgotPasswordActivity extends ActionBarActivity
   }
   
   private void EmptyEditTextWarning() {
-	dialog_ = new JactDialogFragment("Enter Username or Email Address");
-	dialog_.show(getSupportFragmentManager(), "Empty_username");
+	if (can_show_dialog_) {
+	  dialog_ = new JactDialogFragment("Enter Username or Email Address");
+	  dialog_.show(getSupportFragmentManager(), "Empty_username");
+	}
   }
   
   private void UnrecognizedUsernameWarning() {
@@ -123,9 +140,11 @@ public class ForgotPasswordActivity extends ActionBarActivity
       EmptyEditTextWarning();
       return;
     }
-	dialog_ = new JactDialogFragment("Username '" + username + "' Does Not Exist",
-			                         "Enter valid username, or sign up as a new user");
-	dialog_.show(getSupportFragmentManager(), "Bad_username");
+    if (can_show_dialog_) {
+	  dialog_ = new JactDialogFragment("Username '" + username + "' Does Not Exist",
+		  	                           "Enter valid username, or sign up as a new user");
+	  dialog_.show(getSupportFragmentManager(), "Bad_username");
+    }
   }
   
   public void doDialogOkClick(View view) {
@@ -166,8 +185,10 @@ public class ForgotPasswordActivity extends ActionBarActivity
   @Override
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
     if (extra_params.indexOf(FORGOT_PASSWORD_TASK) == 0) {
-      dialog_ = new JactDialogFragment("Further Instructions Have Been Sent to Your Email");
-      dialog_.show(getSupportFragmentManager(), "Successful_password_reset");
+      if (can_show_dialog_) {
+        dialog_ = new JactDialogFragment("Further Instructions Have Been Sent to Your Email");
+        dialog_.show(getSupportFragmentManager(), "Successful_password_reset");
+      }
       is_password_reset_ = true;
     } else {
       Log.e("ForgotPasswordActivity::ProcessUrlResponse", "Unrecognized task: " + extra_params);
@@ -186,9 +207,11 @@ public class ForgotPasswordActivity extends ActionBarActivity
 	if (status == FetchStatus.ERROR_UNRECOGNIZED_USERNAME) {
 	  UnrecognizedUsernameWarning();
 	} else {
-      dialog_ = new JactDialogFragment("Unable to Reach Jact",
-                                       "Check internet connection, and try again.");
-      dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
+	  if (can_show_dialog_) {
+        dialog_ = new JactDialogFragment("Unable to Reach Jact",
+                                         "Check internet connection, and try again.");
+        dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
+	  }
 	}
   }
   

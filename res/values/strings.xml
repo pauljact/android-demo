@@ -121,6 +121,18 @@
     <string name="choose_photo_from_phone">...Or choose photo from device</string>
     <!-- END New User Layout -->
     
+    <!-- Strings used in Layouts -->
+    <string name="dummy_image_view_description">Dummy Image View Description</string>
+    <string name="dummy_text_view_text">Empty</string>
+    <string name="prize_drawing_str">Prize Drawing</string>
+    <string name="drawing_ends_str">Drawing Ends:</string>
+    <string name="orig_price_str">Original Price:</string>
+    <string name="jact_price_str">JACT Price:</string>
+    <string name="product_description_str">Product Description:</string>
+    <string name="product_title_str">Product Title</string>
+    <string name="max_quantity_str">Max Quantity:</string>
+    <!-- END Strings used in Layouts -->
+    
     <!-- Miscellaneous -->
     <string name="empty_string"></string>
     <string name="null_str">null</string>

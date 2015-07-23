@@ -23,7 +23,6 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 public class BillingNewActivity extends JactActionBarActivity implements OnItemSelectedListener, ProcessUrlResponseCallback {
-  private JactDialogFragment dialog_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -94,12 +93,7 @@ public class BillingNewActivity extends JactActionBarActivity implements OnItemS
     RelativeLayout layout = (RelativeLayout) findViewById(R.id.credit_card_new_content_frame);
     layout.startAnimation(alpha); // Add animation to the layout.
   }
-  
-  public void doDialogOkClick(View view) {
-	// Close Dialog window.
-	dialog_.dismiss();
-  }
-  
+
   public void doBillingNewPrevButtonClick(View view) {
       fadeAllViews(true);
 	  startActivity(new Intent(this, ShippingActivity.class));
@@ -254,53 +248,43 @@ public class BillingNewActivity extends JactActionBarActivity implements OnItemS
 	  return;
 	}
 	if (address.first_name_ == null || address.first_name_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter First Name");
-	  dialog_.show(getSupportFragmentManager(), "No_first_name_billing");
+	  DisplayPopupFragment("Must Enter First Name", "No_first_name_billing");
 	  return;
 	}
 	if (address.last_name_ == null || address.last_name_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter Last Name");
-	  dialog_.show(getSupportFragmentManager(), "No_last_name_billing");
+	  DisplayPopupFragment("Must Enter Last Name", "No_last_name_billing");
 	  return;
 	}
 	if (address.cc_type_ == ShoppingCartActivity.CardType.NO_TYPE) {
-	  dialog_ = new JactDialogFragment("Must Enter Credit Card Type");
-	  dialog_.show(getSupportFragmentManager(), "No_type");
+	  DisplayPopupFragment("Must Enter Credit Card Type", "No_type");
 	  return;
 	}
 	if (address.cc_number_ == null || address.cc_number_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter Credit Card Number");
-	  dialog_.show(getSupportFragmentManager(), "No_cc_number");
+	  DisplayPopupFragment("Must Enter Credit Card Number", "No_cc_number");
 	  return;
 	}
 	if (address.cc_exp_date_month_ == 0) {
-	  dialog_ = new JactDialogFragment("Must Enter Expiration Date (Month)");
-	  dialog_.show(getSupportFragmentManager(), "No_cc_month");
+	  DisplayPopupFragment("Must Enter Expiration Date (Month)", "No_cc_month");
 	  return;
 	}
 	if (address.cc_exp_date_year_ == 0) {
-	  dialog_ = new JactDialogFragment("Must Enter Expiration Date (Year)");
-	  dialog_.show(getSupportFragmentManager(), "No_cc_year");
+	  DisplayPopupFragment("Must Enter Expiration Date (Year)", "No_cc_year");
 	  return;
 	}
 	if (address.cc_crv_ < 0) {
-	  dialog_ = new JactDialogFragment("Must Enter Credit Card CRV");
-	  dialog_.show(getSupportFragmentManager(), "No_crv");
+	  DisplayPopupFragment("Must Enter Credit Card CRV", "No_crv");
 	  return;
 	}
 	if (address.street_addr_ == null || address.street_addr_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter Street Address");
-	  dialog_.show(getSupportFragmentManager(), "No_street_billing");
+	  DisplayPopupFragment("Must Enter Street Address", "No_street_billing");
 	  return;
 	}
 	if (address.city_ == null || address.city_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter City");
-	  dialog_.show(getSupportFragmentManager(), "No_city_billing");
+	  DisplayPopupFragment("Must Enter City", "No_city_billing");
 	  return;
 	}
 	if (address.state_ == null || address.state_.isEmpty()) {
-	  dialog_ = new JactDialogFragment("Must Enter State");
-	  dialog_.show(getSupportFragmentManager(), "No_state_billing");
+	  DisplayPopupFragment("Must Enter State", "No_state_billing");
 	  return;
 	}
 	String zip_str = "";
@@ -317,8 +301,7 @@ public class BillingNewActivity extends JactActionBarActivity implements OnItemS
 	  }
 	}
     if (!valid_zip) {
-	  dialog_ = new JactDialogFragment("Must Enter Valid Zip Code");
-	  dialog_.show(getSupportFragmentManager(), "No_zip_billing");
+      DisplayPopupFragment("Must Enter Valid Zip Code", "No_zip_billing");
 	  return;
 	}
 	fadeAllViews(true);

@@ -13,7 +13,9 @@ public class ProductsPageParser {
   private static final String WEBSITE_NID = "nid";
   private static final String WEBSITE_TITLE = "node_title";
   private static final String WEBSITE_SUMMARY_BODY = "Body";
-  private static final String WEBSITE_SUMMARY = "summary";
+  // As of June 2015, we decided to just use "value" tag instead of "summary"
+  private static final String WEBSITE_SUMMARY = "value";
+  //private static final String WEBSITE_SUMMARY = "summary";
   private static final String WEBSITE_PID = "commerce_product_field_data_field_product_product_id";
   private static final String WEBSITE_NODE_TYPE = "node_type";
   private static final String WEBSITE_DATE = "drawing date";
@@ -25,6 +27,7 @@ public class ProductsPageParser {
   private static final String WEBSITE_VALUE = "value";
   private static final String WEBSITE_IMAGE = "field_product_image";
   private static final String WEBSITE_IMAGE_URI = "uri";
+  private static final String WEBSITE_ORIG_PRICE = "Original_Price";
   private static final String WEBSITE_PRICE = "Price";
   private static final String WEBSITE_PRICE_AMOUNT = "amount";
   private static final String WEBSITE_PRICE_CURRENCY = "currency_code";
@@ -45,6 +48,9 @@ public class ProductsPageParser {
     public boolean promote_;
     public String img_url_;
     public String drawing_url_;
+    public String orig_bux_;
+    public String orig_usd_;
+    public String orig_points_;
     public String bux_;
     public String usd_;
     public String points_;
@@ -83,11 +89,11 @@ public class ProductsPageParser {
 		  JSONObject block_ob = block_array.getJSONObject(0);
 		  return block_ob.getString(WEBSITE_VALUE);
 		} else {
-		  Log.e("PHB ERROR", "ProductsPageParse::ParseNode. For tag: " + tag + ", Promote array " +
+		  Log.e("ProductsPageParse::ParseNode", "For tag: " + tag + ", Promote array " +
 				             "should have size at most one, but found: " + block_array.length()); 
 		}
 	  } catch (JSONException ex) {
-		  Log.e("PHB ERROR", "ProductsPageParse::ParseNode. For tag: " + tag + ", Failed to parse " +
+		  Log.e("ProductsPageParse::ParseNode", "For tag: " + tag + ", Failed to parse " +
 	                         "Drawing_Ends tag as both a JSONObject and JSONArray.\n" +
                              node.toString() + "\nException: " + ex.getMessage());
         // TODO(PHB): Handle exception gracefully.
@@ -169,7 +175,7 @@ public class ProductsPageParser {
 	  item.promote_ = true;
 	} else {
 	  item.promote_ = false;
-      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPromote. Unrecognize Promote->Value tag: " + value);
+      Log.e("ProductsPageParse::ParseRewardsPromote", "Unrecognize Promote->Value tag: " + value);
 	}
   }
 
@@ -194,32 +200,43 @@ public class ProductsPageParser {
 	}
   }
   
+  static private void ParseRewardsImageFromString(String value, JSONObject node, ProductItem item) {
+	if (value.isEmpty()) {
+      Log.e("ProductsPageParser::ParseRewardsImage", "Unable to find Image uri:\n" + node.toString());
+      // TODO(PHB): Handle missing image.
+      return;
+	}
+	int prefix_index = value.indexOf("public://");
+	if (prefix_index != 0) {
+      Log.e("ProductsPageParser::ParseRewardsImage", "Unable to parse Image uri:\n" + node.toString());
+      // TODO(PHB): Handle missing image.
+      return;
+	}
+	String image_url = value.substring(9);  // 9 is the length of prefix "public://" that should be removed.
+	item.img_url_ = GetUrlTask.JACT_DOMAIN + jact_icons_website_ +
+	                image_url.replace(" ", "%20");  // Replace whitespace in url with %20.
+  }
   static private void ParseRewardsImage(JSONObject node, ProductItem item) {
 	if (!node.has(WEBSITE_IMAGE) || node.isNull(WEBSITE_IMAGE)) {
-      Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsImage. Unable to find Image tag:\n" + node.toString());
+      Log.e("ProductsPageParser::ParseRewardsImage", "Unable to find Image tag:\n" + node.toString());
       // TODO(PHB): Handle missing image.
 	  return;
 	}
 	try {
 	  JSONObject image = new JSONObject(node.getString(WEBSITE_IMAGE));
 	  String value = image.getString(WEBSITE_IMAGE_URI);
-	  if (value.isEmpty()) {
-        Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsImage. Unable to find Image uri:\n" + node.toString());
-        // TODO(PHB): Handle missing image.
-        return;
-	  }
-	  int prefix_index = value.indexOf("public://");
-	  if (prefix_index != 0) {
-        Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsImage. Unable to parse Image uri:\n" + node.toString());
-        // TODO(PHB): Handle missing image.
-        return;
-	  }
-	  String image_url = value.substring(9);  // 9 is the length of prefix "public://" that should be removed.
-	  item.img_url_ = GetUrlTask.JACT_DOMAIN + jact_icons_website_ +
-			          image_url.replace(" ", "%20");  // Replace whitespace in url with %20.
+	  ParseRewardsImageFromString(value, node, item);
 	} catch (JSONException e) {
-      Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsImage. Unable to parse Image tag:\n" + node.toString());
-      // TODO(PHB): Handle exception gracefully.
+      Log.w("ProductsPageParser::ParseRewardsImage",
+    	  	"Unable to parse Image tag using old format, trying new format");
+	  try {
+        String value = node.getString(WEBSITE_IMAGE);
+	    ParseRewardsImageFromString(value, node, item);
+	  } catch (JSONException ex) {
+	      Log.e("ProductsPageParser::ParseRewardsImage",
+	    	  	"Unable to parse Image tag using new format. Node:\n" + node.toString());
+          // TODO(PHB): Handle exception gracefully.
+	  }
     }
   }
   
@@ -241,43 +258,63 @@ public class ProductsPageParser {
     }
   }
 	
-  static private void ParseRewardsPrice(JSONObject node, ProductItem item) {
+  static private void ParseRewardsPrice(JSONObject node, ProductItem item, boolean isOriginalPrice) {
 	if (!node.has(WEBSITE_PRICE) || node.isNull(WEBSITE_PRICE)) {
-      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPrice. Unable to find Price tag:\n" + node.toString());
+      Log.e("ProductsPageParse::ParseRewardsPrice", "Unable to find Price tag:\n" + node.toString());
       // TODO(PHB): Handle missing price.
 	  return;
 	}
 	try {
-	  JSONObject price = new JSONObject(node.getString(WEBSITE_PRICE));
+	  JSONObject price = new JSONObject(node.getString(isOriginalPrice ? WEBSITE_ORIG_PRICE : WEBSITE_PRICE));
 	  String amount = price.getString(WEBSITE_PRICE_AMOUNT);
 	  String currency = price.getString(WEBSITE_PRICE_CURRENCY);
 	  if (amount.isEmpty() || currency.isEmpty()) {
-        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPrice. Unable to find Price amount:\n" + node.toString());
+        Log.e("ProductsPageParse::ParseRewardsPrice", "Unable to find Price amount:\n" + node.toString());
         // TODO(PHB): Handle missing price.
         return;
 	  }
 	  if (!currency.equalsIgnoreCase("BUX") &&
 	      !currency.equalsIgnoreCase("USD") &&
 		  !currency.equalsIgnoreCase("Points")) {
-        Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPrice. Unrecognize currency: " + currency);
+        Log.e("ProductsPageParse::ParseRewardsPrice", "Unrecognize currency: " + currency);
         // TODO(PHB): Handle missing price.
         return;
 	  }
 	  if (currency.equalsIgnoreCase("BUX")) {
 	    if (amount.substring(amount.length() - 2).equalsIgnoreCase("00")) {
-	      item.bux_ = amount.substring(0, amount.length() - 2);
+	      if (isOriginalPrice) {
+	    	item.orig_bux_ = amount.substring(0, amount.length() - 2);
+	      } else {
+		    item.bux_ = amount.substring(0, amount.length() - 2);
+	      }
 	    } else {
-	      Log.e("PHB ERROR", "ProductsPageParser::ParseRewardsPrice. BUX should be divisible by 100: " + amount);
-	      item.bux_ = amount;
+	      Log.e("ProductsPageParser::ParseRewardsPrice", "BUX should be divisible by 100: " + amount);
+	      if (isOriginalPrice) {
+	    	item.orig_bux_ = amount;
+	      } else {
+		   	item.bux_ = amount;
+	      }
 	    }
 	  } else if (currency.equalsIgnoreCase("USD")) {
-	    item.usd_ = amount.substring(0, amount.length() - 2) + "." + amount.substring(amount.length() - 2);
+		  if (isOriginalPrice) {
+			item.orig_usd_ = amount.substring(0, amount.length() - 2) + "." + amount.substring(amount.length() - 2);
+		  } else {
+			item.usd_ = amount.substring(0, amount.length() - 2) + "." + amount.substring(amount.length() - 2);
+		  }
 	  } else {
-	    item.points_ = amount;
+		if (isOriginalPrice) {
+		  item.orig_points_ = amount;
+		} else {
+		  item.points_ = amount;
+		}
 	  }
 	} catch (JSONException e) {
-      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPrice. Unable to parse Price tag:\n" + node.toString());
-      // TODO(PHB): Handle exception gracefully.
+	  if (isOriginalPrice) {
+		Log.w("ProductsPageParse::ParseRewardsPrice", "Unable to find Original price for item:\n" + node.toString());  
+	  } else {
+		Log.e("ProductsPageParse::ParseRewardsPrice", "Unable to parse Price tag:\n" + node.toString());
+        // TODO(PHB): Handle exception gracefully.
+	  }
     }
   }
   
@@ -285,7 +322,8 @@ public class ProductsPageParser {
 	String value = ParseNode(node, WEBSITE_POINT_PRICE);
 	if (!value.isEmpty()) {
 	  if (item.points_ != null && !item.points_.isEmpty()) {
-		Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsPointPrice. Duplicate entries for Price in points:\n" + node.toString());	
+		Log.e("ProductsPageParse::ParseRewardsPointPrice",
+			  "Duplicate entries for Price in points:\n" + node.toString());	
 	  } else {
 	    item.points_ = value;
 	  }
@@ -304,7 +342,7 @@ public class ProductsPageParser {
         item.types_.add(product_types.getString(i));
       }
 	} catch (JSONException e) {
-      Log.e("PHB ERROR", "ProductsPageParse::ParseRewardsProductType. Unable to parse ProductType:\n" + node.toString());
+      Log.e("ProductsPageParse::ParseRewardsProductType", "Unable to parse ProductType:\n" + node.toString());
       // TODO(PHB): Handle exception gracefully.
     }
   }
@@ -342,9 +380,12 @@ public class ProductsPageParser {
         
         // Parse Image.
         ParseRewardsImage(product, item);
+
+        // Parse Original Price.
+        ParseRewardsPrice(product, item, true);
         
         // Parse Price.
-        ParseRewardsPrice(product, item);
+        ParseRewardsPrice(product, item, false);
         
         // Parse Point_Price.
         ParseRewardsPointPrice(product, item);
@@ -359,7 +400,7 @@ public class ProductsPageParser {
         products_list.add(item);
       }
     } catch (JSONException e) {
-        Log.e("PHB ERROR", "ProductsPageParser.ParseRewardsPage: Failed to parse response");
+        Log.e("ProductsPageParser.ParseRewardsPage", "Failed to parse response");
         // TODO(PHB): Handle exception.
     }
   }
@@ -389,7 +430,7 @@ public class ProductsPageParser {
 	  	products_list.add(item);
       }
     } catch (JSONException e) {
-      Log.e("PHB ERROR", "ProductsPageParser.ParseDrawingsPage: Failed to parse response");
+      Log.e("ProductsPageParser.ParseDrawingsPage", "Failed to parse response");
       // TODO(PHB): Handle exception.
     }
   }
@@ -398,19 +439,19 @@ public class ProductsPageParser {
     if (date == null || date.isEmpty()) return "";
     int expected_start = date.indexOf("<span class=\"");
     if (expected_start < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseDateFromDrawingsDate: Unexpected format of node_title: " + date);
+      Log.e("ProductsActivity.ParseDateFromDrawingsDate", "Unexpected format of node_title: " + date);
       return "";
     }
     String first_cut = date.substring(expected_start);
     int end_link = first_cut.indexOf("\">");
     if (end_link < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseDateFromDrawingsDate: Unexpected format of node_title: " + date);
+      Log.e("ProductsActivity.ParseDateFromDrawingsDate", "Unexpected format of node_title: " + date);
       return "";
     }
     String second_cut = first_cut.substring(end_link + 2);
     int close_tag = second_cut.indexOf("</span>");
     if (close_tag < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseDateFromDrawingsDate: Unexpected format of node_title: " + date);
+      Log.e("ProductsActivity.ParseDateFromDrawingsDate", "Unexpected format of node_title: " + date);
       return "";
     }
     return second_cut.substring(0, close_tag);
@@ -420,19 +461,19 @@ public class ProductsPageParser {
     if (node_title == null || node_title.isEmpty()) return "";
     int expected_start = node_title.indexOf("<a href=\"");
     if (expected_start < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseTitleFromNodeTitle: Unexpected format of node_title: " + node_title);
+      Log.e("ProductsActivity.ParseTitleFromNodeTitle", "Unexpected format of node_title: " + node_title);
       return "";
     }
     String first_cut = node_title.substring(expected_start); 
     int end_link = first_cut.indexOf("\">");
     if (end_link < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseTitleFromNodeTitle: Unexpected format of node_title: " + node_title);
+      Log.e("ProductsActivity.ParseTitleFromNodeTitle", "Unexpected format of node_title: " + node_title);
       return "";
     }
     String second_cut = first_cut.substring(end_link + 2);
     int close_tag = second_cut.indexOf("</a>");
     if (close_tag < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseTitleFromNodeTitle: Unexpected format of node_title: " + node_title);
+      Log.e("ProductsActivity.ParseTitleFromNodeTitle", "Unexpected format of node_title: " + node_title);
       return "";
     }
     return second_cut.substring(0, close_tag);
@@ -442,19 +483,19 @@ public class ProductsPageParser {
     if (nid == null || nid.isEmpty()) return "";
     int expected_start = nid.indexOf("<img ");
     if (expected_start < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseImageUrlFromNodeId: Unexpected format of nid: " + nid);
+      Log.e("ProductsActivity.ParseImageUrlFromNodeId", "Unexpected format of nid: " + nid);
       return "";
     }
     String first_cut = nid.substring(expected_start);
     int start_src = first_cut.indexOf("src=\"");
     if (start_src < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseImageUrlFromNodeId: Unexpected format of node_title: " + nid);
+      Log.e("ProductsActivity.ParseImageUrlFromNodeId", "Unexpected format of node_title: " + nid);
       return "";
     }
     String second_cut = first_cut.substring(start_src + 5);
     int end_src = second_cut.indexOf("\"");
     if (end_src < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseImageUrlFromNodeId: Unexpected format of node_title: " + nid);
+      Log.e("ProductsActivity.ParseImageUrlFromNodeId", "Unexpected format of node_title: " + nid);
       return "";
     }
     return second_cut.substring(0, end_src);
@@ -464,13 +505,13 @@ public class ProductsPageParser {
     if (nid == null || nid.isEmpty()) return "";
     int expected_start = nid.indexOf("<a href=\"");
     if (expected_start < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseDrawingUrlFromNodeId: Unexpected format of nid: " + nid);
+      Log.e("ProductsActivity.ParseDrawingUrlFromNodeId", "Unexpected format of nid: " + nid);
       return "";
     }
     String first_cut = nid.substring(expected_start + 8);
     int end_link = first_cut.indexOf("\">");
     if (end_link < 0) {
-      Log.e("PHB ERROR", "ProductsActivity.ParseDrawingUrlFromNodeId: Unexpected format of node_title: " + nid);
+      Log.e("ProductsActivity.ParseDrawingUrlFromNodeId", "Unexpected format of node_title: " + nid);
       return "";
     }
     return first_cut.substring(0, end_link);
