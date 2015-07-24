@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/values-v14/styles.xml -->
+    <eat-comment/>
+    <style name="AppBaseTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+        <!-- API 14 theme customizations can go here. -->
+    </style>
+    <!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.0.0/res/values-v14/values.xml -->
+    <eat-comment/>
+    <style name="Base.TextAppearance.AppCompat.Button">
+        <item name="android:textSize">@dimen/abc_text_size_button_material</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+    <style name="Base.Theme.AppCompat" parent="Base.V14.Theme.AppCompat">
+        <item name="android:actionModeCutDrawable">?actionModeCutDrawable</item>
+        <item name="android:actionModeCopyDrawable">?actionModeCopyDrawable</item>
+        <item name="android:actionModePasteDrawable">?actionModePasteDrawable</item>
+        <item name="android:actionModeSelectAllDrawable">?actionModeSelectAllDrawable</item>
+        <item name="android:actionModeShareDrawable">?actionModeShareDrawable</item>
+    </style>
+    <style name="Base.Theme.AppCompat.Dialog" parent="Base.V14.Theme.AppCompat.Dialog">
+        <item name="android:actionModeCutDrawable">?actionModeCutDrawable</item>
+        <item name="android:actionModeCopyDrawable">?actionModeCopyDrawable</item>
+        <item name="android:actionModePasteDrawable">?actionModePasteDrawable</item>
+        <item name="android:actionModeSelectAllDrawable">?actionModeSelectAllDrawable</item>
+        <item name="android:actionModeShareDrawable">?actionModeShareDrawable</item>
+    </style>
+    <style name="Base.Theme.AppCompat.Light" parent="Base.V14.Theme.AppCompat.Light">
+        <item name="android:actionModeCutDrawable">?actionModeCutDrawable</item>
+        <item name="android:actionModeCopyDrawable">?actionModeCopyDrawable</item>
+        <item name="android:actionModePasteDrawable">?actionModePasteDrawable</item>
+        <item name="android:actionModeSelectAllDrawable">?actionModeSelectAllDrawable</item>
+        <item name="android:actionModeShareDrawable">?actionModeShareDrawable</item>
+    </style>
+    <style name="Base.Theme.AppCompat.Light.Dialog" parent="Base.V14.Theme.AppCompat.Light.Dialog">
+        <item name="android:actionModeCutDrawable">?actionModeCutDrawable</item>
+        <item name="android:actionModeCopyDrawable">?actionModeCopyDrawable</item>
+        <item name="android:actionModePasteDrawable">?actionModePasteDrawable</item>
+        <item name="android:actionModeSelectAllDrawable">?actionModeSelectAllDrawable</item>
+        <item name="android:actionModeShareDrawable">?actionModeShareDrawable</item>
+    </style>
+    <style name="Base.V14.Theme.AppCompat" parent="Base.V11.Theme.AppCompat"/>
+    <style name="Base.V14.Theme.AppCompat.Dialog" parent="Base.V11.Theme.AppCompat.Dialog"/>
+    <style name="Base.V14.Theme.AppCompat.Light" parent="Base.V11.Theme.AppCompat.Light"/>
+    <style name="Base.V14.Theme.AppCompat.Light.Dialog" parent="Base.V11.Theme.AppCompat.Light.Dialog"/>
+    <!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/values-v14/styles.xml -->
+    <eat-comment/>
+    <style name="JactActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
+    <!-- <item name="android:background">@color/orange</item> -->
+	<item name="android:background">@drawable/ab_solid_example</item>
+</style>
+    <style name="JactMainTheme" parent="JactBaseTheme">
+		<!-- <item name="android:ambientShadowAlpha">0.5</item> Value in [0,1] for shadow strength of elevated views. Commented out here cuz only can be used in v21 and higher -->
+		<item name="android:alpha">1.0</item> <!-- Opaque (1.0) vs. transparent (0.0) -->
+		<!-- The following Overwrites the 'style' for the EditText fields. It is
+		     necessary because the parent style (Theme.AppCompat.Light, which we need
+		     to use to get ActionBar) has the 'style' for EditFields something different -->
+    	<item name="android:editTextBackground">@android:drawable/edit_text</item>
+    	<!-- <item name="android:actionBarStyle">@style/JactActionBar</item> -->
+	</style>
+    <style name="number_picker_style" parent="@android:style/Theme.NoTitleBar.Fullscreen">
+    	<!-- <item name="selectionDivider">@drawable/empty_shape</item>-->
+	</style>
+</resources>

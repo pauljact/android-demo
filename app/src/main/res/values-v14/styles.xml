@@ -1,0 +1,30 @@
+<resources>
+
+    <!--
+        Base application theme for API 14+. This theme completely replaces
+        AppBaseTheme from BOTH res/values/styles.xml and
+        res/values-v11/styles.xml on API 14+ devices.
+    -->
+    <style name="AppBaseTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+        <!-- API 14 theme customizations can go here. -->
+    </style>
+
+    <style name="JactMainTheme" parent="JactBaseTheme">
+		<!-- <item name="android:ambientShadowAlpha">0.5</item> Value in [0,1] for shadow strength of elevated views. Commented out here cuz only can be used in v21 and higher -->
+		<item name="android:alpha">1.0</item> <!-- Opaque (1.0) vs. transparent (0.0) -->
+		<!-- The following Overwrites the 'style' for the EditText fields. It is
+		     necessary because the parent style (Theme.AppCompat.Light, which we need
+		     to use to get ActionBar) has the 'style' for EditFields something different -->
+    	<item name="android:editTextBackground">@android:drawable/edit_text</item>
+    	<!-- <item name="android:actionBarStyle">@style/JactActionBar</item> -->
+	</style>
+	
+    <style name="number_picker_style" parent="@android:style/Theme.NoTitleBar.Fullscreen">
+    	<!-- <item name="selectionDivider">@drawable/empty_shape</item>-->
+	</style>
+
+<style name="JactActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
+    <!-- <item name="android:background">@color/orange</item> -->
+	<item name="android:background">@drawable/ab_solid_example</item>
+</style>
+</resources>

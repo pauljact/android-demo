@@ -1,0 +1,115 @@
+
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- <resources>-->
+    <style name="EmptyStyle"> </style>
+    
+    <!-- <style name="JactBaseTheme" parent="@style/Theme.AppCompat.Light"> -->
+    <style name="JactBaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <!-- Support library compatibility elements appear below the originals,
+             with the 'android:' prefix removed (necessary for AppCompat themes) -->
+        <!-- <item name="android:accountPreferences">jact_preferences.xml</item> -->
+        <!-- <item name="android:action[Bar|Button|Dropdown|Menu|Mode]...">Various Action Bar settings </item> -->
+        <!-- <item name="android:background...">Various background settings (here, 'background' means: when e.g. a menu is in foreground)</item> -->
+        <!-- <item name="android:button...">Various button settings</item> -->
+        <!-- <item name="android:color">#00FF00</item> -->
+    	<!-- <item name="android:background">#20F0F0F0</item> -->
+    	<!--  <item name="android:drawable">@drawable/glossy</item> Doesn't work; settings aren't getting picked up-->
+		<!-- <item name="android:background">@color/translucent_gray</item> -->
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:typeface">sans</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:editTextStyle">@android:style/Widget.EditText</item>
+
+        <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
+        <item name="actionButtonStyle">@style/ActionButtonStyle</item>
+        
+        <!-- Action Bar Settings -->
+		<!-- <item name="android:actionBarStyle">@style/JactActionBar</item> -->
+		<!--<item name="actionBarStyle">@style/JactActionBar</item>-->
+        <!-- <item name="actionBarItemBackground">@drawable/selectable_background_example</item>
+		<item name="popupMenuStyle">@style/PopupMenu.Example</item>
+		<item name="dropDownListViewStyle">@style/DropDownListView.Example</item>
+		<item name="actionBarTabStyle">@style/ActionBarTabStyle.Example</item>
+		<item name="actionDropDownStyle">@style/DropDownNav.Example</item> -->
+		<!-- <item name="actionBarStyle">@style/ActionBar.Solid.Example</item> -->
+		<!-- <item name="actionModeBackground">@drawable/cab_background_top_example</item>
+		<item name="actionModeSplitBackground">@drawable/cab_background_bottom_example</item>
+		<item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Example</item> -->
+	</style>
+    
+	<style name="JactActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">  
+        <!-- <item name="background">@color/light_blue</item>-->
+        <item name="background">@color/orange</item>
+        <!-- <item name="background">@drawable/ab_solid_example</item> --> 
+    </style>
+
+    <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
+        <item name="android:minWidth">0dip</item>
+        <item name="android:paddingLeft">0dip</item>
+        <item name="android:paddingRight">0dip</item>
+    </style>
+    
+    <style name="JactPopupMenu" parent="@style/Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@color/light_blue</item>
+    </style>
+    
+    <style name="JactMainTheme" parent="JactBaseTheme">
+        <!-- Inherits from JactBaseTheme above, but is otherwise empty.
+             The purpose of having a separate theme here, which is
+             empty and is thus completely defined by its parent,
+             is so that higher versions
+             can add functionality to JactMainTheme, but not have to
+             re-define the JactBaseTheme attributes that will be
+             common across all Android versions. See e.g. the
+             JactMainTheme styles in the res/values-vXX/styles.xml files. 
+         -->
+    </style>
+     
+    <style name="DrawerTextViewBase">
+        <item name="android:textColor">#fff</item>
+        <item name="android:paddingRight">16dp</item>
+    	<item name="android:paddingLeft">16dp</item>
+    	<item name="android:gravity">center_vertical</item>
+    	<item name="android:layout_height">wrap_content</item>
+    	<item name="android:layout_width">match_parent</item>
+    </style>
+    
+    <style name="DrawerTextView" parent="DrawerTextViewBase">
+        <!-- Inherits from DrawerTextViewBase; nothing new to add here
+             (Additional style settings are added in the styles.xml
+             file of the v-11 folder).
+         -->
+    </style>
+    
+    <style name="SpinnerStyle" parent="@style/Widget.AppCompat.DropDownItem.Spinner">
+       	<item name="android:layout_width">fill_parent</item>
+       	<item name="android:layout_height">wrap_content</item>
+       	<item name="android:background">@drawable/spinner_selector</item>
+        <!-- <item name="android:background">@drawable/gradient_spinner</item>-->
+        <item name="android:layout_marginLeft">5dp</item>
+        <item name="android:layout_marginRight">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:popupBackground">@color/light_blue</item>
+    </style>
+    
+    <style name="MyActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+    <item name="android:background"  tools:ignore="NewApi">@color/red</item>
+    <item name="background">@color/red</item>
+    <item name="colorPrimary">@color/dark_blue</item> 
+	<item name="colorPrimaryDark">@color/orange</item>
+    </style>
+
+    <style name="JactCustomActionBarTheme" parent="@style/Theme.AppCompat.Light">
+    <item name="android:actionBarStyle"   tools:ignore="NewApi">@style/MyActionBar</item>
+    <item name="actionBarStyle">@style/MyActionBar</item>
+    </style>
+    
+	<style name="number_picker_style" parent="@android:style/Theme.NoTitleBar.Fullscreen">
+    	<!-- <item name="selectionDivider">@drawable/empty_shape</item>-->
+	</style>
+</resources>

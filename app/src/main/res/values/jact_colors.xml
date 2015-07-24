@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!-- ================== Basic Colors ========================== -->
+     <color name="white">#FFFFFF</color>
+     
+     <color name="black">#000000</color>
+     <color name="translucent_black">#50000000</color>
+     
+     <color name="gray">#B6B6B6</color>
+     <color name="gray_text">#343434</color>
+     <color name="light_gray">#464646</color>
+     <color name="jact_gray">#767686</color>
+     <color name="jact_light_gray">#262646</color>
+     <color name="translucent_gray">#50B6B6B4</color>
+     <color name="mostly_translucent_gray">#25B6B6B4</color>
+     
+     <color name="red">#FF0000</color>
+     <color name="lighter_red">#DD0000</color>
+     <color name="red_text">#FF2200</color>
+     
+     <color name="orange">#FF8800</color>
+     
+     <color name="yellow">#FFFF00</color>
+     
+     <color name="light_blue">#0077FF</color>
+     <color name="dark_blue">#000088</color>
+     <color name="turquois">#10bcc9</color>
+     <color name="turquois_light">#10fcf9</color>
+     <color name="turquois_dark">#00627d</color>
+     
+     <color name="transparent">#00FFFFFF</color>
+<!-- ================== End Basic Colors ======================= -->
+     
+<!-- ================== Button Colors ========================== -->
+     <color name="button_red">#F05000</color>
+     <color name="button_red_pressed">#2FF05000</color>
+     <color name="button_blue">#427292</color>
+	 <color name="button_blue_pressed">#2F33CCFF</color>
+	 <color name="button_green">#82D222</color>
+	 <color name="button_green_pressed">#2F00CC11</color>
+	 <color name="button_yellow">#FFAA00</color>
+	 <color name="button_yellow_pressed">#2FFFAA00</color>
+<!-- ================== End Button Colors ====================== -->
+
+</resources>
