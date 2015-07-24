@@ -1,0 +1,29 @@
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/jact_toolbar"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:minHeight="?attr/actionBarSize"
+    app:theme="@style/JactMainTheme"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Dark">
+    <!-- android:background="?attr/colorPrimary"
+         android:background="@color/background_material_dark"
+         app:theme="@style/JactCustomActionBarTheme"
+         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" -->
+
+   <!-- Below will add your text in the center of toolbar -->
+   <TextView
+    android:id="@+id/toolbar_title_tv"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="top"
+    android:text="Jact"
+	android:textSize="24sp"
+	android:textStyle="normal"
+	android:typeface="normal"
+    android:textColor="#000000"/>
+
+ </android.support.v7.widget.Toolbar>
+<!-- 
+    android:background="#111" -->

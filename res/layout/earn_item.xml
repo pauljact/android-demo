@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/earn_item_ll"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/products_bg_selector"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="5dp" >
+
+    <!--  Video Thumbnail image -->
+    <LinearLayout android:id="@+id/earn_thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="1dp"
+        android:background="@drawable/products_image_bg"
+        android:layout_marginRight="2dp">
+        <com.example.jactfirstdemo.JactImageView
+            android:id="@+id/earn_image"
+            android:layout_width="200dp"
+            android:layout_height="180dp"              
+    		android:clickable="true"
+   	    	android:onClick="doEarnNowVideoClick"
+        />
+    </LinearLayout>
+    <!-- END Video Thumbnail image -->
+    
+    <!-- Earn Now Button -->
+    <Button
+   	    android:id="@+id/earn_now_button"
+   	    android:background="@drawable/button_selector_yellow"
+   	    android:layout_width="200dp"
+   	    android:layout_height="30dp"
+   	    android:gravity="center"
+   	    android:paddingLeft="10dp"
+   	    android:paddingRight="10dp"
+   	    android:onClick="doEarnNowClick"
+   	    android:text="@string/earn_now"
+   	    android:textColor="@color/white"/>
+    <!-- END Earn Now Button -->
+    
+    <!-- Earn Title -->
+    <TextView
+        android:id="@+id/earn_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:text="Prize Drawing"
+        android:textColor="@color/black"
+        android:typeface="sans"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
+    <!-- END Earn Title -->
+    
+    <!-- Earn Points -->    
+    <TextView
+        android:id="@+id/earn_points"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:textColor="@color/black"
+        android:typeface="sans"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
+    <!--  END Earn Points -->
+    
+    <!-- Empty Text View, to hold Earn ID -->
+    <TextView
+        android:id="@+id/earn_nid"
+		android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:background="@color/transparent"
+        android:visibility="invisible"/>
+ 
+</LinearLayout>

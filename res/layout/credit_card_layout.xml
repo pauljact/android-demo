@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<include layout="@layout/toolbar_layout"/>
+<!-- The main content view -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/credit_card_content_frame"
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    android:layout_marginTop="40dp"
+    android:background="@drawable/glossy">
+    
+    <!-- Step Navigation -->
+    <LinearLayout
+        android:id="@+id/credit_card_navigation_steps"
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+    	android:background="@color/white"
+    	android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:weightSum="1.0">
+		   	<TextView
+		   	    android:layout_height="wrap_content"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.25"
+		   		android:layout_marginTop="4dp"
+		   		android:layout_marginBottom="4dp"
+		   		android:gravity="center"
+		   	    android:textSize="20sp"
+		   	    android:textStyle="bold"
+		   	    android:text="@string/cart_str"
+		   	    android:textColor="@color/translucent_gray"
+    			android:background="@color/transparent"/>
+		   	<TextView
+		   	    android:layout_height="wrap_content"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.25"
+		   		android:layout_marginTop="4dp"
+		   		android:layout_marginBottom="4dp"
+		   		android:gravity="center"
+		   	    android:textSize="20sp"
+		   	    android:textStyle="bold"
+		   	    android:text="@string/shipping_str"
+		   	    android:textColor="@color/translucent_gray"
+    			android:background="@color/transparent"/>
+		   	<TextView
+		   	    android:layout_height="wrap_content"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.25"
+		   		android:layout_marginTop="4dp"
+		   		android:layout_marginBottom="4dp"
+		   		android:gravity="center"
+		   	    android:textSize="20sp"
+		   	    android:textStyle="bold"
+		   	    android:text="@string/billing_str"
+		   	    android:textColor="@color/yellow"
+    			android:background="@color/transparent"/>
+		   	<TextView
+		   	    android:layout_height="wrap_content"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight="0.25"
+		   		android:layout_marginTop="4dp"
+		   		android:layout_marginBottom="4dp"
+		   		android:gravity="center"
+		   	    android:textSize="20sp"
+		   	    android:textStyle="bold"
+		   	    android:text="@string/submit_str"
+		   	    android:textColor="@color/translucent_gray"
+    			android:background="@color/transparent"/>
+    </LinearLayout>
+    
+    <!-- Add New Address Option -->
+    <LinearLayout
+   	    android:id="@+id/credit_card_add_new_addr_ll"
+        android:layout_below="@id/credit_card_navigation_steps"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+   	    android:layout_marginBottom="1dp"
+    	android:background="@color/transparent"
+    	android:orientation="horizontal"
+	    android:weightSum="1.0">
+	   	<TextView
+	   	    android:layout_width="0dp"
+	   	    android:layout_weight="0.20"
+	   	    android:layout_height="wrap_content"
+   			android:background="@color/transparent"/>
+	   	<Button
+	   	    android:id="@+id/credit_card_add_new_cc_button"
+	   	    android:layout_width="0dp"
+	   	    android:layout_weight="0.60"
+	   	    android:layout_height="20dp"
+	   	    android:background="@drawable/button_selector_yellow"
+	   	    android:layout_marginTop="4dp"
+	   	    android:layout_marginLeft="0dp"
+		   	android:paddingLeft="2dp"
+		   	android:paddingRight="2dp"
+	   	    android:gravity="center"
+	   	    android:onClick="doCreditCardAddNewButtonClick"
+		   	android:textSize="12sp"
+	   	    android:text="@string/new_cc_str"
+	   	    android:textColor="@color/black"/>
+	   	<TextView
+	   	    android:layout_width="0dp"
+	   	    android:layout_weight="0.20"
+	   	    android:layout_height="wrap_content"
+   			android:background="@color/transparent"/>
+    </LinearLayout>
+    <!-- End Add New Address Option -->
+	    
+    <!-- Use Same Address as Shipping -->
+    <!--
+    <LinearLayout
+        android:id="@+id/credit_card_use_same_addr_ll"
+        android:layout_below="@id/credit_card_add_new_addr_ll"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+   	    android:layout_marginBottom="0dp"
+    	android:background="@color/transparent"
+    	android:orientation="horizontal"
+	    android:weightSum="1.0">
+		<CheckBox
+		    android:id="@+id/credit_card_use_same_addr_cb"
+	   	    android:layout_width="0dp"
+	   	    android:layout_weight=".50"
+	        android:layout_height="wrap_content"
+		    android:layout_marginRight="7dp"
+	        android:text="@string/billing_use_same_addr_str"
+		   	android:textColor="@color/dark_blue"
+	        android:onClick="onBillingUseSameAddressCheckboxClicked"/>
+	    <LinearLayout
+	   	    android:layout_width="0dp"
+	   	    android:layout_weight=".50"
+	   	    android:layout_height="wrap_content"
+	    	android:background="@color/transparent"
+	    	android:orientation="vertical">
+		   	<TextView
+		   	    android:id="@+id/credit_card_same_addr_name"
+		   	    android:layout_width="wrap_content"
+		   	    android:layout_height="wrap_content"
+		   	    android:textSize="12sp"
+		   	    android:text="@string/name_str"
+		   	    android:textColor="@color/black"
+	   			android:background="@color/transparent"/>
+		   	<TextView
+		   	    android:id="@+id/credit_card_same_addr_street"
+		   	    android:layout_width="wrap_content"
+		   	    android:layout_height="wrap_content"
+		   	    android:textSize="12sp"
+		   	    android:text="@string/street_str"
+		   	    android:textColor="@color/black"
+	   			android:background="@color/transparent"/>
+		   	<TextView
+		   	    android:id="@+id/credit_card_same_addr_city"
+		   	    android:layout_width="wrap_content"
+		   	    android:layout_height="wrap_content"
+		   	    android:textSize="12sp"
+		   	    android:text="@string/city_str"
+		   	    android:textColor="@color/black"
+	   			android:background="@color/transparent"/>
+	    </LinearLayout>
+    </LinearLayout>
+     -->
+    <!-- Use Same Address as Shipping -->    
+
+    <!-- Title -->
+    <LinearLayout
+        android:id="@+id/credit_card_header_bar"
+        android:layout_below="@id/credit_card_add_new_addr_ll"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="30dp"
+        android:layout_marginTop="1dp"
+   	    android:layout_marginBottom="0dp"
+    	android:background="@color/transparent"
+    	android:orientation="horizontal"
+	    android:weightSum="1.0">
+	   	<TextView
+	   	    android:layout_width="0dp"
+	   	    android:layout_weight="0.01"
+	   	    android:layout_height="wrap_content"
+   			android:background="@color/transparent"/>
+	   	<TextView
+	   	    android:id="@+id/credit_card_header_bar_title"
+	   	    android:layout_width="0dp"
+	   	    android:layout_weight="0.98"
+	   	    android:layout_height="wrap_content"
+	   		android:layout_marginTop="4dp"
+	   		android:layout_marginBottom="4dp"
+	   		android:gravity="center"
+	   	    android:textSize="16sp"
+	   	    android:textStyle="bold"
+	   	    android:text="@string/cc_title_str"
+	   	    android:textColor="@color/dark_blue"
+   			android:background="@color/transparent"/>
+	   	<TextView
+	   	    android:layout_width="0dp"
+	   	    android:layout_weight="0.01"
+	   	    android:layout_height="wrap_content"
+   			android:background="@color/transparent"/>
+	</LinearLayout>    
+   	<!-- End Title -->
+
+	<!-- Divider Bar -->
+    <LinearLayout
+        android:id="@+id/credit_card_divider_bar"
+        android:layout_below="@id/credit_card_header_bar"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="1dp"
+        android:layout_marginTop="0dp"
+   	    android:layout_marginBottom="0dp"
+    	android:background="@color/light_blue"
+    	android:orientation="horizontal">
+    </LinearLayout>
+    <!-- End Divider Bar -->
+    
+    <LinearLayout
+        android:layout_below="@id/credit_card_divider_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+	   	
+    <!-- List of Addresses -->
+    <ListView
+        android:id="@+id/credit_card_list"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="#b5b5b5"
+        android:dividerHeight="1dp"
+        android:listSelector="@drawable/products_bg_selector"
+    />
+    <!-- End List of Addresses -->
+    
+    <LinearLayout
+        android:id="@+id/credit_card_bottom_ll"
+        android:layout_alignParentBottom="true"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+   	    android:layout_marginBottom="1dp"
+    	android:background="@color/transparent"
+    	android:orientation="vertical">
+	    <!-- Divider Bar -->
+	    <LinearLayout
+	   	    android:layout_width="match_parent"
+	   	    android:layout_height="3dp"
+	        android:layout_marginTop="0dp"
+	   	    android:layout_marginBottom="0dp"
+	    	android:background="@color/light_blue"
+	    	android:orientation="horizontal">
+	    </LinearLayout>
+	    <!-- End Divider Bar -->
+	    
+	    <!-- Prev and Next Buttons -->
+		<LinearLayout
+	   	    android:id="@+id/credit_card_button_ll"
+	   	    android:layout_width="match_parent"
+	   	    android:layout_height="wrap_content"
+	        android:layout_marginTop="1dp"
+	   	    android:layout_marginBottom="1dp"
+	    	android:background="@color/transparent"
+	        android:layout_centerHorizontal="true"
+	    	android:orientation="horizontal"
+	        android:weightSum="1.0">
+		   	<Button
+		   	    android:id="@+id/credit_card_prev_button"
+		   	    android:background="@drawable/button_selector_yellow"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight=".40"
+		   	    android:layout_height="40dp"
+		   	    android:layout_marginLeft="5dp"
+		   	    android:layout_marginTop="5dp"
+			   	android:paddingLeft="10dp"
+			   	android:paddingRight="10dp"
+		   	    android:gravity="center"
+		        android:layout_centerHorizontal="true"
+		   	    android:onClick="doBillingPrevButtonClick"
+		   	    android:text="@string/prev_str"
+		   	    android:textColor="@color/black"/>
+		   	<EditText
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight=".20"
+		   	    android:layout_height="wrap_content"
+		   	    android:layout_marginTop="1dp"
+	   	    	android:layout_marginLeft="1dp"
+	   	    	android:layout_marginRight="1dp"
+	        	android:visibility="invisible"/>
+		   	<Button
+		   	    android:id="@+id/credit_card_next_button"
+		   	    android:background="@drawable/button_selector_yellow"
+		   	    android:layout_width="0dp"
+		   	    android:layout_weight=".40"
+		   	    android:layout_height="40dp"
+		   	    android:layout_marginTop="5dp"
+		   	    android:layout_marginRight="5dp"
+			   	android:paddingLeft="10dp"
+			   	android:paddingRight="10dp"
+		   	    android:gravity="center"
+		        android:layout_centerHorizontal="true"
+		   	    android:onClick="doBillingNextButtonClick"
+		   	    android:text="@string/next_str"
+		   	    android:textColor="@color/black"/>
+		</LinearLayout>
+	    <!-- End Next Button -->
+	</LinearLayout>
+	</LinearLayout>
+
+    <ProgressBar
+   	    android:id="@+id/credit_card_progress_bar"
+   	    style="?android:attr/progressBarStyleLarge"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_centerHorizontal="true"
+   	    android:layout_centerVertical="true"
+        android:visibility="invisible"
+   	/> 
+</RelativeLayout>
+
+<!-- Navigation Drawer -->
+
+<ListView
+    android:id="@+id/nav_left_drawer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#CC111111"
+    android:choiceMode="singleChoice"
+    android:divider="@android:color/transparent"
+    android:dividerHeight="0dp"
+    android:listSelector="@drawable/drawer_bg_selector" />
+
+</android.support.v4.widget.DrawerLayout>
