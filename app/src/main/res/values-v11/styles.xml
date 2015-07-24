@@ -1,0 +1,32 @@
+<resources>
+
+    <!--
+        Base application theme for API 11+. This theme completely replaces
+        AppBaseTheme from res/values/styles.xml on API 11+ devices.
+    -->
+    <style name="AppBaseTheme" parent="android:Theme.Holo.Light">
+        <!-- API 11 theme customizations can go here. -->
+    </style>
+    
+    <style name="JactMainTheme" parent="JactBaseTheme">
+		<!-- <item name="android:ambientShadowAlpha">0.5</item> Value in [0,1] for shadow strength of elevated views. Commented out here cuz only can be used in v21 and higher -->
+		<item name="android:alpha">1.0</item> <!-- Opaque (1.0) vs. transparent (0.0) -->
+		<!-- The following Overwrites the 'style' for the EditText fields. It is
+		     necessary because the parent style (Theme.AppCompat.Light, which we need
+		     to use to get ActionBar) has the 'style' for EditFields something different -->
+    	<item name="android:editTextBackground">@android:drawable/edit_text</item>
+	</style>
+     
+    <style name="DrawerTextView" parent="DrawerTextViewBase">
+        <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
+        <item name="android:background">?android:attr/activatedBackgroundIndicator</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceListItemSmall</item>
+    </style>
+    <!--
+    <style name="StandAloneDrawerTextView" parent="DrawerTextViewBase">
+        <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
+        <item name="android:background">?android:attr/activatedBackgroundIndicator</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceListItemSmall</item>
+    </style>
+    -->
+</resources>

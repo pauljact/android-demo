@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.jactfirstdemo"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="17" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- The following three are required for GCM -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- The following permission is necessary for Google/Facebook Sign in -->
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+
+    <!--
+         The following permission/uses-permission are for GCM (ensure only Jact App
+         receives Jact GCM messages)
+    -->
+    <permission
+        android:name="com.example.jactfirstdemo.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.example.jactfirstdemo.permission.C2D_MESSAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
+    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/JactMainTheme" >
+
+        <!-- For Facebook Sign-In and Likes, etc. -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+
+        <!-- For Google Play Services (for GCM) -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <!--
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        -->
+        <!--
+             Receivers for GCM. The android:permission below ensures only GCM has
+             permission to send messages to the Jact App.
+        -->
+        <receiver
+            android:name="com.example.jactfirstdemo.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
+                <category android:name="com.example.jactfirstdemo" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name="com.example.jactfirstdemo.OnBootBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+
+                <category android:name="com.example.jactfirstdemo" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name="com.example.jactfirstdemo.GcmIntentService" />
+
+        <activity
+            android:name="com.example.jactfirstdemo.JactLoginActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.JactLoggedInHomeActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity" >
+
+            <!-- android:label="@string/jact_logged_in_home_activity_label" -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.ProductsActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.ShoppingCartActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.ShippingActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.ShippingNewActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.BillingNewActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.BillingActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.ReviewCartActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.FaqActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.EarnActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.YouTubePlayerActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.EarnActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.EarnActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.EarnRedeemActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.EarnActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.EarnActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.CheckoutActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.ViewOrdersActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.NewUserActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity"
+            android:windowSoftInputMode="adjustPan" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.ForgotPasswordActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoginActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoginActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.CommunityActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.example.jactfirstdemo.GamesActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:parentActivityName="com.example.jactfirstdemo.JactLoggedInHomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.jactfirstdemo.JactLoggedInHomeActivity" />
+        </activity>
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <!-- Include the AdActivity and InAppPurchaseActivity configChanges and themes. -->
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:theme="@android:style/Theme.Translucent" />
+        <activity
+            android:name="com.google.android.gms.ads.purchase.InAppPurchaseActivity"
+            android:theme="@style/Theme.IAPTheme" />
+
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true" />
+
+        <receiver
+            android:name="com.google.android.gms.wallet.EnableWalletOptimizationReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.gms.wallet.ENABLE_WALLET_OPTIMIZATION" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

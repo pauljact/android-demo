@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Activity Labels -->
+    <string name="cart_activity_label">Shopping Cart</string>
+    <string name="billing_label">Checkout: Billing</string>
+    <string name="shipping_label">Checkout: Shipping</string>
+    <string name="review_label">Checkout: Review</string>
+    <string name="faq_label">FAQ</string>
+    <string name="earn_label">Earn</string>
+    <string name="games_label">Games</string>
+    <string name="community_label">Community</string>
+    <string name="forgot_password_label">Forgot Password</string>
+    <string name="forgot_username">Forgot Username</string>
+    <string name="new_user_label">Register</string>
+    <string name="checkout_label">Checkout</string>
+    <string name="rewards_label">Rewards</string>
+    <string name="jact_logged_in_home_activity_label">Jact - Play With Purpose</string>
+    <!-- EnD Activity Labels -->
+    
+    <!-- SharedPreferences Keys -->
+    <string name="was_logged_off_key">logged_off</string>
+    <string name="webview_url_key">webview_url_key</string>
+    <string name="webview_title_key">webview_title_key</string>
+    <string name="earn_url_key">earn_url_key</string>
+    <!-- End SharedPreferences Keys -->
+    
+    <!-- XML Keys -->
+    <string name="nav_drawer_width">320dp</string>
+    <!-- END XML Keys -->
+    
+    <!-- Menu Options -->
+    <string name="menu_games">Games</string>
+    <string name="menu_rewards">Rewards</string>
+    <string name="menu_community">Community</string>
+    <string name="menu_shopping_cart">Shopping Cart</string>
+    <string name="menu_profile">My Profile</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_jact_points">0</string>
+    <string name="menu_jact_points_logo">J</string>
+    <string name="menu_jact_my_profile">My Profile</string>
+    <string name="menu_jact_my_orders">My Orders</string>
+    <string name="menu_about_jact">About Jact</string>
+    <string name="menu_contact_us">Contact Us</string>
+    <string name="menu_faq">FAQ</string>
+    <string name="menu_user_agreement">User Agreement</string>
+    <string name="menu_privacy_policy">Privacy Policy</string>
+    <string name="menu_logout">Sign Out</string>
+    <string name="menu_menu">Menu</string>
+    <!-- End Menu Options -->
+    
+    <!-- User Profile Info Keys -->
+    <string name="ui_master_file">master_file</string>
+    <string name="ui_username">username</string>
+    <string name="ui_usernames">usernames</string>
+    <string name="ui_password">password</string>
+    <string name="ui_is_logged_in">is_logged_in</string>
+    <string name="ui_is_google_logged_in">is_google_logged_in</string>
+    <string name="ui_is_facebook_logged_in">is_facebook_logged_in</string>
+    <string name="ui_session_cookies">session_cookies</string>
+    <string name="ui_csrf_token">csrf_token</string>
+    <string name="ui_session_name">session_name</string>
+    <string name="ui_session_id">session_id</string>
+    <string name="ui_token">token</string>
+    <string name="ui_user_id">user_id</string>
+    <string name="ui_user_name">user_name</string>
+    <string name="ui_user_email">user_email</string>
+    <string name="ui_signature">signature</string>
+    <string name="ui_user_icon_url">user_icon_url</string>
+    <string name="ui_user_points">user_points</string>
+    <!-- End User Profile Info Keys -->
+    
+    <!-- Checkout -->
+    <string name="cart_str">Cart</string>
+    <string name="shipping_str">Shipping</string>
+    <string name="billing_str">Billing</string>
+    <string name="submit_str">Submit</string>
+    <string name="place_order_str">Place Order</string>
+    <string name="ship_to_str">Ship To:</string>
+    <string name="bill_to_str">Bill To:</string>
+    <string name="review_order_str">Review Order:</string>
+    <string name="cart_items_str">Cart Items:</string>
+    <string name="next_str">Next</string>
+    <string name="prev_str">Previous</string>
+    <string name="drawing">Drawing</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="clear_cart">Clear Cart</string>
+    <string name="proceed_to_billing">Proceed to Billing</string>
+    <string name="proceed_to_checkout">  Proceed to Checkout  </string>
+    <string name="proceed_to_final_review">Review and Submit</string>
+    <!-- End Checkout -->
+    
+    <!-- Address and Billing Terms -->
+    <string name="addr_title_str">Or Select From a Saved Address:</string>
+    <string name="cc_title_str">Or Select From a Saved Credit Card:</string>
+    <string name="billing_use_same_addr_str">Use Same Address as Shipping</string>
+    <string name="new_addr_shipping_str">Add New Shipping Address</string>
+    <string name="new_addr_billing_str">Add New Billing Address</string>
+    <string name="new_cc_str">Add New Credit Card</string>
+    <string name="delete_addr_str">Delete Address</string>
+    <string name="name_str">Name</string>
+    <string name="name_on_card_str">Name on Card</string>
+    <string name="first_str">First</string>
+    <string name="last_str">Last</string>
+    <string name="address_str">Address</string>
+    <string name="billing_address_str">Billing Address</string>
+    <string name="street_str">Street</string>
+    <string name="city_str">City</string>
+    <string name="state_str">State</string>
+    <string name="zip_str">Zip Code</string>
+    <string name="cc_str">Credit Card</string>
+    <string name="cc_info_str">Credit Card Info</string>
+    <string name="cc_type_str">Card Type</string>
+    <string name="cc_number_str">Card Number</string>
+    <string name="cc_crv_str">CRV</string>
+    <string name="exp_date_str">Exp Date:</string>
+    <string name="month_str">Month</string>
+    <string name="year_str">Year</string>
+    <!-- End Address Terms -->
+    
+    <!-- New User Layout -->
+    <string name="username">Username</string>
+    <string name="email">E-mail Address</string>
+    <string name="password">Password</string>
+    <string name="password_confirm">Confirm Password</string>
+    <string name="select_icon">Select User Icon</string>
+    <string name="register_button_str">Create New Account</string>
+    <string name="new_user_icon_prompt">Select Jact Avatar</string>
+    <string name="choose_photo_from_phone">...Or choose photo from device</string>
+    <!-- END New User Layout -->
+    
+    <!-- Strings used in Layouts -->
+    <string name="dummy_image_view_description">Dummy Image View Description</string>
+    <string name="dummy_text_view_text">Empty</string>
+    <string name="dummy_quantity_str">0</string>
+    <string name="prize_drawing_str">Prize Drawing</string>
+    <string name="drawing_ends_str">Drawing Ends:</string>
+    <string name="orig_price_str">Original Price:</string>
+    <string name="jact_price_str">JACT Price:</string>
+    <string name="product_description_str">Product Description:</string>
+    <string name="product_title_str">Product Title</string>
+    <string name="earn_title_str">Earn Title</string>
+    <string name="max_quantity_str">Max Quantity:</string>
+    <string name="details">Details</string>
+    <string name="all_rewards">See all Rewards</string>
+    <string name="all_earn">See all Earn</string>
+    <string name="empty_cart">No Items In Cart</string>
+    <!-- END Strings used in Layouts -->
+
+    <!-- Buttons -->
+    <string name="facebook_signin_str">Sign-In with Facebook</string>
+    <string name="google_signin_str">Sign-In with Google</string>
+    <!-- END Buttons -->
+    
+    <!-- Miscellaneous -->
+    <string name="empty_string"></string>
+    <string name="null_str">null</string>
+    <string name="app_name">JACT</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="jact_simple_name">JACT</string>
+    <string name="jact_motto">Play With Purpose</string>
+    <string name="jact_register">Register</string>
+    <string name="jact_username">Username</string>
+    <string name="jact_password">Password</string>
+    <string name="jact_login">Login</string>
+    <string name="youtube_id">youtube_id</string>
+    <string name="earn_now">Earn Now</string>
+    <string name="forgot_password_str">Username</string>
+    <string name="email_password_str">Email New Password</string>
+    <string name="wrong_username">Wrong username or password</string>
+    <string name="unknown_user">Welcome to Jact</string>
+    <string name="user_points_dots">User Points: &#8230;</string>
+    <string name="go_to_earn_main_page">go_to_earn_main_page</string>
+    <string name="facebook_app_id">254319494681206</string>
+    <!-- End Miscellaneous -->
+    
+    <!-- Quantity 0-10 -->
+    <string-array name="quantities">
+	  <item>0</item>
+	  <item>1</item>
+	  <item>2</item>
+	  <item>3</item>
+	  <item>4</item>
+	  <item>5</item>
+	  <item>6</item>
+	  <item>7</item>
+	  <item>8</item>
+	  <item>9</item>
+	  <item>10</item>
+	</string-array>
+	<!-- End Quantity 0-10 -->
+	
+	<!-- Credit Card Types -->
+	<string-array name="cc_types_array">
+	    <item>Card Type</item>
+	    <item>Visa</item>
+	    <item>MasterCard</item>
+	    <item>AmEx</item>
+	</string-array>
+	<!-- END: Credit Card Types -->
+	
+	<!-- Months -->
+	<string-array name="months_array">
+	    <item>Month</item>
+	    <item>01</item>
+	    <item>02</item>
+	    <item>03</item>
+	    <item>04</item>
+	    <item>05</item>
+	    <item>06</item>
+	    <item>07</item>
+	    <item>08</item>
+	    <item>09</item>
+	    <item>10</item>
+	    <item>11</item>
+	    <item>12</item>
+	</string-array>
+	<!-- END: Months -->
+	
+	<!-- Years -->
+	<string-array name="years_array">
+	    <item>Year</item>
+	    <item>2015</item>
+	    <item>2016</item>
+	    <item>2017</item>
+	    <item>2018</item>
+	    <item>2019</item>
+	    <item>2020</item>
+	    <item>2021</item>
+	    <item>2022</item>
+	    <item>2023</item>
+	    <item>2024</item>
+	    <item>2025</item>
+	</string-array>
+	<!-- END: Years -->
+	
+    <!-- States -->
+    <string-array name="states">
+      <item>State</item>
+	  <item>AK</item>
+	  <item>AL</item>
+	  <item>AR</item>
+	  <item>AZ</item>
+	  <item>CA</item>
+	  <item>CO</item>
+	  <item>CT</item>
+	  <item>DE</item>
+	  <item>DC</item>
+	  <item>FL</item>
+	  <item>GA</item>
+	  <item>HI</item>
+	  <item>ID</item>
+	  <item>IL</item>
+	  <item>IN</item>
+	  <item>IA</item>
+	  <item>KS</item>
+	  <item>KY</item>
+	  <item>LA</item>
+	  <item>ME</item>
+	  <item>MD</item>
+	  <item>MA</item>
+	  <item>MI</item>
+	  <item>MN</item>
+	  <item>MS</item>
+	  <item>MO</item>
+	  <item>MT</item>
+	  <item>NE</item>
+	  <item>NV</item>
+	  <item>NH</item>
+	  <item>NJ</item>
+	  <item>NM</item>
+	  <item>NY</item>
+	  <item>NC</item>
+	  <item>ND</item>
+	  <item>OH</item>
+	  <item>OK</item>
+	  <item>OR</item>
+	  <item>PA</item>
+	  <item>RI</item>
+	  <item>SC</item>
+	  <item>SD</item>
+	  <item>TN</item>
+	  <item>TX</item>
+	  <item>UT</item>
+	  <item>VT</item>
+	  <item>VA</item>
+	  <item>WA</item>
+	  <item>WV</item>
+	  <item>WI</item>
+	  <item>WY</item>
+	</string-array>
+    <!-- End States -->
+</resources>

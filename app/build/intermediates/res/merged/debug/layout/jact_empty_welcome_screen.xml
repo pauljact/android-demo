@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/login_empty_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".JactLoginActivity">
+    
+    <LinearLayout
+   	    android:id="@+id/login_icon_and_name_on_empty"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+   	    android:layout_marginBottom="1dp"
+        android:layout_centerHorizontal="true"
+    	android:background="#00FFFFFF">
+		    <ImageView
+		        android:id="@+id/jact_icon_on_empty"
+        		android:layout_marginTop="5dp"
+		        android:layout_width="48dp"
+		        android:layout_height="48dp"
+		        android:src="@drawable/ic_launcher"
+    			android:background="#00FFFFFF"
+		    />
+		   	<TextView
+		   	    android:id="@+id/jact_motto_textview_on_empty"
+		   	    android:layout_width="wrap_content"
+		   	    android:layout_height="wrap_content"
+		   	    android:text="@string/jact_simple_name"
+		   	    android:textSize="44sp"
+		   	    android:textStyle="bold"
+    			android:background="#00FFFFFF"
+		   	/>
+	</LinearLayout>
+   	<TextView
+   	    android:id="@+id/jact_logging_in_message"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_below="@+id/login_icon_and_name_on_empty"
+   	    android:layout_centerHorizontal="true"
+   	    android:layout_marginTop="15dp"
+   	    android:text="Logging in..."
+   	    android:textSize="15sp"
+   	    android:textStyle="bold"
+    	android:background="#00FFFFFF"
+    />
+   	<ProgressBar
+   	    android:id="@+id/login_progress_bar_on_empty"
+   	    style="?android:attr/progressBarStyleLarge"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_below="@+id/jact_logging_in_message"
+   	    android:layout_centerHorizontal="true"
+   	    android:layout_marginTop="10dp"
+    	android:background="#00FFFFFF"
+   	/>		
+</RelativeLayout><!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/layout/jact_empty_welcome_screen.xml -->
