@@ -323,7 +323,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   	  dialog_.show(getSupportFragmentManager(), id);
 	} else {
 	  Log.e("JactActionBarActivity::DisplayPopupFragment",
-			"Unable to show Popup with title: " + title + " and message: " + message);	
+			"Unable to show PopUp with title: " + title + " and message: " + message);
 	}
   }
   
