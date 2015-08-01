@@ -20,6 +20,7 @@ import android.view.animation.AlphaAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -44,6 +45,10 @@ public class ForgotPasswordActivity extends ActionBarActivity
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
     TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
     ab_title.setText(R.string.forgot_password_label);
+    TextView points = (TextView) findViewById(R.id.toolbar_title_points);
+    points.setVisibility(View.GONE);
+    ImageView points_icon = (ImageView) findViewById(R.id.toolbar_userpoints_pic);
+    points_icon.setVisibility(View.GONE);
     setSupportActionBar(toolbar);
   }
     
@@ -197,7 +202,7 @@ public class ForgotPasswordActivity extends ActionBarActivity
       }
       is_password_reset_ = true;
     } else {
-      Log.e("ForgotPasswordActivity::ProcessUrlResponse", "Unrecognized task: " + extra_params);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ForgotPasswordActivity::ProcessUrlResponse", "Unrecognized task: " + extra_params);
     }
   }
 
@@ -209,7 +214,7 @@ public class ForgotPasswordActivity extends ActionBarActivity
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
 	fadeAllViews(false);
 	// TODO(PHB): Implement this for real, once Forgot Password is figured out.
-	Log.e("PHB TEMP", "ForgotPassword::ProcessFailedResponse. Status: " + status);
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "ForgotPassword::ProcessFailedResponse. Status: " + status);
 	if (status == FetchStatus.ERROR_UNRECOGNIZED_USERNAME) {
 	  UnrecognizedUsernameWarning();
 	} else {

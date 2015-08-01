@@ -13,6 +13,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -56,7 +57,7 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
     
   @Override
   protected void onResume() {
-	Log.e("PHB TEMP", "CheckoutActivity::onResume");
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "CheckoutActivity::onResume");
 	super.onResume();
     navigation_drawer_.setActivityIndex(ActivityIndex.CHECKOUT_VIA_MOBILE_SITE);
     
@@ -79,17 +80,20 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
     // Set webview from checkout_url_.
     String url_to_load = checkout_url_ + Integer.toString(order_id_);
     if (order_id_ <= 0) {
-      Log.e("PHB ERROR", "CheckoutActivity::onResume. Order id: " + order_id_);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "CheckoutActivity::onResume. Order id: " + order_id_);
       onBackPressed();
       return;
     }
-    Log.i("CheckoutActivity::onResume", "Loading Checkout webpage with order id: " + order_id_);
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.i("CheckoutActivity::onResume", "Loading Checkout webpage with order id: " + order_id_);
     WebView web_view = (WebView) findViewById(R.id.checkout_mobile_webview);
     web_view.loadUrl(url_to_load);
     web_view.setWebViewClient(webview_client_);
-    // Enable javascript, to have tables display properly.
-    WebSettings ws = web_view.getSettings();
-    ws.setJavaScriptEnabled(true);
+    // Enable javascript, to have tables display properly (we only do this for
+    // newer android operating systems, as older ones don't seem to work well).
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      WebSettings ws = web_view.getSettings();
+      ws.setJavaScriptEnabled(true);
+    }
     
     // Set spinner (and hide WebView) until page has finished loading.
     SetCartIcon(this);
@@ -133,14 +137,14 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
   @Override
   // We overload doSomething to handle clicks on links in the WebView.
   public boolean doSomething(String info) {
-	Log.e("PHB TEMP", "CheckoutActivity::doSomething. url: " + info +
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "CheckoutActivity::doSomething. url: " + info +
 			          ", orders_url: " + order_url_ + Integer.toString(order_id_)); 
 	if (info.equals(order_url_ + Integer.toString(order_id_))) {
-	  Log.e("PHB TEMP", "CheckoutActivity::doSomething. Going to View Orders with order id: " + order_id_);
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "CheckoutActivity::doSomething. Going to View Orders with order id: " + order_id_);
       if (jact_user_id_.isEmpty()) {
     	// TODO(PHB): Determine if I need to do any additional handling here, e.g. returning to main
     	// checkout activity, or to home activity.
-    	Log.e("CheckoutActivity::doSomething", "Cannot view orders without user id. Aborting.");
+    	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("CheckoutActivity::doSomething", "Cannot view orders without user id. Aborting.");
     	return false;
       }
 	  ViewOrdersActivity.SetOrderId(Integer.toString(order_id_));
@@ -148,11 +152,11 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
 	  return true;
 	} else if (info.equals(jact_home_url_) ||
 			   info.equals(jact_home_url_ + "/")) {
-	  Log.e("PHB TEMP", "CheckoutActivity::doSomething. Going back to Rewards Page.");
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "CheckoutActivity::doSomething. Going back to Rewards Page.");
 	  startActivity(new Intent(this, JactLoggedInHomeActivity.class));
 	} else if (info.equals(checkout_url_ + Integer.toString(order_id_) + "/complete")) {
 	  GetCart(this);
-	  Log.e("PHB TEMP", "CheckoutActivity::doSomething. Should clear cart, then go to Checkout complete page.");		
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "CheckoutActivity::doSomething. Should clear cart, then go to Checkout complete page.");		
 	}
 	return webview_client_.CallSuperLoadUrl(info);
   }

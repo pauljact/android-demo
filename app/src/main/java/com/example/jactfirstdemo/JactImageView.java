@@ -61,7 +61,7 @@ public class JactImageView extends ImageView {
         try {
             LayerDrawable layers = (LayerDrawable) this.getDrawable();
             if (layers.getNumberOfLayers() != 2) {
-                Log.w("JactImageView::onDraw",
+                if (!JactActionBarActivity.IS_PRODUCTION) Log.w("JactImageView::onDraw",
                         "For UseCase 'EARN_IMAGE_THUMBNAIL', expected image to have two layers, but found: " +
                                 layers.getNumberOfLayers());
                 return;
@@ -74,7 +74,7 @@ public class JactImageView extends ImageView {
             play_button_icon.setBounds(left, top, right, bottom);
             this.invalidateDrawable(play_button_icon);
         } catch (ClassCastException e) {
-            Log.w("JactImageView::onDraw", "For UseCase 'EARN_IMAGE_THUMBNAIL', expected " +
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.w("JactImageView::onDraw", "For UseCase 'EARN_IMAGE_THUMBNAIL', expected " +
                     "drawable to be layered, but unable to cast as such.");
         }
     } else if (use_case_ == UseCase.FEATURED_EARN) {
@@ -84,7 +84,7 @@ public class JactImageView extends ImageView {
         try {
             LayerDrawable layers = (LayerDrawable) this.getDrawable();
             if (layers.getNumberOfLayers() != 2) {
-                Log.w("JactImageView::onDraw",
+                if (!JactActionBarActivity.IS_PRODUCTION) Log.w("JactImageView::onDraw",
                         "For UseCase 'EARN_IMAGE_THUMBNAIL', expected image to have two layers, but found: " +
                                 layers.getNumberOfLayers());
                 return;
@@ -97,7 +97,7 @@ public class JactImageView extends ImageView {
             play_button_icon.setBounds(left, top, right, bottom);
             this.invalidateDrawable(play_button_icon);
         } catch (ClassCastException e) {
-            Log.w("JactImageView::onDraw", "For UseCase 'EARN_IMAGE_THUMBNAIL', expected " +
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.w("JactImageView::onDraw", "For UseCase 'EARN_IMAGE_THUMBNAIL', expected " +
                     "drawable to be layered, but unable to cast as such.");
         }
     }

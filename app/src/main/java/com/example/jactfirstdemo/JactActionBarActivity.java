@@ -31,6 +31,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   protected JactDialogFragment dialog_;
   protected int activity_id_;
   protected static final String USER_POINTS = "user_points";
+  public static final boolean IS_PRODUCTION = true;
 	
   protected void onCreate(Bundle savedInstanceState, int activity_id,
 		                  int layout, JactNavigationDrawer.ActivityIndex index) {
@@ -38,7 +39,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
 
     can_show_dialog_ = false;
 	if (!IsLoggedOn()) {
-	  Log.w("JactActionBarActivity::onCreate", "Not logged on. Returning to Login Activity...");
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.w("JactActionBarActivity::onCreate", "Not logged on. Returning to Login Activity...");
 	  onBackPressed();
 	  finish();
 	}
@@ -71,7 +72,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
 	// Notification may have set a PendingIntent to open this. In that case, make sure we
 	// are logged in; otherwise, return to home screen.
 	if (!IsLoggedOn()) {
-	  Log.w("JactActionBarActivity::onResume", "Not logged on. Returning to Login Activity...");
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.w("JactActionBarActivity::onResume", "Not logged on. Returning to Login Activity...");
 	  onBackPressed();
 	  finish();
 	}
@@ -122,7 +123,11 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
     super.onPause();
     can_show_dialog_ = false;
   }
-  
+
+  public void SetActivityId(int id) {
+    activity_id_ = id;
+  }
+
   public boolean IsLoggedOn() {
 	SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
     return user_info.getBoolean(getString(R.string.ui_is_logged_in), false);
@@ -142,7 +147,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
         getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
     String user_id = user_info.getString(getString(R.string.ui_user_id), "");
     if (user_id.isEmpty()) {
-      Log.e("JactActionBarActivity::GetUserPoints", "Empty User Id.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::GetUserPoints", "Empty User Id.");
     }
     String points_url = GetUrlTask.GetJactDomain() + "/rest/userpoints/" + user_id + ".json";
     IncrementNumRequestsCounter();
@@ -161,7 +166,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
       points_str = NumberFormat.getNumberInstance(Locale.US).format(user_points);
       SetUserPointsInActionBar(points_str);
     } catch (NumberFormatException e) {
-      Log.e("JactActionBarActivity::SetUserPoints",
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::SetUserPoints",
               "Unable to parse points as an int: '" + points + "'");
       // TODO(PHB): Handle exception.
       return;
@@ -208,6 +213,9 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   }
   
   protected void GetCart(ProcessUrlResponseCallback callback) {
+    // Initialize cart, in case it hasn't been created yet.
+    ShoppingCartActivity.AccessCart(
+            ShoppingCartActivity.CartAccessType.INITIALIZE_CART);
   	// Need cookies to fetch server's cart.
     SharedPreferences user_info = getSharedPreferences(
         getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
@@ -279,14 +287,14 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
 	} else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
 	  if (!ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.SET_CART_FROM_WEBPAGE, webpage)) {
 		// TODO(PHB): Handle this gracefully (popup a dialog).
-		Log.e("PHB ERROR", "JactActionBarActivity::ProcessCartResponse. Unable to parse cart response:\n" + webpage);
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactActionBarActivity::ProcessCartResponse. Unable to parse cart response:\n" + webpage);
 		return;
 	  }
 	  SetCartIcon(callback);
     } else if (extra_params.equalsIgnoreCase(USER_POINTS)) {
       SetUserPoints(webpage);
 	} else {
-      Log.e("PHB ERROR", "JactActionBarActivity::ProcessCartResponse. Returning from " +
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactActionBarActivity::ProcessCartResponse. Returning from " +
                          "unrecognized task: " + GetUrlTask.PrintExtraParams(extra_params));
     }
 	if (num_server_tasks_ == 0) {
@@ -305,13 +313,13 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
       // TODO(PHB): Handle this: should do the right thing for all cases we get here; in
       // particular, should never get here (all cases should be accounted for in the 'else if'
       // statements above.
-      Log.e("JactActionBarActivity::ProcessFailedResponse",
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::ProcessFailedResponse",
               "Status: " + status + ", extra_params: " + GetUrlTask.PrintExtraParams(extra_params));
 	} else {
 	  // TODO(PHB): Handle this: should do the right thing for all cases we get here; in
 	  // particular, should never get here (all cases should be accounted for in the 'else if'
 	  // statements above.
-      Log.e("JactActionBarActivity::ProcessFailedResponse",
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::ProcessFailedResponse",
     		"Status: " + status + "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params));
     }
   }
@@ -322,7 +330,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   	  dialog_ = new JactDialogFragment(title, message);
   	  dialog_.show(getSupportFragmentManager(), id);
 	} else {
-	  Log.e("JactActionBarActivity::DisplayPopupFragment",
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::DisplayPopupFragment",
 			"Unable to show PopUp with title: " + title + " and message: " + message);
 	}
   }
@@ -333,7 +341,8 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   	  dialog_ = new JactDialogFragment(title);
   	  dialog_.show(getSupportFragmentManager(), id);
 	} else {
-	  Log.e("JactActionBarActivity::DisplayPopupFragment", "Unable to show PopUp with title: " + title);
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::DisplayPopupFragment",
+            "Unable to show PopUp with title: " + title);
 	}
   }
   

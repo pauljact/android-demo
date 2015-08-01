@@ -2,7 +2,6 @@ package com.example.jactfirstdemo;
 
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,18 +16,15 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -62,10 +58,18 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   private String jact_user_name_;
   private String jact_user_id_;
   private boolean init_once_;
+  private boolean first_rewards_image_ready_;
+  private boolean first_earn_image_ready_;
 
   private HorizontalScrollView scroll_view_;
+  private HorizontalScrollView earn_scroll_view_;
+  private TextView featured_rewards_title_tv_;
+  private TextView featured_earn_title_tv_;
   private TextView left_caret_tv_;
   private TextView right_caret_tv_;
+  private TextView earn_left_caret_tv_;
+  private TextView earn_right_caret_tv_;
+  private RelativeLayout next_drawing_bar_;
   private LayoutInflater inflater_;
   OnProductClickListener featured_rewards_listener_;
   
@@ -77,21 +81,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   GoogleCloudMessaging gcm_;
   AtomicInteger msg_id_ = new AtomicInteger();
 
-  public static class FeatureRewardsLayoutItem {
-    LinearLayout ll_;
-    ImageView img_view_;
-    TextView is_drawing_;
-    TextView drawing_date_;
-    TextView title_;
-    TextView summary_;
-    TextView quantity_;
-    TextView pid_;
-    TextView orig_price_;
-    LinearLayout jact_price_ll_;
-    TextView jact_price_;
-    ImageView jact_icon_;
-    TextView jact_points_;
-  }
   public ProductsImageLoader featured_image_loader_;
   public ProductsImageLoader earn_image_loader_;
   private static ArrayList<ProductsPageParser.ProductItem> featured_rewards_;
@@ -108,11 +97,18 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   private static final String FETCH_REWARDS_PAGE_TASK = "fetch_rewards_page_task";
   private static final String FETCH_AND_START_REWARDS_TASK = "fetch_and_start_rewards_task";
   private static final String FETCH_REWARDS_PRIZE_DRAWINGS_TASK = "fetch_rewards_prizes_task";
+  private static final String GET_COOKIES_THEN_FEATURED_EARN_TASK = "get_cookies_then_featured_earn_task";
   private static final String DATE_PREFIX = "Drawing Date: ";
+  private static final String EARN_DIALOG_WARNING = "earn_dialog_warning";
   private static String featured_rewards_url_;
   private static String featured_earn_url_;
   private static String rewards_url_;
   private static int next_drawing_bar_height_;
+  private static boolean allow_click_actions_;
+  private static boolean is_current_already_earned_;
+  private static String current_youtube_url_;
+  private static int current_earn_nid_;
+  private static int num_failed_requests_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +116,8 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
             R.layout.jact_logged_in_home_screen,
             JactNavigationDrawer.ActivityIndex.PROFILE);
     init_once_ = false;
+    is_current_already_earned_ = false;
+    current_youtube_url_ = "";
 
     // Set Featured Rewards.
     inflater_ = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -129,28 +127,55 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         new ProductsImageLoader(this, new FeaturedEarnImageLoader(), "JactLoginActivity");
     featured_rewards_ll_ = (LinearLayout) findViewById(R.id.featured_rewards_ll);
     featured_earn_ll_ = (LinearLayout) findViewById(R.id.featured_earn_ll);
+    featured_rewards_title_tv_ = (TextView) findViewById(R.id.featured_rewards_title_tv);
+    featured_earn_title_tv_ = (TextView) findViewById(R.id.featured_earn_title_tv);
     left_caret_tv_ = (TextView) findViewById(R.id.featured_rewards_left_tv);
-    left_caret_tv_.setVisibility(View.INVISIBLE);
     right_caret_tv_ = (TextView) findViewById(R.id.featured_rewards_right_tv);
+    earn_left_caret_tv_ = (TextView) findViewById(R.id.featured_earn_left_tv);
+    earn_right_caret_tv_ = (TextView) findViewById(R.id.featured_earn_right_tv);
+    right_caret_tv_.setVisibility(View.INVISIBLE);
+    left_caret_tv_.setVisibility(View.INVISIBLE);
+    earn_left_caret_tv_.setVisibility(View.INVISIBLE);
+    earn_right_caret_tv_.setVisibility(View.INVISIBLE);
     scroll_view_ = (HorizontalScrollView) findViewById(R.id.featured_rewards_sv);
-    //PHB_OLD scroll_view_.setOnClickListener(this);
     scroll_view_.getViewTreeObserver().addOnScrollChangedListener(
-        new ViewTreeObserver.OnScrollChangedListener() {
-      @Override
-      public void onScrollChanged() {
-        int scrollX = scroll_view_.getScrollX();
-        if (scrollX == 0) {
-          left_caret_tv_.setVisibility(View.INVISIBLE);
-        } else {
-          left_caret_tv_.setVisibility(View.VISIBLE);
-        }
-        if (scrollX >= scroll_view_.getMaxScrollAmount()) {
-          right_caret_tv_.setVisibility(View.INVISIBLE);
-        } else {
-          right_caret_tv_.setVisibility(View.VISIBLE);
-        }
-      }
-    });
+            new ViewTreeObserver.OnScrollChangedListener() {
+              @Override
+              public void onScrollChanged() {
+                if (!featured_rewards_title_tv_.isShown()) {
+                  left_caret_tv_.setVisibility(View.INVISIBLE);
+                  right_caret_tv_.setVisibility(View.INVISIBLE);
+                  return;
+                }
+                int scrollX = scroll_view_.getScrollX();
+                if (scrollX == 0) {
+                  left_caret_tv_.setVisibility(View.INVISIBLE);
+                } else {
+                  left_caret_tv_.setVisibility(View.VISIBLE);
+                }
+                SetRewardsRightArrow();
+              }
+            });
+
+    earn_scroll_view_ = (HorizontalScrollView) findViewById(R.id.featured_earn_sv);
+    earn_scroll_view_.getViewTreeObserver().addOnScrollChangedListener(
+            new ViewTreeObserver.OnScrollChangedListener() {
+              @Override
+              public void onScrollChanged() {
+                if (!featured_earn_title_tv_.isShown()) {
+                  earn_left_caret_tv_.setVisibility(View.INVISIBLE);
+                  earn_right_caret_tv_.setVisibility(View.INVISIBLE);
+                  return;
+                }
+                int scrollX = earn_scroll_view_.getScrollX();
+                if (scrollX == 0) {
+                  earn_left_caret_tv_.setVisibility(View.INVISIBLE);
+                } else {
+                  earn_left_caret_tv_.setVisibility(View.VISIBLE);
+                }
+                SetEarnRightArrow();
+              }
+            });
 
     unfinished_rewards_elements_ = new boolean[100];
     unfinished_earn_elements_ = new boolean[100];
@@ -159,9 +184,10 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
 
     // Get Original height of Next Drawing Bar.
-    RelativeLayout next_drawing_bar = (RelativeLayout) findViewById(R.id.featured_prizes_ll);
-    ViewGroup.LayoutParams bar_params = next_drawing_bar.getLayoutParams();
+    next_drawing_bar_ = (RelativeLayout) findViewById(R.id.featured_prizes_ll);
+    ViewGroup.LayoutParams bar_params = next_drawing_bar_.getLayoutParams();
     next_drawing_bar_height_ = bar_params.height;
+    next_drawing_bar_.setVisibility(View.INVISIBLE);
 
     // Start the Service that will run in background and handle GCM interactions.
     if (CheckPlayServices()) {
@@ -177,7 +203,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   
   @Override
   protected void onResume() {
-	super.onResume();	
+	super.onResume();
+    num_failed_requests_ = 0;
+    allow_click_actions_ = true;
 	
 	// Make sure Google Play is on user's device (so they can use GCM).
 	CheckPlayServices();
@@ -198,19 +226,23 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       jact_user_name_ = user_info.getString(getString(R.string.ui_user_name), "");
       jact_user_id_ = user_info.getString(getString(R.string.ui_user_id), "");
       if (jact_user_name_.isEmpty() || jact_user_id_.isEmpty()) {
-        Log.e("JactLoggedInHomeActivity.onCreate",
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactLoggedInHomeActivity.onCreate",
               "User Info file is missing the requisite info.");
       }
     }
     
     // Set Cart Icon.
-	SetCartIcon(this);
+	//PHB_OLD (doesn't grab fresh cart from server)
+	// SetCartIcon(this);
+    GetCart(this);
 
     // Get Featured Rewards.
     FetchFeaturedRewardsPage();
+    first_rewards_image_ready_ = false;
 
     // Get Featured Earn.
     FetchFeaturedEarnPage();
+    first_earn_image_ready_ = false;
 
     // Get Rewards (to get Prize Drawings for Next Drawing Date).
     FetchPrizeDrawings();
@@ -224,11 +256,17 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   @Override
   public void fadeAllViews(boolean should_fade) {
     ProgressBar spinner = (ProgressBar) findViewById(R.id.my_profile_progress_bar);
+    RelativeLayout main_content = (RelativeLayout) findViewById(R.id.my_profile_content_frame);
     AlphaAnimation alpha;
+    allow_click_actions_ = !should_fade;
     if (should_fade) {
+      main_content.setBackgroundColor(getResources().getColor(R.color.translucent_gray));
       spinner.setVisibility(View.VISIBLE);
       alpha = new AlphaAnimation(0.5F, 0.5F);
     } else {
+      SetRewardsRightArrow();
+      SetEarnRightArrow();
+      main_content.setBackgroundColor(getResources().getColor(R.color.white));
       spinner.setVisibility(View.INVISIBLE);
       alpha = new AlphaAnimation(1.0F, 1.0F);
     }
@@ -240,6 +278,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
   @Override
   public void onClick(View view) {
+    if (!allow_click_actions_) return;
     if (((View) view.getParent()).getId() == R.id.featured_rewards_ll) {
       // Initialize Product Popup Window.
       PopupWindow product_popup =
@@ -251,11 +290,45 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       featured_rewards_listener_.onFeaturedItemClick(view);
     }
     if (((View) view.getParent()).getId() == R.id.featured_earn_ll) {
-      Log.e("PHB TEMP", "JLIHA::onClick. Featured Earn click");
+    }
+  }
+
+  protected void SetRewardsRightArrow() {
+    if (featured_rewards_layouts_ == null || scroll_view_ == null) {
+      right_caret_tv_.setVisibility(View.INVISIBLE);
+      return;
+    }
+    Rect view_bounds = new Rect();
+    featured_rewards_layouts_.get(featured_rewards_layouts_.size() - 1).
+        getHitRect(view_bounds);
+    Rect scroll_bounds = new Rect();
+    scroll_view_.getDrawingRect(scroll_bounds);
+    if (view_bounds.right <= scroll_bounds.right) {
+      right_caret_tv_.setVisibility(View.INVISIBLE);
+    } else {
+      right_caret_tv_.setVisibility(View.VISIBLE);
+    }
+  }
+
+  protected void SetEarnRightArrow() {
+    if (featured_earn_layouts_ == null || earn_scroll_view_ == null) {
+      earn_right_caret_tv_.setVisibility(View.INVISIBLE);
+      return;
+    }
+    Rect view_bounds = new Rect();
+    featured_earn_layouts_.get(featured_earn_layouts_.size() - 1).
+        getHitRect(view_bounds);
+    Rect scroll_bounds = new Rect();
+    earn_scroll_view_.getDrawingRect(scroll_bounds);
+    if (view_bounds.right <= scroll_bounds.right) {
+      earn_right_caret_tv_.setVisibility(View.INVISIBLE);
+    } else {
+      earn_right_caret_tv_.setVisibility(View.VISIBLE);
     }
   }
 
   public void doPrizeDrawingsDetailsClick(View view) {
+    if (!allow_click_actions_) return;
     FetchRewardsPage(FETCH_REWARDS_PRIZE_DRAWINGS_TASK);
     fadeAllViews(true);
   }
@@ -266,7 +339,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     ShoppingUtils.LineItem item = new ShoppingUtils.LineItem();
     ProductsActivity.MessageHolder holder = new ProductsActivity.MessageHolder();
     if (!ProductsActivity.doAddToCartClick(featured_rewards_listener_, item, holder)) {
-      Log.e("PHB TEMP", "JLIHA::doAddToCartClick. Not adding item here");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLIHA::doAddToCartClick. Not adding item here");
       if (holder.title_ != null && !holder.title_.isEmpty()) {
         if (holder.message_ != null && !holder.message_.isEmpty()) {
           DisplayPopupFragment(holder.title_, holder.message_, "Bad_Add_Product_Dialog");
@@ -276,15 +349,18 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       } else if (holder.message_ != null && !holder.message_.isEmpty()) {
         DisplayPopupFragment(holder.message_, "Bad_Add_Product_Dialog");
       } else {
-        Log.e("JLIHA::doAddToCartClick", "Unrecognized failed return.");
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::doAddToCartClick", "Unrecognized failed return.");
+        DisplayPopupFragment("Unknown Error","Unable to add item. Please try again",
+                             "unknown_error");
       }
     } else {
+      fadeAllViews(true);
       AddLineItem(item);
     }
   }
   private void AddLineItem(ShoppingUtils.LineItem line_item) {
     if (line_item == null) return;
-    Log.i("PHB TEMP", "JLIHA::AddLineItem. Adding line item:\n" +
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLIHA::AddLineItem. Adding line item:\n" +
             ShoppingUtils.PrintLineItemHumanReadable(line_item));
 
     // Need cookies and csrf_token to create server's cart.
@@ -304,11 +380,11 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     ShoppingCartActivity.CartAccessResponse response = new ShoppingCartActivity.CartAccessResponse();
     if (!ShoppingCartActivity.AccessCart(
             ShoppingCartActivity.CartAccessType.GET_ORDER_ID, response)) {
-      Log.e("PHB ERROR", "JLIHA::AddLineItem. Failed to get order id.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::AddLineItem. Failed to get order id.");
       return;
     }
     line_item.order_id_ = response.order_id_;
-    Log.i("PHB TEMP", "JLIHA::AddLineItem. Just fetched order_id: " + line_item.order_id_);
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLIHA::AddLineItem. Just fetched order_id: " + line_item.order_id_);
 
     String csrf_token = user_info.getString(getString(R.string.ui_csrf_token), "");
     if (csrf_token.isEmpty()) {
@@ -346,11 +422,27 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
   private void FetchFeaturedEarnPage() {
     MakeFeaturedEarnVisible(false);
+
+    // Need cookies to fetch featured earn (for already_earned_flag).
+    SharedPreferences user_info = getSharedPreferences(
+            getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+    String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+    if (cookies.isEmpty()) {
+      String username = user_info.getString(getString(R.string.ui_username), "");
+      String password = user_info.getString(getString(R.string.ui_password), "");
+      ShoppingUtils.RefreshCookies(this, username, password, GET_COOKIES_THEN_FEATURED_EARN_TASK);
+      return;
+    }
+    FetchFeaturedEarnPage(cookies);
+  }
+
+  private void FetchFeaturedEarnPage(String cookies) {
     IncrementNumRequestsCounter();
     GetUrlTask task = new GetUrlTask(this, GetUrlTask.TargetType.JSON);
     GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
     params.url_ = featured_earn_url_;
     params.connection_type_ = "GET";
+    params.cookies_ = cookies;
     params.extra_info_ = FETCH_FEATURED_EARN_PAGE_TASK;
     task.execute(params);
   }
@@ -361,8 +453,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   }
 
   private void MakeFeaturedRewardsVisible(boolean state) {
-    TextView title = (TextView) findViewById(R.id.featured_rewards_title_tv);
-    title.setVisibility(state ? View.VISIBLE : View.INVISIBLE);
+    featured_rewards_title_tv_.setVisibility(state ? View.VISIBLE : View.INVISIBLE);
     TextView title_two = (TextView) findViewById(R.id.featured_rewards_title_details_tv);
     title_two.setVisibility(state ? View.VISIBLE : View.INVISIBLE);
     featured_rewards_ll_.setVisibility(state ? View.VISIBLE : View.INVISIBLE);
@@ -375,8 +466,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   }
 
   private void MakeFeaturedEarnVisible(boolean state) {
-    TextView title = (TextView) findViewById(R.id.featured_earn_title_tv);
-    title.setVisibility(state ? View.VISIBLE : View.INVISIBLE);
+    featured_earn_title_tv_.setVisibility(state ? View.VISIBLE : View.INVISIBLE);
     TextView title_two = (TextView) findViewById(R.id.featured_earn_title_details_tv);
     title_two.setVisibility(state ? View.VISIBLE : View.INVISIBLE);
     featured_earn_ll_.setVisibility(state ? View.VISIBLE : View.INVISIBLE);
@@ -392,7 +482,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     featured_rewards_ = new ArrayList<ProductsPageParser.ProductItem>();
     ProductsPageParser.ParseRewardsPage(webpage, featured_rewards_);
     if (featured_rewards_.isEmpty()) {
-      Log.w("JLIHA::SetFeaturedRewardsList", "No Featured rewards found from webpage:\n" + webpage);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("JLIHA::SetFeaturedRewardsList", "No Featured rewards found from webpage:\n" + webpage);
       MakeFeaturedRewardsVisible(false);
       return;
     }
@@ -404,11 +494,12 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     //DateFormat date_format = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
     DateFormat date_format = new SimpleDateFormat("MMM dd", Locale.ENGLISH);
     Calendar cal = Calendar.getInstance();
-    TextView title = (TextView) findViewById(R.id.featured_rewards_title_tv);
-    title.setText("FEATURED REWARDS for " + date_format.format(cal.getTime()) + " | ");
+    featured_rewards_title_tv_.setText("FEATURED REWARDS for " +
+            date_format.format(cal.getTime()) + " | ");
 
     featured_rewards_layouts_ = new ArrayList<View>(featured_rewards_.size());
     int position = 0;
+    boolean show_right_arrow = false;
     for (ProductsPageParser.ProductItem item : featured_rewards_) {
       View vi = (View) inflater_.inflate(R.layout.products_item, null);
       ProductsAdapter.ProductViewHolder view_holder = new ProductsAdapter.ProductViewHolder();
@@ -432,7 +523,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       // Populate text fields with product info.
       // Set Minimum Text Width.
       ViewGroup.LayoutParams text_params = view_holder.text_ll_.getLayoutParams();
-      text_params.width = 600;
+      text_params.width = 450;
 
       // Set Title.
       if (item.title_ != null) {
@@ -456,11 +547,13 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       // Set Drawing Date.
       view_holder.drawing_.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
       if (item.date_ != null && !item.date_.isEmpty()) {
-        view_holder.date_.setVisibility(View.VISIBLE);
         view_holder.date_.setText(item.date_);
-        view_holder.date_.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        view_holder.date_.setGravity(Gravity.CENTER_HORIZONTAL);
+        view_holder.date_.setVisibility(View.GONE);
+        // No longer displaying Drawing date on Featured rewards, so don't need below.
+        //view_holder.date_.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        //view_holder.date_.setGravity(Gravity.CENTER_HORIZONTAL);
       } else {
+        view_holder.drawing_.setVisibility(View.GONE);
         view_holder.date_.setVisibility(View.GONE);
       }
 
@@ -483,6 +576,8 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       if (item.img_url_ != null) {
         if (!featured_image_loader_.DisplayImage(item.img_url_, view_holder.img_, position)) {
           unfinished_rewards_elements_[position] = true;
+        } else {
+          show_right_arrow = true;
         }
         ViewGroup.LayoutParams img_params = view_holder.img_.getLayoutParams();
         img_params.height = 350;
@@ -500,13 +595,17 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       featured_rewards_ll_.removeViewAt(i);
     }
     MakeFeaturedRewardsVisible(true);
+    if (show_right_arrow && !first_rewards_image_ready_) {
+      first_rewards_image_ready_ = true;
+      SetRewardsRightArrow();
+    }
   }
 
   private void SetFeaturedEarnList(String webpage) {
     featured_earn_ = new ArrayList<EarnPageParser.EarnItem>();
     EarnPageParser.ParseEarnPage(webpage, featured_earn_);
     if (featured_earn_.isEmpty()) {
-      Log.w("JLIHA::SetFeaturedEarnList", "No Earn items found from webpage:\n" + webpage);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("JLIHA::SetFeaturedEarnList", "No Earn items found from webpage:\n" + webpage);
       MakeFeaturedEarnVisible(false);
       return;
     }
@@ -514,10 +613,10 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     //DateFormat date_format = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
     DateFormat date_format = new SimpleDateFormat("MMM dd", Locale.ENGLISH);
     Calendar cal = Calendar.getInstance();
-    TextView title = (TextView) findViewById(R.id.featured_earn_title_tv);
-    title.setText("FEATURED Earn Items for " + date_format.format(cal.getTime()) + " | ");
+    featured_earn_title_tv_.setText("FEATURED Earn Items for " + date_format.format(cal.getTime()) + " | ");
 
     featured_earn_layouts_ = new ArrayList<View>(featured_earn_.size());
+    boolean show_right_arrow = false;
     int position = 0;
     for (EarnPageParser.EarnItem item : featured_earn_) {
       View vi = (View) inflater_.inflate(R.layout.earn_item, null);
@@ -539,17 +638,25 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       if (item.title_ != null) {
         view_holder.title_.setText(item.title_);
         view_holder.title_.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        ViewGroup.LayoutParams text_params = view_holder.title_.getLayoutParams();
-        text_params.width = 600;
+        //PHB_OLDViewGroup.LayoutParams text_params = view_holder.title_.getLayoutParams();
+        LinearLayout.LayoutParams text_params = (LinearLayout.LayoutParams) view_holder.title_.getLayoutParams();
+        text_params.width = 450;
+        text_params.setMargins(0, 0, 0, 0);
       }
 
       // Set Points.
-      view_holder.points_.setText(Integer.toString(item.earn_points_) + " Points");
+      view_holder.points_.setText(Integer.toString(item.earn_points_));
       view_holder.points_.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
       view_holder.words_.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-      //ViewGroup.LayoutParams icon_params = view_holder.jact_icon_.getLayoutParams();
-      //icon_params.height = 12;
-      //icon_params.width = 12;
+      if (item.already_earned_) {
+        view_holder.points_.setTextColor(getResources().getColor(R.color.red_text));
+        view_holder.words_.setTextColor(getResources().getColor(R.color.red_text));
+        view_holder.words_.setText("Earned");
+      } else {
+        view_holder.points_.setTextColor(getResources().getColor(R.color.black));
+        view_holder.words_.setTextColor(getResources().getColor(R.color.black));
+        view_holder.words_.setText("Earn");
+      }
 
       // Set Earn ID.
       view_holder.nid_.setText(Integer.toString(item.nid_));
@@ -559,11 +666,13 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       if (item.img_url_ != null) {
         if (!earn_image_loader_.DisplayImage(item.img_url_, view_holder.img_, position, true)) {
           unfinished_earn_elements_[position] = true;
+        } else {
+          show_right_arrow = true;
         }
         view_holder.img_.SetUseCase(JactImageView.UseCase.EARN_IMAGE_THUMBNAIL);
         ViewGroup.LayoutParams img_params = view_holder.img_.getLayoutParams();
-        img_params.height = 250;
-        img_params.width = 250;
+        img_params.height = 350;
+        img_params.width = 350;
         //view_holder.img_.SetBounds(50, 200, 50, 200);
         view_holder.img_.SetUseCase(JactImageView.UseCase.FEATURED_EARN);
       }
@@ -580,32 +689,50 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       featured_earn_ll_.removeViewAt(i);
     }
     MakeFeaturedEarnVisible(true);
+    if (show_right_arrow && !first_earn_image_ready_) {
+      first_earn_image_ready_ = true;
+      SetEarnRightArrow();
+    }
   }
 
   public void doEarnNowVideoClick(View view) {
+    if (!allow_click_actions_) return;
     Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     vibe.vibrate(JactConstants.VIBRATION_DURATION);
-    TextView nid_tv = (TextView) ((LinearLayout) view.getParent().getParent()).findViewById(R.id.earn_nid);
+    TextView nid_tv = (TextView) ((LinearLayout) view.getParent().getParent()).findViewById(
+        R.id.earn_nid);
     String nid_str = nid_tv.getText().toString();
     int nid = -1;
     try {
       nid = Integer.parseInt(nid_str);
     } catch (NumberFormatException e) {
-      Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to parse nid " + nid_str + ":" + e.getMessage());
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnActivity::doEarnNowVideoClick",
+            "Unable to parse nid " + nid_str + ":" + e.getMessage());
       Popup("Unable to find Video", "Try again later.");
       return;
     }
 
-    String youtube_url = GetYoutubeUrlViaNodeId(nid);
-    if (youtube_url.isEmpty()) {
-      Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to find nid " + nid + " in earn_list_");
+    current_earn_nid_ = nid;
+    if (!GetYoutubeUrlViaNodeId(current_earn_nid_) || current_youtube_url_.isEmpty()) {
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnActivity::doEarnNowVideoClick", "Unable to find nid " + nid + " in earn_list_");
       Popup("Unable to find Video", "Try again later.");
+    } else if (is_current_already_earned_) {
+      if (can_show_dialog_) {
+        dialog_ =
+            new JactDialogFragment("Already Earned Points for this Item",
+                                   "Watching again will not earn you more points. Watch Anyway?");
+        dialog_.SetButtonOneText("Cancel");
+        dialog_.SetButtonTwoText("OK");
+        dialog_.show(getSupportFragmentManager(), EARN_DIALOG_WARNING);
+        is_popup_showing_ = true;
+      }
     } else {
-      StartYoutubeActivity(youtube_url, nid);
+      StartYoutubeActivity(current_youtube_url_, nid);
     }
   }
 
   public void doEarnNowClick(View view) {
+    if (!allow_click_actions_) return;
     Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     vibe.vibrate(JactConstants.VIBRATION_DURATION);
     TextView nid_tv = (TextView) ((LinearLayout) view.getParent()).findViewById(R.id.earn_nid);
@@ -614,39 +741,65 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     try {
       nid = Integer.parseInt(nid_str);
     } catch (NumberFormatException e) {
-      Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to parse nid " + nid_str + ":" + e.getMessage());
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnActivity::doEarnNowClick", "Unable to parse nid " + nid_str + ":" + e.getMessage());
       Popup("Unable to find Video", "Try again later.");
       return;
     }
 
-    String youtube_url = GetYoutubeUrlViaNodeId(nid);
-    if (youtube_url.isEmpty()) {
-      Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to find nid " + nid + " in earn_list_");
+    current_earn_nid_ = nid;
+    if (!GetYoutubeUrlViaNodeId(current_earn_nid_) || current_youtube_url_.isEmpty()) {
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnActivity::doEarnNowClick", "Unable to find nid " + nid + " in earn_list_");
       Popup("Unable to find Video", "Try again later.");
+    } else if (is_current_already_earned_) {
+      if (can_show_dialog_) {
+        dialog_ =
+                new JactDialogFragment("Already Earned Points for this Item",
+                        "Watching again will not earn you more points. Watch Anyway?");
+        dialog_.SetButtonOneText("Cancel");
+        dialog_.SetButtonTwoText("OK");
+        dialog_.show(getSupportFragmentManager(), EARN_DIALOG_WARNING);
+        is_popup_showing_ = true;
+      }
     } else {
-      StartYoutubeActivity(youtube_url, nid);
+      StartYoutubeActivity(current_youtube_url_, current_earn_nid_);
     }
   }
 
-  private String GetYoutubeUrlViaNodeId(int nid) {
+  public void doDialogCancelClick(View view) {
+    // Close Dialog window.
+    super.doDialogOkClick(view);
+  }
+
+  public void doDialogOkClick(View view) {
+    if (dialog_ == null) return;
+    // Close Dialog window.
+    super.doDialogOkClick(view);
+    // Check to see if this was the "Item Already Earned" dialog. If so, proceed to Earn Item.
+    if (dialog_.getTag() != null && dialog_.getTag().equals(EARN_DIALOG_WARNING)) {
+      StartYoutubeActivity(current_youtube_url_, current_earn_nid_);
+    }
+  }
+
+  private boolean GetYoutubeUrlViaNodeId(int nid) {
     if (featured_earn_ == null) {
-      Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Null nid");
-      return "";
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Null nid");
+      return false;
     }
 
     // Look up nid.
     for (EarnPageParser.EarnItem item : featured_earn_) {
       if (item.nid_ == nid) {
-        return item.youtube_url_;
+        is_current_already_earned_ = item.already_earned_;
+        current_youtube_url_ = item.youtube_url_;
+        return true;
       }
     }
-    Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to find nid " + Integer.toString(nid));
-    return "";
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnActivity::GetYoutubeUrlViaNodeId", "Unable to find nid " + Integer.toString(nid));
+    return false;
   }
 
   private void StartYoutubeActivity(String youtube_id, int nid) {
     Intent youtube_intent = new Intent(this, YouTubePlayerActivity.class);
-    Log.w("PHB TEMP", "Setting youtube id: " + youtube_id);
     youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
     YouTubePlayerActivity.SetEarnId(nid);
     startActivity(youtube_intent);
@@ -657,6 +810,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   }
 
   public void doSeeAllRewardsClick(View view) {
+    if (!allow_click_actions_) return;
     FetchRewardsPage(FETCH_AND_START_REWARDS_TASK);
     fadeAllViews(true);
   }
@@ -686,7 +840,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       DateFormat date_format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
       current_date = date_format.parse(date_format.format(cal.getTime()));
     } catch (ParseException e) {
-      Log.e("JLIHA::GetNextDrawingDate",
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::GetNextDrawingDate",
             "ParseException for date_to_parse " + cal.getTime() + ": " + e.getMessage());
       return "";
     }
@@ -713,7 +867,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
           earliest_date = drawing_date;
         }
       } catch (ParseException e) {
-        Log.e("JLIHA::GetNextDrawingDate",
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::GetNextDrawingDate",
               "ParseException for date_to_parse " + date_to_parse + ": " + e.getMessage());
         return "";
       }
@@ -725,12 +879,13 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
   private void SetNextDrawingBar(String next_drawing_date) {
     if (next_drawing_date.isEmpty()) {
-      RelativeLayout next_drawing_bar = (RelativeLayout) findViewById(R.id.featured_prizes_ll);
-      ViewGroup.LayoutParams bar_params = next_drawing_bar.getLayoutParams();
+      //RelativeLayout next_drawing_bar = (RelativeLayout) findViewById(R.id.featured_prizes_ll);
+      ViewGroup.LayoutParams bar_params = next_drawing_bar_.getLayoutParams();
       bar_params.height = 0;
     } else {
-      RelativeLayout next_drawing_bar = (RelativeLayout) findViewById(R.id.featured_prizes_ll);
-      ViewGroup.LayoutParams bar_params = next_drawing_bar.getLayoutParams();
+      //RelativeLayout next_drawing_bar = (RelativeLayout) findViewById(R.id.featured_prizes_ll);
+      next_drawing_bar_.setVisibility(View.VISIBLE);
+      ViewGroup.LayoutParams bar_params = next_drawing_bar_.getLayoutParams();
       bar_params.height = next_drawing_bar_height_;
       TextView next_date = (TextView) findViewById(R.id.featured_prizes_tv);
       next_date.setText("Next Prize Drawing: " + next_drawing_date);
@@ -751,6 +906,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   }
 
   public void doSeeAllEarnClick(View view) {
+    if (!allow_click_actions_) return;
     EarnActivity.SetShouldRefreshEarnItems(true);
     Intent earn_intent = new Intent(this, EarnActivity.class);
     earn_intent.putExtra(getString(R.string.go_to_earn_main_page), "true");
@@ -772,12 +928,16 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
   protected void RewardsPositionsReady(HashSet<Integer> positions) {
     if (positions == null) {
-      Log.e("JLIHA::AlertPositionsReady", "Null positions");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::RewardsPositionsReady", "Null positions");
       return;
     }
     if (positions.isEmpty()) {
-      Log.e("JLIHA::AlertPositionsReady", "Empty positions");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::RewardsPositionsReady", "Empty positions");
       return;
+    }
+    if (!first_rewards_image_ready_) {
+      first_rewards_image_ready_ = true;
+      SetRewardsRightArrow();
     }
     for (Integer i : positions) {
       int position = i.intValue();
@@ -793,11 +953,11 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
                   holder.img_, position);
           featured_rewards_layouts_.get(position).invalidate();
         } else if (featured_rewards_layouts_ == null) {
-          Log.e("JLIHA::AlertPositionsReady", "Null Featured Rewards Layouts");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::RewardsPositionsReady", "Null Featured Rewards Layouts");
         } else if (featured_rewards_ == null) {
-          Log.e("JLIHA::AlertPositionsReady", "Null Products List");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::RewardsPositionsReady", "Null Products List");
         } else {
-          Log.e("JLIHA::AlertPositionsReady",
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::RewardsPositionsReady",
                   "Position: " + position + "featured_rewards_layouts_.size(): " +
                           featured_rewards_layouts_.size() + ", featured_rewards_.size(): " +
                           featured_rewards_.size());
@@ -823,12 +983,16 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
   protected void EarnPositionsReady(HashSet<Integer> positions) {
     if (positions == null) {
-      Log.e("JLIHA::AlertPositionsReady", "Null positions");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::AlertPositionsReady", "Null positions");
       return;
     }
     if (positions.isEmpty()) {
-      Log.e("JLIHA::AlertPositionsReady", "Empty positions");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::AlertPositionsReady", "Empty positions");
       return;
+    }
+    if (!first_earn_image_ready_) {
+      first_earn_image_ready_ = true;
+      SetEarnRightArrow();
     }
     for (Integer i : positions) {
       int position = i.intValue();
@@ -845,14 +1009,14 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
                     holder.img_, position, true);
             featured_earn_layouts_.get(position).invalidate();
           } else {
-            Log.e("PHB TEMP", "JLIHA::AlertPositionsReady. Earn image is null for pos: " + position);
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLIHA::AlertPositionsReady. Earn image is null for pos: " + position);
           }
         } else if (featured_earn_layouts_ == null) {
-          Log.e("JLIHA::AlertPositionsReady", "Null Featured Earn Layouts");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::AlertPositionsReady", "Null Featured Earn Layouts");
         } else if (featured_earn_ == null) {
-          Log.e("JLIHA::AlertPositionsReady", "Null Earn List");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::AlertPositionsReady", "Null Earn List");
         } else {
-          Log.e("JLIHA::AlertPositionsReady",
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::AlertPositionsReady",
                 "Position: " + position + "featured_earn_layouts_.size(): " +
                 featured_earn_layouts_.size() + ", featured_earn_.size(): " +
                 featured_earn_.size());
@@ -900,7 +1064,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         GooglePlayServicesUtil.getErrorDialog(
         	resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
       } else {
-        Log.i("JactLoginActivity::CheckPlayServices", "This device is not supported.");
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.i("JactLoginActivity::CheckPlayServices", "This device is not supported.");
         finish();
       }
       return false;
@@ -920,7 +1084,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       final SharedPreferences prefs = GetGCMPreferences(context);
       String registrationId = prefs.getString(PROPERTY_REG_ID, "");
       if (registrationId.isEmpty()) {
-          Log.i("JactLoginActivity::CheckPlayServices", "Registration not found.");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.i("JactLoginActivity::CheckPlayServices", "Registration not found.");
           return "";
       }
       // Check if app was updated; if so, it must clear the registration ID
@@ -929,7 +1093,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
       int currentVersion = GetAppVersion(context);
       if (registeredVersion != currentVersion) {
-          Log.i("JactLoginActivity::CheckPlayServices", "App version changed.");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.i("JactLoginActivity::CheckPlayServices", "App version changed.");
           return "";
       }
       return registrationId;
@@ -969,7 +1133,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     new AsyncTask<Void, String, String>() {
         @Override
         protected String doInBackground(Void... params) {
-          Log.e("PHB TEMP", "JLHA::RegisterInBackground::doInBackground.");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLHA::RegisterInBackground::doInBackground.");
           String msg = "";
           try {
             if (gcm_ == null) {
@@ -1001,7 +1165,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
         @Override
         protected void onPostExecute(String msg) {
-          Log.e("PHB TEMP", "JLHA::RegisterInBackground::onPostExecute. msg: " + msg);
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLHA::RegisterInBackground::onPostExecute. msg: " + msg);
           //mDisplay.append(msg + "\n");
         }
     }.execute(null, null, null);
@@ -1014,7 +1178,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
    * using the 'from' address in the message.
    */
   private void SendRegistrationIdToBackend() {
-	Log.e("PHB TEMP", "JLHA::SendRegistrationIdToBackend");
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLHA::SendRegistrationIdToBackend");
 	Intent registration_intent = new Intent("com.google.android.c2dm.intent.REGISTER");
 	registration_intent.putExtra(
 		"app", PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(), 0));
@@ -1030,10 +1194,10 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
    * @param regId registration ID
    */
   private void StoreRegistrationId(Context context, String regId) {
-	  Log.e("PHB TEMP", "JLHA::StoreRegistrationId");
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLHA::StoreRegistrationId");
       final SharedPreferences prefs = GetGCMPreferences(context);
       int appVersion = GetAppVersion(context);
-      Log.i("JactLoginActivity::CheckPlayServices", "Saving regId on app version " + appVersion);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.i("JactLoginActivity::CheckPlayServices", "Saving regId on app version " + appVersion);
       SharedPreferences.Editor editor = prefs.edit();
       editor.putString(PROPERTY_REG_ID, regId);
       editor.putInt(PROPERTY_APP_VERSION, appVersion);
@@ -1045,7 +1209,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 	new AsyncTask<Void, String, String>() {
 	    @Override
 	    protected String doInBackground(Void... params) {
-	      Log.e("PHB TEMP", "JLHA::doSendUpstreamMessageClick");
+	      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLHA::doSendUpstreamMessageClick");
 	      String msg = "";
 	      try {
 	        Bundle data = new Bundle();
@@ -1062,7 +1226,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
 	    @Override
 	    protected void onPostExecute(String msg) {
-	      Log.e("PHB TEMP", "JLHA::onSendUpstreamMessageClick::onPostExecute. msg: " + msg);
+	      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLHA::onSendUpstreamMessageClick::onPostExecute. msg: " + msg);
 	      //mDisplay.append(msg + "\n");
 	    }
 	}.execute(null, null, null);
@@ -1080,19 +1244,30 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   @Override
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
     if (extra_params.isEmpty()) {
-      Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: JactLoggedInHomeActivity has multiple calls " +
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: JactLoggedInHomeActivity has multiple calls " +
               "to GetUrlTask; in order to properly handle the response, " +
               "must specify desired action via extra_params");
     } else if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK) == 0) {
   	  SaveCookies(cookies);
   	  GetCart(this);
+    } else if (extra_params.indexOf(GET_COOKIES_THEN_FEATURED_EARN_TASK) == 0) {
+      SaveCookies(cookies);
+      FetchFeaturedEarnPage(cookies);
   	} else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
       if (!ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.SET_CART_FROM_WEBPAGE, webpage)) {
         // TODO(PHB): Handle this gracefully (popup a dialog).
-        Log.e("PHB ERROR", "JactActionBarActivity::ProcessCartResponse. Unable to parse cart response:\n" + webpage);
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::ProcessCartResponse",
+              "Unable to parse cart response:\n" + webpage);
       }
+      SetCartIcon(this);
     } else if (extra_params.indexOf(FETCH_REWARDS_PAGE_TASK) == 0) {
       ParseRewardsPage(webpage);
+      // PHB HACK. Put this here, as right arrows don't always load when re-starting
+      // this activity, as the test to see if they should load (there are more images to
+      // the right) is not ready to pass before the images have loaded. So we use the
+      // fact that code will hit here after images have had time to load.
+      SetEarnRightArrow();
+      SetRewardsRightArrow();
     } else if (extra_params.indexOf(FETCH_AND_START_REWARDS_TASK) == 0) {
       StartRewardsActivity(webpage);
     } else if (extra_params.indexOf(FETCH_REWARDS_PRIZE_DRAWINGS_TASK) == 0) {
@@ -1109,19 +1284,19 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         if (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 &&
                 !ShoppingUtils.ParseLineItemFromAddLineItemPage(line_item, new_line_items)) {
           // TODO(PHB): Handle this error (e.g. popup warning to user).
-          Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
           return;
         } else if (extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 &&
                 !ShoppingUtils.ParseLineItemFromUpdateLineItemPage(line_item, new_line_items)) {
           // TODO(PHB): Handle this error (e.g. popup warning to user).
-          Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
           return;
         }
         if (new_line_items.size() != 1 ||
                 !ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.UPDATE_LINE_ITEM,
                         new_line_items.get(0))) {
           // TODO(PHB): Handle this error (e.g. popup warning to user).
-          Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse cart response. " +
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse cart response. " +
                   "Num new line items: " + new_line_items.size() + "; Webpage response:\n" + webpage);
           return;
         }
@@ -1130,7 +1305,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         fadeAllViews(false);
       } catch (JSONException e) {
         // TODO(PHB): Handle this error (e.g. popup warning to user).
-        Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse add line-item response " +
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse add line-item response " +
                 "from server. Exception: " + e.getMessage() + "; webpage response:\n" + webpage);
         return;
       }
@@ -1148,7 +1323,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       } else if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0) {
         if (!ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.SET_CART_FROM_WEBPAGE, webpage)) {
           // TODO(PHB): Handle this gracefully (pop-up a dialog).
-          Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Create_cart: Unable to parse cart response:\n" + webpage);
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Create_cart: Unable to parse cart response:\n" + webpage);
           return;
         }
       }
@@ -1157,7 +1332,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       ProcessCartResponse(this, webpage, cookies, extra_params);
       return;
   	} else {
-      Log.e("JLIHA::ProcessUrlResponse",
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::ProcessUrlResponse",
             "Unrecognized extra params: " + GetUrlTask.PrintExtraParams(extra_params));
     }
     num_server_tasks_--;
@@ -1173,11 +1348,11 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   @Override
   public void ProcessUrlResponse(Bitmap pic, String cookies, String extra_params) {
     if (extra_params.isEmpty()) {
-      Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: JactLoggedInHomeActivity has multiple calls " +
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: JactLoggedInHomeActivity has multiple calls " +
                          "to GetUrlTask; in order to properly handle the response, " +
       		             "must specify desired action via extra_params");
     } else {
-        Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: Unrecognized extra params: " +
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: Unrecognized extra params: " +
                            GetUrlTask.PrintExtraParams(extra_params));
     }
     num_server_tasks_--;
@@ -1192,8 +1367,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
   @Override
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
+    num_failed_requests_++;
 	// TODO(PHB): Implement this.
-	Log.e("PHB ERROR", "JLIHA::ProcessFailedResponse. Status: " + status);
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JLIHA::ProcessFailedResponse. Status: " + status);
     if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
       GetCookiesThenGetCart(this);
       return;
@@ -1214,7 +1390,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
           // Nothing to do.
         }
       } else {
-        Log.e("PHB TEMP", "JLIHA::ProcessFailedResponse. Status: " + status +
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLIHA::ProcessFailedResponse. Status: " + status +
               "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params));
       }
     } else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) >= 0) {
@@ -1223,13 +1399,13 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
       ShoppingUtils.GetCsrfToken(this, cookies, extra_params);
     } else if (extra_params.indexOf(FETCH_FEATURED_REWARDS_PAGE_TASK) == 0) {
-      Log.e("JLIHA::ProcessFailedResponse", "Failed to fetch Featured Rewards Page.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::ProcessFailedResponse", "Failed to fetch Featured Rewards Page.");
     } else if (extra_params.indexOf(FETCH_REWARDS_PAGE_TASK) == 0) {
-      Log.e("JLIHA::ProcessFailedResponse", "Failed to fetch Rewards Page.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::ProcessFailedResponse", "Failed to fetch Rewards Page.");
     } else if (extra_params.indexOf(FETCH_AND_START_REWARDS_TASK) == 0) {
-      Log.e("JLIHA::ProcessFailedResponse", "Failed to fetch (and start) Rewards Page.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::ProcessFailedResponse", "Failed to fetch (and start) Rewards Page.");
     } else if (extra_params.indexOf(FETCH_FEATURED_EARN_PAGE_TASK) == 0) {
-      Log.e("JLIHA::ProcessFailedResponse", "Failed to fetch Featured Earn Page.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::ProcessFailedResponse", "Failed to fetch Featured Earn Page.");
     } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
                (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
                 extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 ||
@@ -1243,11 +1419,14 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
               getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
       String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
       ShoppingUtils.GetCsrfToken(this, cookies, extra_params);
+    } else if (extra_params.indexOf(GET_COOKIES_THEN_FEATURED_EARN_TASK) == 0) {
+      if (num_failed_requests_ > 5) return;
+      FetchFeaturedEarnPage();
     } else if (extra_params.equalsIgnoreCase(USER_POINTS)) {
       ProcessFailedCartResponse(this, status, extra_params);
       return;
     } else {
-      Log.e("JLIHA::ProcessFailedResponse", "Failed for Unhandled task: " +
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JLIHA::ProcessFailedResponse", "Failed for Unhandled task: " +
                                             GetUrlTask.PrintExtraParams(extra_params));
     }
     num_server_tasks_--;

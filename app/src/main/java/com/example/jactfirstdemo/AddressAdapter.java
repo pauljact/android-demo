@@ -89,10 +89,10 @@ public class AddressAdapter extends ArrayAdapter<ShoppingCartActivity.JactAddres
           has_credit_card = true;
           holder.name_.setText(reddit_number);
           holder.delete_.setText("Delete Credit Card");
-          Log.e("PHB", "BHP address w/ CC: " + reddit_number + ", and address:\n" + address.Print());
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB", "BHP address w/ CC: " + reddit_number + ", and address:\n" + address.Print());
         } else {
           holder.delete_.setText("Delete Address");
-          Log.e("PHB", "BHP address w/o CC:\n" + address.Print());
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB", "BHP address w/o CC:\n" + address.Print());
         }
         
         // Set Name.

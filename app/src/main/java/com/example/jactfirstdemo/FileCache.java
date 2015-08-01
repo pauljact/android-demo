@@ -21,7 +21,7 @@ public class FileCache {
     
     public File getEncodedFilename(String url) {
     	if (JactFileUtils.GetDirSize(cache_dir_) > max_dir_size_) {
-    		Log.i("PHB", "FileCache::getFile. Not enough space in CacheDir to create new file.");
+    		if (!JactActionBarActivity.IS_PRODUCTION) Log.i("PHB", "FileCache::getFile. Not enough space in CacheDir to create new file.");
     		JactFileUtils.TrimDirToMaxSize(cache_dir_, max_dir_size_);
     	}
         String filename = "PHB_foo";
@@ -30,11 +30,11 @@ public class FileCache {
 		} catch (UnsupportedEncodingException e) {
 			// TODO(PHB): Implement this.
 			e.printStackTrace();
-			Log.e("PHB ERROR", "FileCache::getFile: UnsupportedEncodingException:\n" +
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "FileCache::getFile: UnsupportedEncodingException:\n" +
 			                   e.toString());
 		}
 		if (filename.equals("PHB_foo")) {
-		  Log.e("PHB ERROR", "FileCache::getFile: Never reset file name.");
+		  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "FileCache::getFile: Never reset file name.");
 		}
         File f = new File(cache_dir_, filename);
         return f;

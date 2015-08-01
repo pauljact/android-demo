@@ -39,7 +39,7 @@ public class CommunityActivity extends JactActionBarActivity implements ProcessU
     	}
     });
     // Set spinner (and hide WebView) until page has finished loading.
-    SetCartIcon(this);
+    GetCart(this);
     fadeAllViews(num_server_tasks_ > 0);
   }
 

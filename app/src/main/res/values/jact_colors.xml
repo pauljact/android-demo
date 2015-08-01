@@ -11,6 +11,7 @@
      <color name="light_gray">#464646</color>
      <color name="jact_gray">#767686</color>
      <color name="jact_light_gray">#262646</color>
+     <color name="jact_blue">#66AFE9</color>
      <color name="translucent_gray">#50B6B6B4</color>
      <color name="mostly_translucent_gray">#25B6B6B4</color>
      
@@ -37,7 +38,9 @@
      <color name="button_blue">#427292</color>
 	 <color name="button_blue_pressed">#2F33CCFF</color>
 	 <color name="button_green">#82D222</color>
-	 <color name="button_green_pressed">#2F00CC11</color>
+     <color name="button_green_pressed">#2F00CC11</color>
+     <color name="button_jact_green">#9BCA0A</color>
+     <color name="button_jact_green_pressed">#2F9BCA0A</color>
 	 <color name="button_yellow">#FFAA00</color>
 	 <color name="button_yellow_pressed">#2FFFAA00</color>
 <!-- ================== End Button Colors ====================== -->

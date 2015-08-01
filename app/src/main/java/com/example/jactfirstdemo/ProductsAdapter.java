@@ -63,11 +63,11 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
 	@Override
 	public void AlertPositionsReady (HashSet<Integer> positions) {
 		if (positions == null) {
-			Log.e("ProductsAdapter::alertPositionsReady", "Null positions");
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsAdapter::alertPositionsReady", "Null positions");
 			return;
 		}
 		if (positions.isEmpty()) {
-			Log.e("ProductsAdapter::alertPositionsReady", "Empty positions");
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsAdapter::alertPositionsReady", "Empty positions");
 			return;
 		}
 		boolean should_alert_state_change = false;
@@ -185,13 +185,14 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
         String node_type = "";
         if (product.node_type_ != null) node_type = product.node_type_;
         if (node_type.equalsIgnoreCase("Prize Drawings")) {
-        	holder.layout_.setBackgroundResource(R.drawable.products_drawing_bg_selector);
+        	//PHB_OLDholder.layout_.setBackgroundResource(R.drawable.products_drawing_bg_selector);
         	holder.drawing_.setVisibility(View.VISIBLE);
         	holder.drawing_.setGravity(Gravity.CENTER_HORIZONTAL);
         } else {
-        	holder.layout_.setBackgroundResource(R.drawable.products_bg_selector);
+			//PHB_OLDholder.layout_.setBackgroundResource(R.drawable.products_bg_selector);
         	holder.drawing_.setVisibility(View.GONE);
         }
+		holder.layout_.setBackgroundResource(R.drawable.products_bg_selector);
         
         return vi;
     }
@@ -215,7 +216,7 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
        	// Only products that sell for USD should be Jact BUX, and these should
        	// NOT have a combined price in BUX nor Points.
        	if (!bux.isEmpty()) {
-          Log.e("ProductsAdapter::SetPrice", "Product has both USD and BUX:\n" + product.toString());
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsAdapter::SetPrice", "Product has both USD and BUX:\n" + product.toString());
         } else if (!points.isEmpty()) {
           // Product has a combination of Points and USD.
           if (isOriginalPrice) {
@@ -282,7 +283,7 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
       } else if (!points.isEmpty()) {
        	// Points Only Product.
     	if (isOriginalPrice) {
-			Log.e("ProductsAdapter::SetPrice", "Points only items should not have an original price.");
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsAdapter::SetPrice", "Points only items should not have an original price.");
     	} else {
     	  holder.jact_price_second_line_.setText(parent_activity.getString(R.string.jact_price_str));
 		  holder.jact_price_usd_.setVisibility(View.GONE);
@@ -292,7 +293,7 @@ public class ProductsAdapter extends ArrayAdapter<ProductsPageParser.ProductItem
       	  holder.jact_price_points_.setText(NumberFormat.getNumberInstance(Locale.US).format(Integer.parseInt(points)));
     	}
       } else {
-       	Log.e("ProductsAdapter::SetPrice", "Product has no price:\n" + product.toString());
+       	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsAdapter::SetPrice", "Product has no price:\n" + product.toString());
       }
 	}
 

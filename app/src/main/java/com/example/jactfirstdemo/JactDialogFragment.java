@@ -79,7 +79,7 @@ class JactDialogFragment extends DialogFragment {
         
         // Add title, if present.
         if (title_tv == null) {
-          Log.e("PHB ERROR", "JactDialogFragment::Constructor. Null title text view");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactDialogFragment::Constructor. Null title text view");
           return builder.create();
         }
         if (!title_.isEmpty()) {
@@ -93,7 +93,7 @@ class JactDialogFragment extends DialogFragment {
         
         // Add message, if present.
         if (message_tv == null) {
-          Log.e("PHB ERROR", "JactDialogFragment::Constructor. Null message text view");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactDialogFragment::Constructor. Null message text view");
           return builder.create();
         }
         if (!message_.isEmpty()) {

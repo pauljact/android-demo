@@ -98,7 +98,7 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
     		               "Select At Most One From the List, or Add a New One",
     		               "too_many_shipping_addr_selected");
     } else {
-      Log.e("PHB ERROR", "ShippingActivity::doShippingNextButtonClick. Unexpected value for num_checked_addresses_: " +
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "ShippingActivity::doShippingNextButtonClick. Unexpected value for num_checked_addresses_: " +
                          num_checked_addresses_ + ", selected_address_position_: " + selected_address_position_);
     }
   }
@@ -115,7 +115,7 @@ public class ShippingActivity extends JactActionBarActivity implements ProcessUr
           num_checked_addresses_--;
         }
       } catch (ClassCastException e) {
-        Log.e("PHB ERROR", "ShippingActivity::onAddressItemCheckboxClicked. Unexpected click on view:\n" + view.toString());
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "ShippingActivity::onAddressItemCheckboxClicked. Unexpected click on view:\n" + view.toString());
       }
     }
   }

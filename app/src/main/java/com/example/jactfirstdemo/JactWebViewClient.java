@@ -36,20 +36,20 @@ public class JactWebViewClient extends WebViewClient {
   
   @Override
   public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-	Log.e("PHB TEMP", "JWebViewClient::onReceivedError. error code: " +
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JWebViewClient::onReceivedError. error code: " +
                       errorCode + ", description: " + description + ", url: " + failingUrl);
     super.onReceivedError(view, errorCode, description, failingUrl);
   }
   
   @Override
   public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
-	Log.e("PHB TEMP", "JWebViewClient::onReceivedHttpAuthRequest. host: " + host + ", realm: " + realm);
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JWebViewClient::onReceivedHttpAuthRequest. host: " + host + ", realm: " + realm);
 	super.onReceivedHttpAuthRequest(view, handler, host, realm);
   }
   
   @Override
   public void onReceivedLoginRequest(WebView view, String realm, String account, String args) {
-	Log.e("PHB TEMP", "JWebViewClient::onReceivedLoginRequest. realm: " +
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JWebViewClient::onReceivedLoginRequest. realm: " +
                       realm + ", account: " + account + ", args: " + args);
 	// TODO(PHB): The following requires API 21. Add TargetUrl etc. to call it when supported.
 	// super.onReceivedLoginRequest(view, realm, account, args);
@@ -57,26 +57,26 @@ public class JactWebViewClient extends WebViewClient {
   
   @Override
   public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-	Log.e("PHB TEMP", "JWebViewClient::onReceivedSslError. error: " + error.toString());
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JWebViewClient::onReceivedSslError. error: " + error.toString());
 	super.onReceivedSslError(view, handler, error);
   }
   
   @Override
   public void onUnhandledInputEvent(WebView view, InputEvent event) {
-	Log.e("PHB TEMP", "JWebViewClient::onUnhandledInputEvent. event: " + event.toString());
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JWebViewClient::onUnhandledInputEvent. event: " + event.toString());
 	// TODO(PHB): The following requires API 21. Add TargetUrl etc. to call it when supported.
 	// super.onUnhandledInputEvent(view, event);
   }
   
   @Override
   public boolean shouldOverrideKeyEvent(WebView view, KeyEvent event) {
-	Log.e("PHB TEMP", "JWebViewClient::shouldOverrideKeyEvent. event: " + event.toString());
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JWebViewClient::shouldOverrideKeyEvent. event: " + event.toString());
 	return super.shouldOverrideKeyEvent(view, event);
   }
   
   @Override
   public boolean shouldOverrideUrlLoading(WebView view, String url) {
-	Log.e("PHB TEMP", "JWebViewClient::shouldOverrideUrlLoading. url: " + url);
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JWebViewClient::shouldOverrideUrlLoading. url: " + url);
 	current_webview_ = view;
 	return parent_.doSomething(url);
   }

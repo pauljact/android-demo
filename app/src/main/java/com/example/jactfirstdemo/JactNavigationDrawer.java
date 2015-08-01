@@ -62,10 +62,11 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   private ListView drawer_list_view_;
   private ActionBarDrawerToggle drawer_toggle_;
   private JactActionBarActivity parent_activity_;
+  private JactMenuAdapter adapter_;
   private Typeface lato_font_;
   
   public JactNavigationDrawer(JactActionBarActivity a,
-		                      View drawer_layout,
+		                      final View drawer_layout,
 		                      View left_drawer,
 		                      ActivityIndex parent_activity_index) {
     rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
@@ -73,7 +74,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     contact_us_url_ = GetUrlTask.GetJactDomain() + "/contact";
     privacy_policy_url_ = GetUrlTask.GetJactDomain() + "/privacy-policy";
     user_agreement_url_ = GetUrlTask.GetJactDomain() + "/user-agreement";
-    about_jact_url_ = GetUrlTask.GetJactDomain() + "/about-jact";
+    //PHB_OLDabout_jact_url_ = GetUrlTask.GetJactDomain() + "/about-jact";
+    about_jact_url_ = GetUrlTask.GetJactDomain() + "/how-jact-works";
     jact_my_profile_url_ = GetUrlTask.GetJactDomain() + "/user";
     
     parent_activity_ = a;
@@ -84,22 +86,6 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     // Create font that will be used for Menu.
     lato_font_ = Typeface.createFromAsset(parent_activity_.getAssets(), "Lato-Regular.ttf");
 
-    // Toggles the icon that gets displayed in left side of Action Bar
-    // (the "UP" button, also the menu button), based on whether the
-    // drawer is open or closed.
-    drawer_toggle_ =
-        new ActionBarDrawerToggle(parent_activity_, drawer_layout_, 0, 0) {
-          // Called when a drawer has settled in a completely closed state.
-          public void onDrawerClosed(View view) {
-            super.onDrawerClosed(view);
-            // Set default item selected to be the parent activity.
-            if (ActivityToDrawerIndex(parent_activity_index_) >= 0) {
-              drawer_list_view_.setItemChecked(ActivityToDrawerIndex(parent_activity_index_), true);
-            }
-          }
-        };
-    
-    drawer_layout_.setDrawerListener(drawer_toggle_);
     drawer_list_view_ = (ListView) left_drawer;
     IconAndText menu_data[] = new IconAndText[] {
         //PHB_OLDnew IconAndText(R.drawable.profile_transparent, "Home"),
@@ -111,11 +97,33 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
         new IconAndText(R.drawable.community2_transparent, "Community"),
         new IconAndText(R.drawable.cart_white_transparent, "Shopping Cart")
     };
-    
-    drawer_list_view_.setAdapter(new JactMenuAdapter(
-        parent_activity_, R.layout.drawer_list_icon, menu_data));
-    
+
+    adapter_ = new JactMenuAdapter(parent_activity_, R.layout.drawer_list_icon, menu_data);
+    drawer_list_view_.setAdapter(adapter_);
+
+    // Toggles the icon that gets displayed in left side of Action Bar
+    // (the "UP" button, also the menu button), based on whether the
+    // drawer is open or closed.
+    drawer_toggle_ =
+            new ActionBarDrawerToggle(parent_activity_, drawer_layout_, 0, 0) {
+              // Called when a drawer has settled in a completely closed state.
+              public void onDrawerClosed(View view) {
+                // Set default item selected to be the parent activity.
+                if (ActivityToDrawerIndex(parent_activity_index_) >= 0) {
+                  drawer_list_view_.setItemChecked(ActivityToDrawerIndex(parent_activity_index_), true);
+                }
+                super.onDrawerClosed(view);
+              }
+            };
+
+    drawer_layout_.setDrawerListener(drawer_toggle_);
     drawer_list_view_.setOnItemClickListener(new DrawerItemClickListener(this));
+    drawer_list_view_.setOnDragListener(null);
+    //drawer_list_view_.setOnClickListener(null);
+    drawer_list_view_.setOnItemLongClickListener(null);
+    drawer_list_view_.setOnItemSelectedListener(null);
+    drawer_list_view_.setOnTouchListener(null);
+    drawer_list_view_.setOnHoverListener(null);
     
     // Set default item selected to be the parent activity.
     drawer_list_view_.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -164,22 +172,22 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
       case android.R.id.navigationBarBackground:
         // TODO(PHB): Not sure which click will cause this to happen.
     	// Log it, and implement later if necessary.
-    	//Log.e("PHB", "JactNavigationDrawer.onOptionsItemSelected: Clicked on Navigation Bar Background");
+    	//if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB", "JactNavigationDrawer.onOptionsItemSelected: Clicked on Navigation Bar Background");
         break;
       case android.R.id.selectedIcon:
         // TODO(PHB): Not sure which click will cause this to happen.
       	// Log it, and implement later if necessary.
-    	//Log.e("PHB", "JactNavigationDrawer.onOptionsItemSelected: Clicked on SelectedIcon");
+    	//if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB", "JactNavigationDrawer.onOptionsItemSelected: Clicked on SelectedIcon");
         break;
       case android.R.id.summary:
         // TODO(PHB): Not sure which click will cause this to happen.
       	// Log it, and implement later if necessary.
-    	//Log.e("PHB", "JactNavigationDrawer.onOptionsItemSelected: Clicked on Summary");
+    	//if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB", "JactNavigationDrawer.onOptionsItemSelected: Clicked on Summary");
         break;
       case android.R.id.widget_frame:
         // TODO(PHB): Not sure which click will cause this to happen.
         // Log it, and implement later if necessary.
-    	//Log.e("PHB", "JactNavigationDrawer.onOptionsItemSelected: Clicked on Widget Frame");
+    	//if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB", "JactNavigationDrawer.onOptionsItemSelected: Clicked on Widget Frame");
         break;
       case R.id.menu_shopping_cart:
   	    if (parent_activity_index_ == ActivityIndex.CHECKOUT_MAIN) {
@@ -196,7 +204,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	    }
       	parent_activity_.fadeAllViews(true);
         startWebViewActivity(jact_my_profile_url_,
-                             parent_activity_.getString(R.string.menu_jact_my_profile));
+                             parent_activity_.getString(R.string.menu_jact_my_profile),
+                             R.string.my_profile_label);
         break;
       case R.id.menu_orders:
         if (parent_activity_index_ == ActivityIndex.VIEW_ORDERS) {
@@ -212,7 +221,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(about_jact_url_, parent_activity_.getString(R.string.menu_about_jact));
+       	startWebViewActivity(about_jact_url_, parent_activity_.getString(R.string.menu_about_jact),
+                             R.string.menu_about_jact);
         break;
       case R.id.menu_contact_us:
 	    if (parent_activity_index_ == ActivityIndex.CONTACT_US) {
@@ -220,7 +230,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(contact_us_url_, parent_activity_.getString(R.string.menu_contact_us));
+       	startWebViewActivity(contact_us_url_, parent_activity_.getString(R.string.menu_contact_us),
+                             R.string.menu_contact_us);
        	break;
       case R.id.menu_faq:
   	    if (parent_activity_index_ == ActivityIndex.FAQ) {
@@ -228,7 +239,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(faq_url_, parent_activity_.getString(R.string.menu_faq));
+       	startWebViewActivity(faq_url_, parent_activity_.getString(R.string.menu_faq),
+                             R.string.menu_faq);
         break;
       case R.id.menu_user_agreement:
   	    if (parent_activity_index_ == ActivityIndex.USER_AGREEMENT) {
@@ -236,7 +248,9 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(user_agreement_url_, parent_activity_.getString(R.string.menu_user_agreement));
+       	startWebViewActivity(user_agreement_url_,
+                             parent_activity_.getString(R.string.menu_user_agreement),
+                             R.string.menu_user_agreement);
         break;
       case R.id.menu_privacy_policy:
   	    if (parent_activity_index_ == ActivityIndex.PRIVACY_POLICY) {
@@ -244,7 +258,9 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(privacy_policy_url_, parent_activity_.getString(R.string.menu_privacy_policy));
+       	startWebViewActivity(privacy_policy_url_,
+                             parent_activity_.getString(R.string.menu_privacy_policy),
+                             R.string.menu_privacy_policy);
         break;
       case R.id.menu_logout:
        	parent_activity_.fadeAllViews(true);
@@ -269,8 +285,9 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     drawer_toggle_.onConfigurationChanged(newConfig);
   }
   
-  private void startWebViewActivity(String url, String title) {
-    FaqActivity.SetUrlAndTitle(url, title);
+  private void startWebViewActivity(String url, String title, int title_resource_id) {
+    if (title.equals(""));
+    FaqActivity.SetUrlAndTitle(url, title, title_resource_id);
     parent_activity_.startActivity(new Intent(parent_activity_, FaqActivity.class));
   }
   
@@ -317,7 +334,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     // Only should have empty webpage if click was on 'My Profile'.
     if (webpage.equals("") && drawer_click_pos_ != 0) {
       // TODO(PHB): Handle failed GET.
-      Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawClickResponse. Empty webpage.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawClickResponse. Empty webpage.");
     } else if (drawer_click_pos_ == ActivityToDrawerIndex(parent_activity_index_)) {
       // Nothing to do; clicked on parent activity.
     } else if (drawer_click_pos_ == 0) {
@@ -336,21 +353,61 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
       // drawer position should not have sent a request to the server here (rather,
       // EarnActivity should have been started directly).
       // TODO(PHB): Handle the error of being here.
-      Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Earn'.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Earn'.");
     //PHB_GAMES} else if (drawer_click_pos_ == 3) {
       // Position 3 corresponds to 'Games'. We should never be here, as a click on this
       // drawer position should not have sent a request to the server here (rather,
       // GamesActivity should have been started directly).
       // TODO(PHB): Handle the error of being here.
-    //PHB_GAMES  Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Games'.");
+    //PHB_GAMES  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Games'.");
     } else if (drawer_click_pos_ == 3) {
       // Position 4 corresponds to 'Community'. We should never be here, as a click on this
       // drawer position should not have sent a request to the server here (rather,
       // CommunityActivity should have been started directly).
       // TODO(PHB): Handle the error of being here.
-      Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Community'.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Community'.");
     } else {
-      Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawClickResponse. Unexpected drawer pos: " + drawer_click_pos_);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawClickResponse. Unexpected drawer pos: " + drawer_click_pos_);
+    }
+  }
+
+  protected void HandleClick(View view, int position) {
+    drawer_click_pos_ = position;
+    drawer_list_view_.setItemChecked(ActivityToDrawerIndex(parent_activity_index_), true);
+    drawer_layout_.closeDrawer(drawer_list_view_);
+    if (position == ActivityToDrawerIndex(parent_activity_index_)) {
+      // Nothing to do except close drawer.
+    } else if (position == 0) {
+      // Position '0' is for 'My Profile. Start 'JactLoggedInHomeActivity'.
+      // Must be done via parent_class, which has access to the parent_activity.
+      parent_activity_.fadeAllViews(true);
+      ProcessDrawerClickResponse("", "");
+    } else if (position == 1) {
+      // Position '1' is for Rewards (Products). Start that activity.
+      new GetUrlTask((ProcessUrlResponseCallback) this, GetUrlTask.TargetType.JSON).execute(
+              rewards_url_, "GET");
+      parent_activity_.fadeAllViews(true);
+      //PHB_BUX} else if (position == 2) {
+      //PHB_BUX// Position '2' is for Purchase BUX. Start that activity.
+    } else if (position == 2) {
+      // Position '2' is for Earn. Start that activity.
+      parent_activity_.fadeAllViews(true);
+      startEarnActivity();
+      //PHB_GAMES} else if (position == 3) {
+      // Position '3' is for Games. Start that activity.
+      //PHB_GAMES  parent_class_.parent_activity_.fadeAllViews(true);
+      //PHB_GAMES  parent_class_.startGamesActivity();
+    } else if (position == 3) {
+      // Position '4' is for Community. Start that activity.
+      parent_activity_.fadeAllViews(true);
+      startCommunityActivity();
+    } else if (position == 4) {
+      // Position '5' is for Shopping Cart. Start that activity.
+      startCheckoutActivity();
+      parent_activity_.fadeAllViews(true);
+    } else {
+      // Only 7 drawers expected. Error.
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB Error", "JactNavigationDrawer::onItemClick. Unexpected position: " + position);
     }
   }
 
@@ -412,52 +469,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	    
 	    @Override
 	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-          // PHB  TEMP while using UAT and US7 for Jact Server
-          rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
-          faq_url_ = GetUrlTask.GetJactDomain() + "/faq-page";
-          contact_us_url_ = GetUrlTask.GetJactDomain() + "/contact";
-          privacy_policy_url_ = GetUrlTask.GetJactDomain() + "/privacy-policy";
-          user_agreement_url_ = GetUrlTask.GetJactDomain() + "/user-agreement";
-          about_jact_url_ = GetUrlTask.GetJactDomain() + "/about-jact";
-          jact_my_profile_url_ = GetUrlTask.GetJactDomain() + "/user";
-          // END PHB  TEMP while using UAT and US7 for Jact Server
-
-	      drawer_click_pos_ = position;
-	      drawer_layout_.closeDrawer(drawer_list_view_);
-	      if (position == ActivityToDrawerIndex(parent_activity_index_)) {
-	        // Nothing to do except close drawer.
-	      } else if (position == 0) {
-	        // Position '0' is for 'My Profile. Start 'JactLoggedInHomeActivity'.
-	    	// Must be done via parent_class, which has access to the parent_activity.
-		    parent_class_.parent_activity_.fadeAllViews(true);
-	    	parent_class_.ProcessDrawerClickResponse("", "");
-	      } else if (position == 1) {
-	        // Position '1' is for Rewards (Products). Start that activity.
-	    	new GetUrlTask((ProcessUrlResponseCallback) parent_class_, GetUrlTask.TargetType.JSON).execute(
-	        		rewards_url_, "GET");
-	    	parent_class_.parent_activity_.fadeAllViews(true);
-	      //PHB_BUX} else if (position == 2) {
-	    	//PHB_BUX// Position '2' is for Purchase BUX. Start that activity.
-	      } else if (position == 2) {
-            // Position '2' is for Earn. Start that activity.
-	    	parent_class_.parent_activity_.fadeAllViews(true);
-	    	parent_class_.startEarnActivity();
-	      //PHB_GAMES} else if (position == 3) {
-	        // Position '3' is for Games. Start that activity.
-		  //PHB_GAMES  parent_class_.parent_activity_.fadeAllViews(true);
-		  //PHB_GAMES  parent_class_.startGamesActivity();
-	      } else if (position == 3) {
-	        // Position '4' is for Community. Start that activity.
-		    parent_class_.parent_activity_.fadeAllViews(true);
-		    parent_class_.startCommunityActivity();
-	      } else if (position == 4) {
-	    	// Position '5' is for Shopping Cart. Start that activity.
-	        parent_class_.startCheckoutActivity();
-	    	parent_class_.parent_activity_.fadeAllViews(true);
-	      } else {
-	        // Only 7 drawers expected. Error.
-	        Log.e("PHB Error", "JactNavigationDrawer::onItemClick. Unexpected position: " + position);
-	      }
+          HandleClick(view, position);
 	    }
 	  }
 	
@@ -469,13 +481,13 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	@Override
 	public void ProcessUrlResponse(Bitmap pic, String cookies, String extra_params) {
 	  // TODO(PHB): Implement this.
-	  Log.e("PHB ERROR", "JactNavigationDrawer.ProcessUrlResponse: " +
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer.ProcessUrlResponse: " +
 	                     "This should never be called for a bitmap input param.");
 	}
 
 	@Override
 	public void ProcessFailedResponse(FetchStatus status, String extra_params) {
-	  Log.e("PHB ERROR", "JactNavigationDrawer.ProcessUrlResponse: " +
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer.ProcessUrlResponse: " +
                          "Failed to fetch URL. Status: " + status);
 	  parent_activity_.fadeAllViews(false);
 	  if (status == FetchStatus.ERROR_UNABLE_TO_CONNECT ||

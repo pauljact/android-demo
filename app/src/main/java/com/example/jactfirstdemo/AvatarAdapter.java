@@ -45,11 +45,11 @@ public class AvatarAdapter extends ArrayAdapter<NewUserActivity.AvatarItem>
 	@Override
 	public void AlertPositionsReady (HashSet<Integer> positions) {
 	  if (positions == null) {
-		Log.e("AvatarAdapter::alertPositionsReady", "Null positions");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("AvatarAdapter::alertPositionsReady", "Null positions");
 		return;
 	  }
 	  if (positions.isEmpty()) {
-		Log.e("AvatarAdapter::alertPositionsReady", "Empty positions");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("AvatarAdapter::alertPositionsReady", "Empty positions");
 		return;
 	  }
 	  boolean should_alert_state_change = false;

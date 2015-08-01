@@ -86,7 +86,7 @@ public class BillingActivity extends JactActionBarActivity implements ProcessUrl
           num_checked_addresses_--;
         }
       } catch (ClassCastException e) {
-        Log.e("PHB ERROR", "BillingActivity::onAddressItemCheckboxClicked. Unexpected click on view:\n" + view.toString());
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "BillingActivity::onAddressItemCheckboxClicked. Unexpected click on view:\n" + view.toString());
       }
     }
   }
@@ -116,7 +116,7 @@ public class BillingActivity extends JactActionBarActivity implements ProcessUrl
     		               "Select At Most One From the List, or Add a New One",
 	                       "too_many_billing_addr_selected");
     } else {
-      Log.e("PHB ERROR", "BillingActivity::doBillingNextButtonClick. Unexpected value for num_checked_addresses_: " + num_checked_addresses_);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "BillingActivity::doBillingNextButtonClick. Unexpected value for num_checked_addresses_: " + num_checked_addresses_);
     }
   }
   

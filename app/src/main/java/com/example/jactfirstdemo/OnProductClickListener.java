@@ -63,7 +63,7 @@ public class OnProductClickListener implements OnItemClickListener {
 			view_holder_.jact_price_points_ == null || view_holder_.jact_price_point_icon_ == null ||
             view_holder_.img_ == null || view_holder_.pid_ == null || view_holder_.max_quantity_ == null) {
         	// TODO(PHB): Gracefully handle this.
-        	Log.e("OnProductClickListener::Constructor", "Null PopupWindowViewHolder. App will crash.");
+        	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("OnProductClickListener::Constructor", "Null PopupWindowViewHolder. App will crash.");
         }
 	}
 
@@ -125,7 +125,7 @@ public class OnProductClickListener implements OnItemClickListener {
 			// or if somehow SetPopupHeight failed to work right (also an error).
 			// In the middle case, need to implement going straight to
 			// "Product Purchase" page.
-			Log.e("OnProductClickListener::GetYOffset", "popup_height_: " +
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("OnProductClickListener::GetYOffset", "popup_height_: " +
 					popup_height_ + ", view.getHeight(): " + view.getHeight());
 			return 1;
 		}
@@ -155,7 +155,8 @@ public class OnProductClickListener implements OnItemClickListener {
 				(PopupWindowViewHolder) popup_view.getTag();
 		ProductViewHolder orig_holder = (ProductViewHolder) parent_view.getTag();
 		if (orig_holder.drawing_.isShown()) {
-			popup_holder.drawing_.setVisibility(View.VISIBLE);
+			popup_holder.drawing_.setVisibility(View.GONE);
+			//PHB_OLDpopup_holder.drawing_.setVisibility(View.VISIBLE);
 		} else {
 			popup_holder.drawing_.setVisibility(View.GONE);
 		}
@@ -224,7 +225,7 @@ public class OnProductClickListener implements OnItemClickListener {
 		} else if (price_ll.getChildCount() == 1) {
 			popup_holder.jact_price_point_icon_.setVisibility(View.GONE);
 		} else {
-			Log.e("onProductClickListener::SetPopupViewFromFeatured",
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("onProductClickListener::SetPopupViewFromFeatured",
 				  "Unexpected length of Price LL: " + price_ll.getChildCount());
 		}
 	}
@@ -254,7 +255,7 @@ public class OnProductClickListener implements OnItemClickListener {
 		int y_offset = GetYOffset(view, parent.getHeight());
 		if (y_offset > 0) {
 			// GetYOffset returns positive values when something went wrong.
-			Log.e("OnProductClickListener::DisplayProductPopup", "Invalid popup_height_: " + popup_height_);
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("OnProductClickListener::DisplayProductPopup", "Invalid popup_height_: " + popup_height_);
 			return;
 		}
 		//if (from_featured_click) {
@@ -272,7 +273,7 @@ public class OnProductClickListener implements OnItemClickListener {
 		view_holder_.img_.setDrawingCacheEnabled(false);
 		
 		// Fetch from the Popup whether this product is a drawing or not; and if so, grab date.
-		item.is_drawing_ = view_holder_.drawing_.isShown();
+		item.is_drawing_ = view_holder_.date_.isShown();
 		if (item.is_drawing_ && view_holder_.date_ != null) {
 		  item.drawing_date_ = view_holder_.date_.getText().toString();
 		}
@@ -296,7 +297,7 @@ public class OnProductClickListener implements OnItemClickListener {
 			return price_status;
 		  }
 		} catch (NumberFormatException e) {
-			Log.e("OnProductClickListener::GetProductDetails", "NumberFormatException. " +
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("OnProductClickListener::GetProductDetails", "NumberFormatException. " +
 		                       "Error Msg: " + err_msg + ", Item:\n" + ShoppingUtils.PrintLineItem(item));
 			return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 		}
@@ -310,7 +311,7 @@ public class OnProductClickListener implements OnItemClickListener {
 	  String usd_prefix = "JACT Price:";
 	  if (usd_price.isEmpty() || usd_price.length() < usd_prefix.length() ||
 		  !usd_price.substring(0, usd_prefix.length()).equals(usd_prefix)) {
-		Log.e("OnProductClickListener::GetPrice", "Unable to parse USD price: |" + usd_price +
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("OnProductClickListener::GetPrice", "Unable to parse USD price: |" + usd_price +
 			  "|, comparing to: |" + usd_prefix + "|");
 		return ShoppingCartActivity.ItemStatus.NO_PRICE;
 	  }
@@ -329,7 +330,7 @@ public class OnProductClickListener implements OnItemClickListener {
 		  amount.type_ = ShoppingUtils.CurrencyCode.BUX;
 		  item.cost_.add(amount);
 		} catch (java.text.ParseException e) {
-		  Log.e("OnProductClickListener::GetPrice", "ParseException. Bux Price: " + price + ", Item:\n" +
+		  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("OnProductClickListener::GetPrice", "ParseException. Bux Price: " + price + ", Item:\n" +
 	            ShoppingUtils.PrintLineItem(item));
 	      return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 		}
@@ -340,12 +341,12 @@ public class OnProductClickListener implements OnItemClickListener {
 		  amount.type_ = ShoppingUtils.CurrencyCode.USD;
 		  item.cost_.add(amount);
 		} catch (java.text.ParseException e) {
-			Log.e("OnProductClickListener::GetPrice", "ParseException. USD Price: " + price +", Item:\n" +
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("OnProductClickListener::GetPrice", "ParseException. USD Price: " + price +", Item:\n" +
 	              ShoppingUtils.PrintLineItem(item));
 	       return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 		}
 	  } else {
-		Log.e("OnProductClickListener::GetPrice", "Unable to parse price: |" + price + "|");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("OnProductClickListener::GetPrice", "Unable to parse price: |" + price + "|");
 		return ShoppingCartActivity.ItemStatus.INVALID_PRICE;
 	  }
       
@@ -357,7 +358,7 @@ public class OnProductClickListener implements OnItemClickListener {
 		amount.type_ = ShoppingUtils.CurrencyCode.POINTS;
 	    item.cost_.add(amount);
 	  } catch (java.text.ParseException e) {
-		Log.e("OnProductClickListener::GetPrice",
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("OnProductClickListener::GetPrice",
 			  "ParseException. PointsPrice: |" + points_price +
 			  "|, Item:\n" + ShoppingUtils.PrintLineItem(item));
 	    return ShoppingCartActivity.ItemStatus.INVALID_PRICE;

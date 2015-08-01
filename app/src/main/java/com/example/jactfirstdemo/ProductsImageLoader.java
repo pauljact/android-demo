@@ -154,7 +154,7 @@ public class ProductsImageLoader {
     private Bitmap GetBitmap(String url) {
     	// Check if image already exists in file_cache_ (on SD). 
         File f = file_cache_.getEncodedFilename(url);
-        if (f == null) Log.e("ProductsImageLoader::GetBitmap", "Null file for url: " + url);
+        if (f == null) if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsImageLoader::GetBitmap", "Null file for url: " + url);
         Bitmap b = DecodeFile(f);
         if (b != null) {
         	// File found. Return image.
@@ -164,7 +164,7 @@ public class ProductsImageLoader {
         // File not found. Do a synchronous (blocking; ok since we're on not on main thread)
         // call to fetch it from web.
         try {
-            Log.d("ProductsImageLoader", "Fetching image at url: " + url);
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.d("ProductsImageLoader", "Fetching image at url: " + url);
         	// Fetch file.
         	Bitmap bitmap = null;
             URL imageUrl = new URL(url);
@@ -181,10 +181,10 @@ public class ProductsImageLoader {
             
             // Return image.
             bitmap = DecodeFile(f);
-            if (bitmap == null) Log.e("ProductsImageLoader::GetBitmap", "Null bitmap");
+            if (bitmap == null) if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsImageLoader::GetBitmap", "Null bitmap");
             return bitmap;
         } catch (Exception ex) {
-           	Log.e("ProductsImageLoader::GetBitmap",
+           	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsImageLoader::GetBitmap",
            		  "Unable to fetch image at url: " + url + ". Exception:\n" + ex.toString());
             ex.printStackTrace();
             return null;
@@ -235,7 +235,7 @@ public class ProductsImageLoader {
 
             // END PHB NEW.
         } catch (FileNotFoundException e) {
-            Log.e("ProductsImageLoader::DecodeFile", "Unable to decode file '" + f.getName() +
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsImageLoader::DecodeFile", "Unable to decode file '" + f.getName() +
                                                      "': File Not Found.");
         }
         return null;

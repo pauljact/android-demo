@@ -34,10 +34,10 @@ public class YouTubePlayerActivity extends JactActionBarActivity
   private void LoadYoutubePlayer() {
 	if (youtube_player_ == null || youtube_id_ == null || youtube_id_.isEmpty()) {
 	  // TODO(PHB): Handle this.
-	  Log.e("PHB ERROR", "YouTubePlayerActivity::LoadYoutubePlayer. Null parameters.");
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "YouTubePlayerActivity::LoadYoutubePlayer. Null parameters.");
 	  return;
 	}
-	Log.w("PHB TEMP", "YouTubePlayerActivity::LoadYoutubePlayer. About to load url: " + youtube_id_);
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::LoadYoutubePlayer. About to load url: " + youtube_id_);
     youtube_player_.setFullscreen(true);
     youtube_player_.loadVideo(youtube_id_);
     youtube_player_.play();
@@ -73,7 +73,7 @@ public class YouTubePlayerActivity extends JactActionBarActivity
           youtube_player_.setPlayerStateChangeListener(player_state_change_listener_);
           youtube_player_.setPlaybackEventListener(playback_event_listener_);
           youtube_player_.setPlayerStyle(PlayerStyle.MINIMAL);
-          Log.e("PHB TEMP", "YouTubePlayerActivity::onInitializationSucess. wasRestored: " + wasRestored);
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "YouTubePlayerActivity::onInitializationSucess. wasRestored: " + wasRestored);
           if (!wasRestored) {
             youtube_player_ = player;
         	LoadYoutubePlayer();
@@ -82,7 +82,7 @@ public class YouTubePlayerActivity extends JactActionBarActivity
         
         @Override
         public void onInitializationFailure(Provider provider, YouTubeInitializationResult result) {
-          Log.e("PHB ERROR", "YouTubePlayerActivity::onInitializationFailure. result: " + result.toString());
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "YouTubePlayerActivity::onInitializationFailure. result: " + result.toString());
           ReturnToEarn();
             // PHB Copied.
         }
@@ -165,28 +165,28 @@ public class YouTubePlayerActivity extends JactActionBarActivity
   private final class EarnPlaybackEventListener implements PlaybackEventListener {
     @Override
     public void onPlaying() {
-      Log.w("PHB TEMP", "YouTubePlayerActivity::onPlaying.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onPlaying.");
     }
 
     @Override
     public void onBuffering(boolean isBuffering) {
-      Log.w("PHB TEMP", "YouTubePlayerActivity::onBuffering. \t\t" +
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onBuffering. \t\t" +
                         (isBuffering ? "BUFFERING " : "NOT BUFFERING "));
     }
 
     @Override
     public void onStopped() {
-      Log.w("PHB TEMP", "YouTubePlayerActivity::onStopped. \tSTOPPED");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onStopped. \tSTOPPED");
     }
 
     @Override
     public void onPaused() {
-      Log.w("PHB TEMP", "YouTubePlayerActivity::onPaused. \tPAUSED");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onPaused. \tPAUSED");
     }
 
     @Override
     public void onSeekTo(int endPositionMillis) {
-    	Log.w("PHB TEMP", "YouTubePlayerActivity::onSeekTo. Current time: " +
+    	if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onSeekTo. Current time: " +
                           youtube_player_.getCurrentTimeMillis() + ". See to time: " +
     			          endPositionMillis);
     	PopupWarning();
@@ -199,31 +199,31 @@ public class YouTubePlayerActivity extends JactActionBarActivity
     @Override
     public void onLoading() {
       playerState = "LOADING";
-      Log.w("PHB TEMP", "YouTubePlayerActivity::onLoading. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onLoading. " + playerState);
     }
 
     @Override
     public void onLoaded(String videoId) {
       playerState = String.format("LOADED %s", videoId);
-      Log.w("PHB TEMP", "YouTubePlayerActivity::onLoaded. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onLoaded. " + playerState);
     }
 
     @Override
     public void onAdStarted() {
       playerState = "AD_STARTED";
-      Log.w("PHB TEMP", "YouTubePlayerActivity::onAdStarted. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onAdStarted. " + playerState);
     }
 
     @Override
     public void onVideoStarted() {
       playerState = "VIDEO_STARTED";
-      Log.w("PHB TEMP", "YouTubePlayerActivity::onVideoStarted. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onVideoStarted. " + playerState);
     }
 
     @Override
     public void onVideoEnded() {
       playerState = "VIDEO_ENDED";
-      Log.w("PHB TEMP", "YouTubePlayerActivity::onVideoEnded. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onVideoEnded. " + playerState);
       if (has_skipped_ahead_) {
     	ReturnToEarn();
       } else {
@@ -238,7 +238,7 @@ public class YouTubePlayerActivity extends JactActionBarActivity
         // When this error occurs the player is released and can no longer be used.
         youtube_player_ = null;
       }
-      Log.e("YouTubePlayerActivity::onError", playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("YouTubePlayerActivity::onError", playerState);
     }
   }
 }

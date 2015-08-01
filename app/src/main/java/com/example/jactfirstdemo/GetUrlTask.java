@@ -93,7 +93,8 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  ERROR_NEW_USER_DUPLICATE_EMAIL,
   }
 
-  static public final String JACT_DOMAIN = "https://uatm.jact.com:443";
+  //static public final String JACT_DOMAIN = "https://uatm.jact.com:443";
+  static public final String JACT_DOMAIN = "https://mobile.jact.com";
   static final String COOKIES_HEADER = "Set-Cookie";
   static private final String HEADER_NAME_VALUE_SEPERATOR = "_PHB_HEADER_NAME_VALUE_PHB_";
   static private final String FORM_NAME_VALUE_SEPERATOR = "_PHB_FORM_NAME_VALUE_PHB_";
@@ -201,12 +202,12 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
   protected Void doInBackground(String... params) {      
     // Sanity check params.
     if (params.length < 1) {
-  	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. No url specified to fetch.");
+  	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. No url specified to fetch.");
    	  status_ = FetchStatus.ERROR_PARAMS_LENGTH;
    	  return null;
     } else if (params.length < 2 ||
    		       (!params[1].equals("GET") && !params[1].equals("POST") && !params[1].equals("PUT"))) {
-      Log.e("PHB ERROR", "GetUrlTask::doInBackground. No connection type (GET, POST, or PUT) specified.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. No connection type (GET, POST, or PUT) specified.");
       status_ = FetchStatus.ERROR_PARAMS_LENGTH;
       return null;
     }
@@ -268,7 +269,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
     connection.setDoInput(true);
     connection.setDoOutput(connection_type.equals("POST") || connection_type.equals("PUT"));
     // PHB TEMP. Print request.
-    Log.w("PHB", "GetUrlTask::execute. Doing " + connection_type + " to " + url_ +
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB", "GetUrlTask::execute. Doing " + connection_type + " to " + url_ +
   	             "; and with extra task info: " +
                  (params.length > 4 ? PrintExtraParams(params[4]) : ""));
        	
@@ -349,12 +350,12 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
       } else if (type_ == TargetType.JSON) {
         input_stream = ParseResultAsString(is);
       } else {
-        Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unknown target url type.");
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unknown target url type.");
         status_ = FetchStatus.ERROR_WEBPAGE_TYPE;
         return null;
       }
     } catch (IOException e) {
-      Log.w("PHB ERROR", "GetUrlTask::doInBackground. Failed to get response code and/or InputStream.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB ERROR", "GetUrlTask::doInBackground. Failed to get response code and/or InputStream.");
 	  // Surround fetching of the response code with try/catch is neccessary when the server returns 401
 	  // errors; see e.g. this post explaining it:
 	  // http://stackoverflow.com/questions/17121213/java-io-ioexception-no-authentication-challenges-found
@@ -366,7 +367,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	    is = connection.getErrorStream();
 	    error_stream = ParseResultAsString(is);
 	  } catch (IOException second_level_ex) {
-	    Log.e("PHB ERROR", "GetUrlTask::doInBackground. Second level exeception. Input Stream: " +
+	    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Second level exeception. Input Stream: " +
 	    		           input_stream + ". PHB. Error string: " + error_stream +
 	   					   "; responsecode" + responsecode);
 	  }
@@ -400,7 +401,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
       List<String> cookies_header_list = header_fields.get(COOKIES_HEADER);
       if (cookies_header_list != null && !cookies_header_list.isEmpty()) {
         cookies_ = TextUtils.join(COOKIES_SEPERATOR, cookies_header_list);
-        Log.i("PHB", "BHP cookie header_length: " + cookies_header_list.size() + ", saving cookies:\n" + cookies_);
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.i("PHB", "BHP cookie header_length: " + cookies_header_list.size() + ", saving cookies:\n" + cookies_);
       }
     }
     status_ = FetchStatus.SUCCESS;
@@ -411,12 +412,12 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 		  int responsecode, InputStream is, String input_stream, String error_stream) {
 	FetchStatus to_return;
     if (responsecode == 400) {
-	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. Server didn't recognize a form field. Response (" +
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Server didn't recognize a form field. Response (" +
 	                     responsecode + "); response:\n" + input_stream +
 	                     ". PHB. Error string: " + error_stream);
 	  to_return = FetchStatus.ERROR_BAD_FORM_ITEM;
     } else if (responsecode == 401) {
-  	  Log.w("PHB", "GetUrlTask::doInBackground. CSRF Failed. Response (" +
+  	  if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB", "GetUrlTask::doInBackground. CSRF Failed. Response (" +
   	               responsecode + "); response:" + input_stream +
   	               ". PHB. Error string: " + error_stream);
   	  if (error_stream.indexOf("\"Missing required argument data\"") >= 0) {
@@ -428,16 +429,16 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
   	  }    
     } else if (responsecode == 403) {
       // TODO(PHB): Handle error here.
-      Log.e("PHB ERROR", "GetUrlTask::doInBackground. " +
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. " +
                          "Server responded with 403, likely because " +
                          "logged-in credentials (cookies) were not properly " +
                          "transferred to the server.");
       to_return = FetchStatus.ERROR_403;
     } else if (responsecode == 404) {
-      Log.e("PHB ERROR", "GetUrlTask::doInBackground. Response 404. error: " + error_stream);	
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Response 404. error: " + error_stream);	
       to_return = FetchStatus.ERROR_NO_CONTROLLER;
     } else if (responsecode == 406) {
-      Log.e("PHB ERROR", "GetUrlTask::doInBackground. Response 406. error: " + error_stream);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Response 406. error: " + error_stream);
       if (error_stream.indexOf("The name") >= 0 && error_stream.indexOf("is already taken.") >= 0) {
     	to_return = FetchStatus.ERROR_NEW_USER_BAD_NAME;
       } else if (error_stream.indexOf("The specified passwords do not match.") >= 0) {
@@ -454,7 +455,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
     	to_return = FetchStatus.ERROR_UNKNOWN_406;
       }
     } else {
-	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. Bad response (" +
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Bad response (" +
 	                     responsecode + "); response:\n" + input_stream +
 	                     ". PHB. Error string: " + error_stream);
 	  to_return = FetchStatus.ERROR_RESPONSE_CODE;
@@ -480,13 +481,13 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
     boolean empty_form = seperator_pos == (params.length() - HEADER_FORM_SEPERATOR.length());
     ArrayList<String> header_and_form = new ArrayList<String>(Arrays.asList(params.split(HEADER_FORM_SEPERATOR)));
     if (header_and_form.size() > 2) {
-      Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
                          "size=" + header_and_form.size() + ", post_params_: " + params);
       return error_msg;
     }
     if (!empty_header) {
       if (header_and_form.size() < 1) {
-        Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
                            "size =" + header_and_form.size() + ", post_params_: " + params);
         return error_msg;
       }
@@ -496,11 +497,11 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
         for (String header : headers) {
           ArrayList<String> name_value = new ArrayList<String>(Arrays.asList(header.split(HEADER_NAME_VALUE_SEPERATOR)));
           if (name_value.size() != 2) {
-            Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for header. " +
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for header. " +
                                "size=" + name_value.size() + ", header: " + header);
             return error_msg;
           }
-          Log.i("PHB", "GetUrlTask::doInBackground. Header Name: " + name_value.get(0) +
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.i("PHB", "GetUrlTask::doInBackground. Header Name: " + name_value.get(0) +
                        ", Header Value: " + name_value.get(1));
           HeaderInfo new_header = new HeaderInfo();
           new_header.name_ = name_value.get(0);
@@ -517,7 +518,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
    	String forms_str = "";
  	if (!empty_header) {
  	  if (header_and_form.size() != 2) {
-   	    Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
+   	    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
    	                       "size = " + header_and_form.size() + ", post_params_: " + params);
    	    return error_msg;
  	  }
@@ -525,7 +526,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
  	} else if (header_and_form.size() == 2) {
  	  // Verify first part (header) is empty; then set forms_str to second part.
  	  if (!header_and_form.get(0).isEmpty()) {
- 	 	Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
+ 	 	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
                            "size = " + header_and_form.size() + ", header_and_form.get(0): " +
                            header_and_form.get(0) + ", header_and_form.get(1): " +
                            header_and_form.get(1) + ", post_params_: " + params);
@@ -533,7 +534,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
  	  }
  	  forms_str = header_and_form.get(1);
    	} else if (header_and_form.size() != 1) {
- 	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
+ 	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for UrlParams.post_params_: " +
  	                     "size = " + header_and_form.size() + ", post_params_: " + params);
  	  return error_msg;
    	} else {
@@ -547,25 +548,25 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
    	  for (String form : forms) {
         ArrayList<String> name_value = new ArrayList<String>(Arrays.asList(form.split(FORM_NAME_VALUE_SEPERATOR)));
      	if (name_value.size() != 2) {
-       	  Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for form. " +
+       	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. Unexpected format for form. " +
                              "size=" + name_value.size() + ", form: " + form);
   	      return error_msg;
   	    }
      	if (!form_info.isEmpty()) {
      	  form_info += "&";
      	}
-     	//Log.i("PHB", "GetUrlTask::doInBackground. Adding form data, name: " + name_value.get(0) +
+     	//if (!JactActionBarActivity.IS_PRODUCTION) Log.i("PHB", "GetUrlTask::doInBackground. Adding form data, name: " + name_value.get(0) +
 	    //           ", value: " + name_value.get(1));
      	form_info += name_value.get(0) + "=" + name_value.get(1);
    	    json.put(name_value.get(0), name_value.get(1)); 
       }
    	  json_str = json.toString();
    	} catch (JSONException e) {
-   	  Log.e("PHB ERROR", "JactLoginActivity::Login. Error logging in:\n" + e.getMessage());
+   	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactLoginActivity::Login. Error logging in:\n" + e.getMessage());
    	  // TODO(PHB): Implement this.
    	}
- 	Log.i("PHB", "GetUrlTask::doInBackground. form_str: " + form_info);
- 	Log.i("PHB", "GetUrlTask::doInBackground. json_str: " + json_str);
+ 	if (!JactActionBarActivity.IS_PRODUCTION) Log.i("PHB", "GetUrlTask::doInBackground. form_str: " + form_info);
+ 	if (!JactActionBarActivity.IS_PRODUCTION) Log.i("PHB", "GetUrlTask::doInBackground. json_str: " + json_str);
    	return json_str;
   }
 
@@ -582,7 +583,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
       String webPage = new String(baf.toByteArray());
       return webPage;
     } catch (IOException e) {
-      Log.e("PHB ERROR", "GetUrlTask::ParseResultAsString. Error reading returned webpage:\n" + e.getMessage());
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::ParseResultAsString. Error reading returned webpage:\n" + e.getMessage());
   	  if (e.getMessage().indexOf("Read timed out") >= 0) {
   		return READ_TIMED_OUT;
   	  }
@@ -592,23 +593,23 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  
   protected void onPostExecute(Void result) {
     if (callback_ == null) {
-      Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Null pointer here");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Null pointer here");
       return;
     }
     if (status_ == null) {
-      Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Null status");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Null status");
   	  callback_.ProcessFailedResponse(status_, extra_params_);
     } else if (status_ != FetchStatus.SUCCESS) {
-      Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Non Success");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Non Success");
       callback_.ProcessFailedResponse(status_, extra_params_);
     } else if (webpage_ != null && !webpage_.isEmpty()) {
-      Log.w("GetUrlTask::onPostExecute", "Successful task to: " + url_);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("GetUrlTask::onPostExecute", "Successful task to: " + url_);
       callback_.ProcessUrlResponse(webpage_, cookies_, extra_params_);
     } else if (picture_ != null) {
-      Log.w("GetUrlTask::onPostExecute", "Successful task to: " + url_);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("GetUrlTask::onPostExecute", "Successful task to: " + url_);
       callback_.ProcessUrlResponse(picture_, cookies_, extra_params_);
     } else {
-   	  Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Webpage not successfully parsed.");
+   	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::onPostExecute. Webpage not successfully parsed.");
       callback_.ProcessFailedResponse(FetchStatus.ERROR_OTHER_EXCEPTION, extra_params_);
       // TODO(PHB): Error. Abort gracefully.
     }

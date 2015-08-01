@@ -117,12 +117,11 @@ public class JactLoginActivity extends FragmentActivity implements
   @Override
   protected void onStart() {
     super.onStart();
-    Log.e("PHB TEMP", "JactLoginActivity::onStart");
     if (is_google_signed_in_) {
-      Log.e("PHB TEMP", "JactLoginActivity::onStart. is_google_signed_in");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onStart. is_google_signed_in");
       mGoogleApiClient.connect();
     } else if (is_facebook_signed_in_) {
-      Log.e("PHB TEMP", "JactLoginActivity::onStart. is_facebook_signed_in");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onStart. is_facebook_signed_in");
       //TODO(PHB): Implement this.
     }
   }
@@ -135,7 +134,6 @@ public class JactLoginActivity extends FragmentActivity implements
 	//PHB fadeAllViews(num_server_tasks_ != 0);
 	super.onResume();
     can_show_dialog_ = true;
-    Log.e("PHB TEMP", "JactLoginActivity::onResume");
 
 	// Check to see if 'logged_off' was passed in; if so, log-off (delete
 	// login credentials from SharedPreferences, and log-off Google/Facebook if necessary).
@@ -150,7 +148,7 @@ public class JactLoginActivity extends FragmentActivity implements
 
       // Log off of Google.
       editor.putBoolean(getString(R.string.ui_is_google_logged_in), false);
-      Log.e("PHB TEMP", "JactLoginActivity::onResume. Logging out of google and facebook");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onResume. Logging out of google and facebook");
       is_google_signed_in_ = false;
       if (mGoogleApiClient.isConnected()) {
         mGoogleApiClient.clearDefaultAccountAndReconnect();
@@ -168,7 +166,7 @@ public class JactLoginActivity extends FragmentActivity implements
     username_ = user_info.getString(getString(R.string.ui_username), "");
     password_ = user_info.getString(getString(R.string.ui_password), "");
     logging_in_ = false;
-    Log.e("PHB TEMP", "JactLoginActivity::onResume. is_google_signed_in_: " +
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onResume. is_google_signed_in_: " +
                       is_google_signed_in_ + ", is_facebook_signed_in_: " +
                       is_facebook_signed_in_);
     if (require_login_ ||
@@ -177,16 +175,16 @@ public class JactLoginActivity extends FragmentActivity implements
          (username_ == null || username_.isEmpty() || password_ == null || password_.isEmpty()))) {
       SetupWelcomeLayout();
     } else if (is_google_signed_in_) {
-      Log.e("PHB TEMP", "JactLoginActivity::onResume. is_google_signed_in_ = true");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onResume. is_google_signed_in_ = true");
       requires_user_input_ = false;
       setContentView(R.layout.jact_empty_welcome_screen);
     } else if (is_facebook_signed_in_) {
-      Log.e("PHB TEMP", "JactLoginActivity::onResume. is_facebook_signed_in_ = true");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onResume. is_facebook_signed_in_ = true");
       AppEventsLogger.activateApp(this);
       requires_user_input_ = false;
       setContentView(R.layout.jact_empty_welcome_screen);
     } else {
-      Log.e("PHB TEMP",
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP",
             "JactLoginActivity::onResume. is_google_signed_in_, is_facebook_signed_in_ = false");
       requires_user_input_ = false;
       setContentView(R.layout.jact_empty_welcome_screen);
@@ -196,13 +194,13 @@ public class JactLoginActivity extends FragmentActivity implements
 
   @Override
   protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
-    Log.e("PHB TEMP", "JactLoginActivity::onActivityResult. requestCode: " + requestCode +
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onActivityResult. requestCode: " + requestCode +
             ", responseCode: " + responseCode + ", + intent: " + intent.toString());
     // TODO(PHB): Decide if I should do both Google and Facebook clauses below for
     // when I'm in the case that both are true (i.e. how to decide which is the proper one to do?
     // Use requestCode?
     if (mSignInClicked || mIntentInProgress || is_google_signed_in_) {
-      Log.e("PHB TEMP", "JactLoginActivity::onActivityResult. Inside is_google_signed_in.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onActivityResult. Inside is_google_signed_in.");
       if (requestCode == RC_SIGN_IN) {
         if (responseCode != RESULT_OK) {
           mSignInClicked = false;
@@ -218,7 +216,7 @@ public class JactLoginActivity extends FragmentActivity implements
 
     if (is_facebook_signed_in_ || is_facebook_signing_in_) {
       is_facebook_signing_in_ = false;
-      Log.e("PHB TEMP", "JactLoginActivity::onActivityResult. Inside is_facebook_signed_in.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onActivityResult. Inside is_facebook_signed_in.");
       callbackManager_.onActivityResult(requestCode, responseCode, intent);
     }
   }
@@ -265,7 +263,7 @@ public class JactLoginActivity extends FragmentActivity implements
     setContentView(R.layout.jact_welcome_screen);
 
     // Listener for Google Sign-In button click.
-    findViewById(R.id.jact_google_signin_button).setOnClickListener(this);
+    //BHPfindViewById(R.id.jact_google_signin_button).setOnClickListener(this);
 
     // Size Jact Motto so text stretches to fill the Icon and Title.
     // Can't set it here, because views haven't been inflated yet.
@@ -369,12 +367,12 @@ public class JactLoginActivity extends FragmentActivity implements
   public void doGoogleButtonClick(View view) {
     Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     vibe.vibrate(JactConstants.VIBRATION_DURATION);
-    Log.e("PHB TEMP", "JactLoginActivity::doGoogleButtonClick. is_google_signed_in_ : " +
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::doGoogleButtonClick. is_google_signed_in_ : " +
                       is_google_signed_in_ + ", mGoogleApiClient.isConnecting(): " +
                       mGoogleApiClient.isConnecting() + ", mSignInClicked: " +
                       mSignInClicked + ", mIntentInProgress: " + mIntentInProgress);
     if (!is_google_signed_in_ && !mGoogleApiClient.isConnecting()) {
-      Log.e("PHB TEMP", "JactLoginActivity::doGoogleButtonClick. Attempting to connect.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::doGoogleButtonClick. Attempting to connect.");
       mSignInClicked = true;
       mGoogleApiClient.connect();
     }
@@ -382,10 +380,11 @@ public class JactLoginActivity extends FragmentActivity implements
     //EditText password = (EditText) findViewById(R.id.jact_password);
     //Login(username, password.getText().toString());
   }
+  /*BHP Start
   public void doFacebookButtonClick(View view) {
     Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     vibe.vibrate(JactConstants.VIBRATION_DURATION);
-    Log.e("PHB TEMP", "JactLoginActivity::doFacebookButtonClick.");
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::doFacebookButtonClick.");
     if (is_facebook_signed_in_) {
       // Already signed in, so they must have clicked Sign Out
       is_facebook_signed_in_ = false;
@@ -401,7 +400,7 @@ public class JactLoginActivity extends FragmentActivity implements
       loginButton.registerCallback(callbackManager_, new FacebookCallback<LoginResult>() {
         @Override
         public void onSuccess(LoginResult loginResult) {
-          Log.e("PHB TEMP", "JactLoginActivity::FacebookCallback::onSuccess. loginResult:" +
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::FacebookCallback::onSuccess. loginResult:" +
                   loginResult.toString());
           is_facebook_signed_in_ = true;
           SharedPreferences user_info =
@@ -413,12 +412,12 @@ public class JactLoginActivity extends FragmentActivity implements
 
         @Override
         public void onCancel() {
-          Log.e("PHB TEMP", "JactLoginActivity::FacebookCallback::onCancel.");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::FacebookCallback::onCancel.");
         }
 
         @Override
         public void onError(FacebookException exception) {
-          Log.e("PHB TEMP", "JactLoginActivity::FacebookCallback::onError. Exception: " +
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::FacebookCallback::onError. Exception: " +
                   exception.toString());
         }
       });
@@ -426,7 +425,7 @@ public class JactLoginActivity extends FragmentActivity implements
     //String username = autocomplete_tv_.getText().toString();
     //EditText password = (EditText) findViewById(R.id.jact_password);
     //Login(username, password.getText().toString());
-  }
+  }BHP END*/
   public void doLoginScreenClick(View view) {
     SetLoggingInState(false);
   }
@@ -456,7 +455,7 @@ public class JactLoginActivity extends FragmentActivity implements
         }
       }
     } catch (JSONException e) {
-    	Log.e("PHB ERROR", "JactLoginActivity::StoreUserInfo. Unable to parse Login JSON:\n" + user_info);
+    	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactLoginActivity::StoreUserInfo. Unable to parse Login JSON:\n" + user_info);
       // TODO(PHB): Handle exception gracefully.
     }
   }
@@ -477,7 +476,7 @@ public class JactLoginActivity extends FragmentActivity implements
     if (webpage.equals("")) {
       // Handle failed POST
       SetLoggingInState(false);
-      Log.e("PHB ERROR", "JactLoginActivity.ProcessUrlResponse: Empty webpage.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactLoginActivity.ProcessUrlResponse: Empty webpage.");
       TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
       tv.setVisibility(View.VISIBLE);
     } else {
@@ -547,7 +546,7 @@ public class JactLoginActivity extends FragmentActivity implements
       return;
     }
 	SetLoggingInState(false);
-	Log.e("PHB ERROR", "JactLoginActivity.ProcessFailedResponse. Status: " + status);
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactLoginActivity.ProcessFailedResponse. Status: " + status);
     // Handle failed POST
     if (status == GetUrlTask.FetchStatus.ERROR_403 ||
     	status == GetUrlTask.FetchStatus.ERROR_BAD_USERNAME_OR_PASSWORD) {
@@ -619,7 +618,7 @@ public class JactLoginActivity extends FragmentActivity implements
 
   @Override
   public void onConnectionSuspended(int i) {
-    Log.e("PHB TEMP", "JactLoginActivity::onConnectionSuspended. Reconnecting to google.");
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onConnectionSuspended. Reconnecting to google.");
     mGoogleApiClient.connect();
   }
 
@@ -633,7 +632,7 @@ public class JactLoginActivity extends FragmentActivity implements
         // The intent was canceled before it was sent.  Return to the default
         // state and attempt to connect to get an updated ConnectionResult.
         mIntentInProgress = false;
-        Log.e("PHB TEMP", "JactLoginActivity::onConnectionFailed. Reconnecting to google.");
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactLoginActivity::onConnectionFailed. Reconnecting to google.");
         mGoogleApiClient.connect();
       }
     }

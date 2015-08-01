@@ -37,11 +37,11 @@ public class GcmIntentService extends IntentService {
       // in your BroadcastReceiver.
       String message_type = gcm.getMessageType(intent);
       String intent_action = intent.getAction();
-      Log.e("PHB Temp", "GcmIntentService::onHandleIntent. message_type: " +
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB Temp", "GcmIntentService::onHandleIntent. message_type: " +
                         message_type + ", intent_action: " + intent_action);
       if (intent_action == null) {
     	// TODO(PHB): Handle this case.
-        Log.e("PHB Temp", "GcmIntentService::onHandleIntent. Null intent_action.");
+        if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB Temp", "GcmIntentService::onHandleIntent. Null intent_action.");
       } else if (intent_action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
     	// Callback from registering this user-specific Jact app with Jact's GCM Service.
     	HandleRegistration(intent);
@@ -50,7 +50,7 @@ public class GcmIntentService extends IntentService {
     	// TODO(PHB): Implement this.
       }
       if (extras != null && !extras.isEmpty()) {  // has effect of unparcelling Bundle
-          Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Non-null extras: " +
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Non-null extras: " +
                             extras.toString() + ". GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE: " +
                             GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
     	  /*
@@ -61,39 +61,39 @@ public class GcmIntentService extends IntentService {
            */
           if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(message_type)) {
               sendNotification("Send error: " + extras.toString());
-              Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Send error: " + extras.toString());
+              if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Send error: " + extras.toString());
           } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(message_type)) {
               sendNotification("Deleted messages on server: " + extras.toString());
-              Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Deleted messages on server: " + extras.toString());
+              if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Deleted messages on server: " + extras.toString());
           } else if (GoogleCloudMessaging.ERROR_MAIN_THREAD.equals(message_type)) {
               sendNotification("Main Thread Error: " + extras.toString());
-              Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Main thread error: " + extras.toString());
+              if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Main thread error: " + extras.toString());
           } else if (GoogleCloudMessaging.ERROR_SERVICE_NOT_AVAILABLE.equals(message_type)) {
               sendNotification("Service Not Available: " + extras.toString());
-              Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Service Not Available: " + extras.toString());
+              if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Service Not Available: " + extras.toString());
           //PHB this constant is new (May 10, 2015)? It's not compiling as is, and even google search can't find it anywhere...
           //} else if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_EVENT.equals(message_type)) {
           //    sendNotification("Service Not Available: " + extras.toString());
-          //    Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Service Not Available: " + extras.toString());
+          //    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Service Not Available: " + extras.toString());
           } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(message_type)) {
-              Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Received: " + extras.toString());
+              if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Received: " + extras.toString());
               // If it's a regular GCM message, do some work.
               // This loop represents the service doing some work.
               for (int i=0; i<5; i++) {
-                  Log.i("GcmIntentService::onHandleEvent", "Working... " + (i+1)
+                  if (!JactActionBarActivity.IS_PRODUCTION) Log.i("GcmIntentService::onHandleEvent", "Working... " + (i+1)
                           + "/5 @ " + SystemClock.elapsedRealtime());
                   try {
                       Thread.sleep(5000);
                   } catch (InterruptedException e) {
                   }
               }
-              Log.i("GcmIntentService::onHandleEvent", "Completed work @ " + SystemClock.elapsedRealtime());
+              if (!JactActionBarActivity.IS_PRODUCTION) Log.i("GcmIntentService::onHandleEvent", "Completed work @ " + SystemClock.elapsedRealtime());
               // Post notification of received message.
               sendNotification("Received: " + extras.toString());
-              Log.i("GcmIntentService::onHandleEvent", "Received: " + extras.toString());
+              if (!JactActionBarActivity.IS_PRODUCTION) Log.i("GcmIntentService::onHandleEvent", "Received: " + extras.toString());
           } else {
         	sendNotification("else: " + extras.toString());
-            Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. else: " + extras.toString());
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. else: " + extras.toString());
           }
       }
       // Release the wake lock provided by the WakefulBroadcastReceiver.
@@ -102,7 +102,7 @@ public class GcmIntentService extends IntentService {
   
   @TargetApi(16)
   private PendingIntent GetPendingIntentNew() {
-    Log.e("PHB TEMP", "GcmIntentService::GetPendingIntentNew.");
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::GetPendingIntentNew.");
 	Intent result_intent = new Intent(this, JactLoggedInHomeActivity.class);
 
     result_intent.putExtra(getString(R.string.was_logged_off_key), "true");
@@ -116,7 +116,7 @@ public class GcmIntentService extends IntentService {
   }
   
   private PendingIntent GetPendingIntentOld() {
-	Log.e("PHB TEMP", "GcmIntentService::GetPendingIntentOld.");
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::GetPendingIntentOld.");
 	Intent result_intent = new Intent(this, JactLoggedInHomeActivity.class);
     result_intent.putExtra(getString(R.string.was_logged_off_key), "true");
 	return PendingIntent.getActivity(this, 0, result_intent, 0);
@@ -126,7 +126,7 @@ public class GcmIntentService extends IntentService {
   // This is just one simple example of what you might choose to do with
   // a GCM message.
   private void sendNotification(String msg) {
-      Log.e("PHB TEMP", "GcmIntentService::sendNotification. msg: " + msg);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::sendNotification. msg: " + msg);
       
       PendingIntent contentIntent = null;
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -136,7 +136,7 @@ public class GcmIntentService extends IntentService {
       }
       
       if (contentIntent == null) {
-    	Log.e("GcmIntentService::sendNotification", "Null Pending Intent. No Notification will be sent");
+    	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("GcmIntentService::sendNotification", "Null Pending Intent. No Notification will be sent");
     	return;
       }
       
@@ -170,30 +170,30 @@ public class GcmIntentService extends IntentService {
   private void HandleRegistration(Intent intent) {
 	// TODO(PHB): Implement this.
 	String registration = intent.getStringExtra("registration_id");
-	Log.e("PHB TEMP", "GcmIntentService::HandleRegistration. non-null registration: " + registration);
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::HandleRegistration. non-null registration: " + registration);
 	if (intent.getStringExtra("error") != null) {
 	  // Registration failed, should try again later.
-	  Log.d("c2dm", "registration failed");
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.d("c2dm", "registration failed");
 	  String error = intent.getStringExtra("error");
 	  if (error == "SERVICE_NOT_AVAILABLE") {
-		Log.d("c2dm", "SERVICE_NOT_AVAILABLE");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.d("c2dm", "SERVICE_NOT_AVAILABLE");
 	  } else if (error == "ACCOUNT_MISSING"){
-		Log.d("c2dm", "ACCOUNT_MISSING");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.d("c2dm", "ACCOUNT_MISSING");
 	  } else if (error == "AUTHENTICATION_FAILED") {
-		Log.d("c2dm", "AUTHENTICATION_FAILED");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.d("c2dm", "AUTHENTICATION_FAILED");
 	  } else if (error == "TOO_MANY_REGISTRATIONS") {
-		Log.d("c2dm", "TOO_MANY_REGISTRATIONS");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.d("c2dm", "TOO_MANY_REGISTRATIONS");
 	  } else if (error == "INVALID_SENDER"){
-		Log.d("c2dm", "INVALID_SENDER");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.d("c2dm", "INVALID_SENDER");
 	  } else if (error == "PHONE_REGISTRATION_ERROR") {
-		Log.d("c2dm", "PHONE_REGISTRATION_ERROR");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.d("c2dm", "PHONE_REGISTRATION_ERROR");
 	  }
 	} else if (intent.getStringExtra("unregistered") != null) {
 	  // unregistration done, new messages from the authorized sender will be rejected
-	  Log.d("c2dm", "unregistered");
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.d("c2dm", "unregistered");
 	} else if (registration != null) {
-	  Log.d("c2dm", registration);
-	  Log.e("PHB TEMP", "GcmIntentService::HandleRegistration. non-null registration: " + registration);
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.d("c2dm", registration);
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::HandleRegistration. non-null registration: " + registration);
 	  //Editor editor =
       //    context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
       //editor.putString(REGISTRATION_KEY, registration);

@@ -68,11 +68,11 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 	@Override
 	public void AlertPositionsReady (HashSet<Integer> positions) {
 	  if (positions == null) {
-		Log.e("PHB ERROR", "CheckoutAdapter::alertPositionsReady. Null positions");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "CheckoutAdapter::alertPositionsReady. Null positions");
 		return;
 	  }
 	  if (positions.isEmpty()) {
-		Log.e("PHB ERROR", "CheckoutAdapter::alertPositionsReady. Empty positions");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "CheckoutAdapter::alertPositionsReady. Empty positions");
 		return;
 	  }
 	  boolean should_alert_state_change = false;
@@ -142,7 +142,7 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
           } else {
             amount = item.cost_.size();
           }
-          Log.e("PHB ERROR", "CheckoutAdapter::getView. Product " + item.title_ +
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "CheckoutAdapter::getView. Product " + item.title_ +
         		             " has " + amount + " prices associated it it.");
           return null;
         }
@@ -184,7 +184,7 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
           holder.price_and_.setVisibility(View.GONE);
           holder.points_.setVisibility(View.GONE);
         } else {
-          Log.e("PHB ERROR", "CheckoutAdapter::getView. Unable to parse price for item:\n" + item.toString());
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "CheckoutAdapter::getView. Unable to parse price for item:\n" + item.toString());
         }
         
         // Sets PID (invisible as a view, used to find product in the Cart).
@@ -223,7 +223,7 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 			LinearLayout ll = (LinearLayout) view;
 			current_quantity_tv_ = (TextView) ll.getChildAt(0);
 		} else {
-			Log.e("CheckoutAdapter::onQuantityClick", "Unrecognized id: " + view.getId());
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("CheckoutAdapter::onQuantityClick", "Unrecognized id: " + view.getId());
 			return;
 		}
 		AlertDialog.Builder b = new AlertDialog.Builder(parent_activity_);
@@ -246,7 +246,7 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 	@SuppressLint("LongLogTag")
 	private void SetQuantity(int position) {
 	  if (current_quantity_tv_ == null) {
-		Log.e("CheckoutAdapter::SetQuantity",
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("CheckoutAdapter::SetQuantity",
 			  "Unable to update quantity: current_quantity_tv_ is null.");
 		return;
 	  }
@@ -256,7 +256,7 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 	  try {
 		pid = Integer.parseInt(pid_tv.getText().toString());
 	  } catch (NumberFormatException e) {
-		Log.e("CheckoutAdapter::SetQuantity",
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("CheckoutAdapter::SetQuantity",
 			  "Unable to update quantity: Unable to parse PID|" +
 			  pid_tv.getText().toString() + "|as int.");
 		return;
@@ -265,20 +265,20 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 	  response.line_item_ = new ShoppingUtils.LineItem();
 	  if (!ShoppingCartActivity.AccessCart(
 			  ShoppingCartActivity.CartAccessType.GET_LINE_ITEM, pid, -1, "", response)) {
-		Log.e("CheckoutAdapter::SetQuantity", "Unable to update quantity: Failed Cart Access.");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("CheckoutAdapter::SetQuantity", "Unable to update quantity: Failed Cart Access.");
 		return;
 	  }
 	  ShoppingUtils.LineItem item = response.line_item_;
 
 	  if (item == null) {
-		Log.e("CheckoutAdapter::SetQuantity",
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("CheckoutAdapter::SetQuantity",
 			  "Unable to update quantity: item.quantity_ is null.");
 		return;
 	  }
 
 	  // Check if the selected position matches the current quantity for this item.
 	  if (item.quantity_ == position) {
-		Log.i("PHB TEMP", "CheckoutAdapter::SetQuantity. Nothing to do, as position selected (" +
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.i("PHB TEMP", "CheckoutAdapter::SetQuantity. Nothing to do, as position selected (" +
 					 position + ") matches the current quantity for this item: " +
 					 ShoppingUtils.PrintLineItemHumanReadable(item));
 		if (current_quantity_tv_ != null) {
@@ -290,7 +290,7 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 	  CartAccessResponse response_two = new CartAccessResponse();
 	  if (!ShoppingCartActivity.AccessCart(
 		  ShoppingCartActivity.CartAccessType.ENFORCE_CART_RULES, item.pid_, position, item.type_, response_two)) {
-		Log.e("PHB ERROR", "CheckoutAdapter::SetQuantity. Failed CartAccessResponse.");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "CheckoutAdapter::SetQuantity. Failed CartAccessResponse.");
 		return;
 	  }
 	  ShoppingCartActivity.ItemToAddStatus item_status = response_two.to_add_status_;
@@ -306,7 +306,7 @@ public class CheckoutAdapter extends ArrayAdapter<ShoppingUtils.LineItem>
 		  parent_activity_.DisplayPopup("Unable to adjust quantity",
 										"Max quantity for this item is: " + ProductsActivity.GetMaxQuantity(item.pid_));
 		} else {
-		  Log.e("PHB ERROR", "CheckoutAdapter::SetQuantity. Unrecognized ItemToAddStatus: " + item_status);
+		  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "CheckoutAdapter::SetQuantity. Unrecognized ItemToAddStatus: " + item_status);
 		}
 		if (current_quantity_tv_ != null) {
 		  current_quantity_tv_.setText(Integer.toString(item.quantity_));

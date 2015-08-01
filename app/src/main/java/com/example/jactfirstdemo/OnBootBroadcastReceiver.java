@@ -9,7 +9,7 @@ public class OnBootBroadcastReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-	  Log.e("PHB TEMP", "OnBootBroadcastReceiver::onRecieve.");
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "OnBootBroadcastReceiver::onRecieve.");
 	  Intent intent_to_start = new Intent(context, GcmIntentService.class);
 	  context.startService(intent_to_start);
 	}

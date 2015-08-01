@@ -27,18 +27,20 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
   private static String url_;
   private static String faq_url_;
   private static String title_;
+  private static int title_resource_;
   
-  public static synchronized void SetUrlAndTitle(String url, String title) {
+  public static synchronized void SetUrlAndTitle(String url, String title, int resource_id) {
     url_ = url;
     title_ = title;
+    title_resource_ = resource_id;
   }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
     super.onCreate(savedInstanceState, R.string.faq_label,
-		       R.layout.faq_layout,
-		       JactNavigationDrawer.ActivityIndex.FAQ);
+		           R.layout.faq_layout,
+		           JactNavigationDrawer.ActivityIndex.FAQ);
     faq_url_ = GetUrlTask.GetJactDomain() + "/faq-page";
     
     // Initialize url_ and title_ to dummy values if necessary (they should get re-written
@@ -48,16 +50,20 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
     }
     if (title_ == null || title_.isEmpty()) {
       title_ = "FAQ";
+      title_resource_ = R.string.faq_label;
     }
   }
     
   @Override
   protected void onResume() {
-	super.onResume();
-    TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
-    ab_title.setText(title_);
+    SetActivityId(title_resource_);
+    super.onResume();
+    //TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
+    //ab_title.setText(title_);
     if (title_.equalsIgnoreCase(getString(R.string.menu_about_jact))) {
       navigation_drawer_.setActivityIndex(ActivityIndex.ABOUT_JACT);
+    } else if (title_.equalsIgnoreCase(getString(R.string.menu_jact_my_profile))) {
+      navigation_drawer_.setActivityIndex(ActivityIndex.PROFILE);
     } else if (title_.equalsIgnoreCase(getString(R.string.menu_contact_us))) {
         navigation_drawer_.setActivityIndex(ActivityIndex.CONTACT_US);
     } else if (title_.equalsIgnoreCase(getString(R.string.menu_faq))) {
@@ -67,7 +73,7 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
     } else if (title_.equalsIgnoreCase(getString(R.string.menu_privacy_policy))) {
         navigation_drawer_.setActivityIndex(ActivityIndex.PRIVACY_POLICY);
     } else {
-      Log.e("PHB ERROR", "FaqActivity::onResume. Unrecognized activity: " + title_);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "FaqActivity::onResume. Unrecognized activity: " + title_);
     }
 
     // Set cookies for WebView.
@@ -96,7 +102,7 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
     	}
     });
     // Set spinner (and hide WebView) until page has finished loading.
-    SetCartIcon(this);
+    GetCart(this);
     fadeAllViews(num_server_tasks_ > 0);
   }
 

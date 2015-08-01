@@ -22,8 +22,9 @@ public class JactLinearLayout extends LinearLayout {
     
     @Override
     protected void onSizeChanged(int w, int h, int old_w, int old_h) {
-      if (w <= 0 || tv_to_match_ == null || w < tv_to_match_.getWidth()) return;
-      tv_to_match_.setTextScaleX((float) ((float) this.getWidth() / tv_to_match_.getWidth()));
+      //PHB_OLDif (w <= 0 || tv_to_match_ == null || w < tv_to_match_.getWidth()) return;
+      //PHB_OLDtv_to_match_.setTextScaleX((float) ((float) this.getWidth() / tv_to_match_.getWidth()));
+      super.onSizeChanged(w, h, old_w, old_h);
     }
     
     public void SetTextViewToMatch(JactTextView to_match) {

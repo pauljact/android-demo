@@ -43,7 +43,7 @@ public class JactComparators {
 	  if (length > 10) {
 		  am_pm = date.substring(length - 2, length);
 		  if (!am_pm.equals("am") && !am_pm.equals("pm")) {
-			  Log.e("PHB", "JactComparators::ParseDate. Unknown trailing two characters in :" + date);
+			  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB", "JactComparators::ParseDate. Unknown trailing two characters in :" + date);
 			  return false;
 		  }
 		  int hyphen = date.indexOf("- ");
@@ -63,7 +63,7 @@ public class JactComparators {
 			  holder.min_ = Integer.parseInt(min_str);
 		  }
 	  } catch (NumberFormatException e) {
-		  Log.e("PHB ERROR", "JactComparators::ParseDate. Unable to parse: " + date);
+		  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactComparators::ParseDate. Unable to parse: " + date);
 		  return false;
 	  }
 	  return true;

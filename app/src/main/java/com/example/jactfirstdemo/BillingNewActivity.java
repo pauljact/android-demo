@@ -181,7 +181,7 @@ public class BillingNewActivity extends JactActionBarActivity implements OnItemS
 	    Spinner state = (Spinner) findViewById(R.id.credit_card_new_state_spinner);
 	    state.setSelection(pos);
 	  } else {
-		  Log.e("PHB", "BHP. State: " + address.state_ + ", pos: " + pos);
+		  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB", "BHP. State: " + address.state_ + ", pos: " + pos);
 	  }
 	  if (address.zip_ != null && !address.zip_.isEmpty()) {
 	    EditText zip = (EditText) findViewById(R.id.credit_card_new_zip_et);

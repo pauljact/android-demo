@@ -53,7 +53,7 @@ public class ViewOrdersActivity extends JactActionBarActivity implements Process
     
     // Sanity Check we're here legitimately.
     if (orders_url_.isEmpty()) {
-      Log.e("ViewOrdersActivity::onResume", "No user id found. Aborting call to View Orders.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ViewOrdersActivity::onResume", "No user id found. Aborting call to View Orders.");
       // TODO(PHB): Handle this failure case (i.e. should abort, going back to main Profile page).
       // For now, I just do onBackPressed, which maybe is correct?
       onBackPressed();
@@ -76,7 +76,7 @@ public class ViewOrdersActivity extends JactActionBarActivity implements Process
     		  cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain());
     }
     // Set webview from order_url_.
-    Log.i("ViewOrdersActivity::onResume", "Loading View Orders webpage with url: " + orders_url_ + order_id_);
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.i("ViewOrdersActivity::onResume", "Loading View Orders webpage with url: " + orders_url_ + order_id_);
     WebView web_view = (WebView) findViewById(R.id.checkout_mobile_webview);
     web_view.loadUrl(orders_url_ + order_id_);
     web_view.setWebViewClient(new JactWebViewClient(this));

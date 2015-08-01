@@ -20,7 +20,7 @@ public class MemoryCache {
  
     public void put(String id, Bitmap bitmap) {
 		if (bitmap == null) {
-			Log.e("MemoryCache::put", "Null bitmap");
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("MemoryCache::put", "Null bitmap");
 		}
     	if (cache_.get(id) == null) {
     		cache_.put(id, bitmap);

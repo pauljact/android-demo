@@ -57,6 +57,10 @@ public class NewUserActivity extends ActionBarActivity
     Toolbar toolbar = (Toolbar) findViewById(R.id.jact_toolbar);
     TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
     ab_title.setText(R.string.new_user_label);
+    TextView points = (TextView) findViewById(R.id.toolbar_title_points);
+    points.setVisibility(View.GONE);
+    ImageView points_icon = (ImageView) findViewById(R.id.toolbar_userpoints_pic);
+    points_icon.setVisibility(View.GONE);
     setSupportActionBar(toolbar);
 
     should_clear_form_on_resume_ = true;
@@ -80,7 +84,7 @@ public class NewUserActivity extends ActionBarActivity
 
   @Override
   public void onBackPressed() {
-    Log.e("PHB TEMP", "ForgotPassword::onBackPressed");
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "ForgotPassword::onBackPressed");
     JactLoginActivity.SetRequireLogin(true);
     super.onBackPressed();
   }
@@ -96,7 +100,7 @@ public class NewUserActivity extends ActionBarActivity
       try {
         bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(img_uri));
         if (bitmap == null) {
-          Log.e("NewUserActivity::onActivityResult", "Null bitmap. Aborting.");
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("NewUserActivity::onActivityResult", "Null bitmap. Aborting.");
           return;
         }
         if (bitmap.getHeight() < 2000 && bitmap.getWidth() < 2000) {
@@ -114,7 +118,7 @@ public class NewUserActivity extends ActionBarActivity
 		byte[] array = os.toByteArray();
          */
       } catch (FileNotFoundException e) {
-    	Log.e("NewUserActivity::onActivityResult", "FNF Bitmap exception: " + e.getMessage());
+    	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("NewUserActivity::onActivityResult", "FNF Bitmap exception: " + e.getMessage());
       }
     }
   }
@@ -262,7 +266,7 @@ public class NewUserActivity extends ActionBarActivity
     form_info.add(GetUrlTask.CreateFormInfo("select_avatar", avatar_id));
   	params.post_string_ = GetUrlTask.CreatePostString(header_info, form_info);
   	fadeAllViews(true);
-  	Log.e("PHB TEMP", "NewUserActivity::SendRequest. post string: " + params.post_string_);
+  	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "NewUserActivity::SendRequest. post string: " + params.post_string_);
 	task.execute(params);
   }
   
@@ -290,13 +294,13 @@ public class NewUserActivity extends ActionBarActivity
 	EditText username_et = (EditText) findViewById(R.id.new_user_name_et);
     String username = username_et.getText().toString().trim();
     if (username.isEmpty()) {
-      Log.e("NewUserActivity::Login", "Username field empty; unable to login.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("NewUserActivity::Login", "Username field empty; unable to login.");
       return;
     }
 	EditText password_et = (EditText) findViewById(R.id.new_user_password_et);
     String password = password_et.getText().toString().trim();
     if (password.isEmpty()) {
-      Log.e("NewUserActivity::Login", "Password field empty; unable to login.");
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("NewUserActivity::Login", "Password field empty; unable to login.");
       return;
     }
     SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
@@ -330,7 +334,7 @@ public class NewUserActivity extends ActionBarActivity
 	if (extra_params.indexOf(REGISTER_NEW_USER_TASK) == 0) {
 	  Login();
 	} else {
-	  Log.e("NewUserActivity::ProcessUrlResponse", "Unexpected task: " + extra_params);
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("NewUserActivity::ProcessUrlResponse", "Unexpected task: " + extra_params);
 	}
   }
 
@@ -360,13 +364,13 @@ public class NewUserActivity extends ActionBarActivity
 	  } else if (status == FetchStatus.ERROR_NEW_USER_MISMATCHING_PASSWORDS) {
 		EmptyEditTextWarning("Passwords Do Not Match. Re-enter Password(s)");
 	  } else if (status == FetchStatus.ERROR_UNKNOWN_406) {
-		Log.e("NewUserActivity::ProcessFailedResponse", "Unknown 406 error");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("NewUserActivity::ProcessFailedResponse", "Unknown 406 error");
 	  } else {
 		EmptyEditTextWarning("Unknown Error", "Please Try Again");
-		Log.e("NewUserActivity::ProcessFailedResponse", "Unknown status: " + status);
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("NewUserActivity::ProcessFailedResponse", "Unknown status: " + status);
 	  }
 	} else {
-	  Log.e("NewUserActivity::ProcessUrlResponse", "Unexpected task: " + extra_params);
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("NewUserActivity::ProcessUrlResponse", "Unexpected task: " + extra_params);
 	}
   }
   
@@ -404,6 +408,6 @@ public class NewUserActivity extends ActionBarActivity
 
   @Override
   public void onNothingSelected(AdapterView<?> parent) {
-		Log.e("PHB tEMP", "NewUserActivity::onNothingSelected.");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB tEMP", "NewUserActivity::onNothingSelected.");
   }
 }

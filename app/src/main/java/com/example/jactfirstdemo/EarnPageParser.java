@@ -14,6 +14,7 @@ public class EarnPageParser {
   // Website node keys.
   private static final String TITLE_NODE = "node_title";
   private static final String NID_NODE = "nid";
+  private static final String EARNED_FLAG = "flagging_flagged";
   private static final String YOUTUBE_ID_NODE = "YouTube_ID";
   private static final String YOUTUBE_ID_NODE_TWO = "YouTube ID";
   private static final String VALUE_NODE = "value";
@@ -30,6 +31,7 @@ public class EarnPageParser {
 	String youtube_url_;
 	String img_url_;
 	int earn_points_;
+    boolean already_earned_;
   }
   
   static private boolean ParseTitle(String title, EarnItem item) {
@@ -43,10 +45,18 @@ public class EarnPageParser {
     try {
       item.nid_ = Integer.parseInt(nid);
     } catch (NumberFormatException e) {
-      Log.e("PHB ERROR", "EarnPageParser::ParseNodeId. Unable to parse nid as an int: " + nid);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParseNodeId. Unable to parse nid as an int: " + nid);
       return false;
     }
     return true;
+  }
+
+  static private void ParseAlreadyEarned(int flag, EarnItem item) {
+    if (flag == 1) {
+      item.already_earned_ = true;
+    } else {
+      item.already_earned_ = false;
+    }
   }
   
   static private boolean ParseYoutubeUrl(String youtube_id, EarnItem item) {
@@ -55,12 +65,12 @@ public class EarnPageParser {
 	  JSONObject youtube_object = new JSONObject(youtube_id);
 	  String id = youtube_object.getString(VALUE_NODE);
 	  if (id == null || id.isEmpty()) {
-		Log.e("EarnPageParser::ParseYoutubeUrl", "Unable to parse youtube id: " + youtube_id);
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseYoutubeUrl", "Unable to parse youtube id: " + youtube_id);
 		return false;
 	  }
 	  item.youtube_url_ = id;
 	} catch (JSONException e) {
-	  Log.e("EarnPageParser::ParseYoutubeUrl", "Unable to parse youtube id block: " + youtube_id +
+	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseYoutubeUrl", "Unable to parse youtube id block: " + youtube_id +
 			                                   ". Error: " + e.getMessage());
 	  return false;
 	}
@@ -77,7 +87,7 @@ public class EarnPageParser {
     }
     youtube_prefix = url.indexOf(YOUTUBE_URL_PREFIX_TWO);
     if (youtube_prefix != 0) {
-      Log.e("EarnPageParser::ParseYoutubeUrl", "Unexpected Youtube url: " + url);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseYoutubeUrl", "Unexpected Youtube url: " + url);
       return false;
     }
     item.youtube_url_ = url.substring(YOUTUBE_URL_PREFIX_TWO.length());
@@ -88,7 +98,7 @@ public class EarnPageParser {
     if (url == null || url.isEmpty()) return false;
     int prefix_index = url.indexOf("public://");
 	if (prefix_index != 0) {
-      Log.e("PHB ERROR", "EarnPageParser::ParseImageUrl. Unable to parse Image uri:\n" + url);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParseImageUrl. Unable to parse Image uri:\n" + url);
       return false;
 	}
     String image_url = url.substring(9);  // 9 is the length of prefix "public://" that should be removed.
@@ -101,12 +111,12 @@ public class EarnPageParser {
     if (points == null || points.isEmpty()) return false;
     int points_suffix = points.indexOf(POINTS_SUFFIX);
     if (points_suffix < 0 || (points_suffix + POINTS_SUFFIX.length() != points.length())) {
-      Log.e("PHB ERROR", "EarnPageParser::ParsePoints. Unexpected points string: " + points);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParsePoints. Unexpected points string: " + points);
     }
     try {
       item.earn_points_ = Integer.parseInt(points.substring(0, points_suffix));
     } catch (NumberFormatException e) {
-      Log.e("PHB ERROR", "EarnPageParser::ParsePoints. Unable to parse points as an int: " + points);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParsePoints. Unable to parse points as an int: " + points);
       return false;
     }
     return true;
@@ -121,30 +131,33 @@ public class EarnPageParser {
         
         // Parse title.
         if (!ParseTitle(item.getString(TITLE_NODE), earn_item)) {
-          Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse title: " +
-        		             item.getString(TITLE_NODE));
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseEarnPage",
+                "Unable to parse title: " + item.getString(TITLE_NODE));
           return;
         }
         
         // Parse Node id.
         if (!ParseNodeId(item.getString(NID_NODE), earn_item)) {
-            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse nid: " +
-		                       item.getString(NID_NODE));
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseEarnPage",
+                  "Unable to parse nid: " + item.getString(NID_NODE));
             return;
         }
+
+        // Parse Already Earned flag.
+        ParseAlreadyEarned(item.getInt(EARNED_FLAG), earn_item);
         
         // Parse Youtube Url.
         boolean found_id = false;
         if (item.has(YOUTUBE_ID_NODE)) {
           if (!ParseYoutubeUrl(item.getString(YOUTUBE_ID_NODE), earn_item)) {
-            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube id: " +
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube id: " +
  		                        item.getString(YOUTUBE_ID_NODE));
           } else {
         	found_id = true;
           }
         } else if (item.has(YOUTUBE_ID_NODE_TWO)) {
           if (!ParseYoutubeUrl(item.getString(YOUTUBE_ID_NODE_TWO), earn_item)) {
-            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube id: " +
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube id: " +
  		                        item.getString(YOUTUBE_ID_NODE));
           } else {
         	found_id = true;
@@ -153,7 +166,7 @@ public class EarnPageParser {
         if (!found_id) {
           // Try getting youtube id the old way.
           if (!ParseYoutubeUrlOld(item.getString(YOUTUBE_URL_NODE), earn_item)) {
-            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube url: " +
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube url: " +
 	                           item.getString(YOUTUBE_URL_NODE));
             return;
           }
@@ -161,15 +174,15 @@ public class EarnPageParser {
         
         // Parse Image Url.
         if (!ParseImageUrl(item.getString(IMG_URL_NODE), earn_item)) {
-            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse title: " +
-		                       item.getString(IMG_URL_NODE));
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseEarnPage",
+                  "Unable to parse title: " + item.getString(IMG_URL_NODE));
             return;
         }
         
         // Parse Points.
         if (!ParsePoints(item.getString(POINTS_NODE), earn_item))  {
-            Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse title: " +
-		                       item.getString(POINTS_NODE));
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseEarnPage",
+                  "Unable to parse title: " + item.getString(POINTS_NODE));
             return;
         }
         
@@ -177,7 +190,8 @@ public class EarnPageParser {
         earn_list.add(earn_item);
       }
     } catch (JSONException e) {
-      Log.e("PHB ERROR", "EarnPageParser.ParseEarnPage: Failed to parse response. Error: " + e.getMessage());
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser.ParseEarnPage",
+            "Failed to parse response. Error: " + e.getMessage());
       // TODO(PHB): Handle exception.
     }
   }

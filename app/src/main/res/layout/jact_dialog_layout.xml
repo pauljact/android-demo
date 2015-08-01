@@ -3,15 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".JactLoginActivity"
     style="@style/EmptyStyle"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_centerHorizontal="true"
     android:layout_marginLeft="0dp"
     android:layout_marginRight="0dp"
-    android:paddingRight="0dp"
-    android:paddingLeft="0dp"
-    android:background="#FFFFFF">
+    android:paddingRight="3dp"
+    android:paddingLeft="3dp"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp"
+    android:background="@color/dark_blue">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/white">
+
     <!-- Only need the below if not setting title programmatically
          via builder.setTitle(). --> 
 	<TextView
@@ -59,7 +67,7 @@
          android:layout_width="match_parent"
          android:layout_height="wrap_content"
          android:layout_marginTop="5dp"
-   	     android:layout_marginBottom="5dp"
+   	     android:layout_marginBottom="15dp"
   	     android:layout_marginLeft="15dp"
          android:layout_marginRight="15dp"
 		 android:gravity="center"
@@ -68,4 +76,11 @@
 	     android:textStyle="bold"
 	     android:textColor="#FFFFFFFF"
 	     android:onClick="doDialogOkClick" />
+    <!-- Empty LL to create vertical space/padding below button-->
+        <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="5dp">
+    </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

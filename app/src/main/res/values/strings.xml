@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Activity Labels -->
-    <string name="cart_activity_label">Shopping Cart</string>
+    <string name="cart_activity_label">Cart</string>
     <string name="billing_label">Checkout: Billing</string>
     <string name="shipping_label">Checkout: Shipping</string>
     <string name="review_label">Checkout: Review</string>
@@ -14,6 +14,7 @@
     <string name="new_user_label">Register</string>
     <string name="checkout_label">Checkout</string>
     <string name="rewards_label">Rewards</string>
+    <string name="my_profile_label">Profile</string>
     <string name="jact_logged_in_home_activity_label">Jact - Play With Purpose</string>
     <!-- EnD Activity Labels -->
     
@@ -38,8 +39,9 @@
     <string name="menu_jact_points">0</string>
     <string name="menu_jact_points_logo">J</string>
     <string name="menu_jact_my_profile">My Profile</string>
+    <string name="jact_my_profile">Profile</string>
     <string name="menu_jact_my_orders">My Orders</string>
-    <string name="menu_about_jact">About Jact</string>
+    <string name="menu_about_jact">How it Works</string>
     <string name="menu_contact_us">Contact Us</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_user_agreement">User Agreement</string>
@@ -159,6 +161,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="jact_simple_name">JACT</string>
     <string name="jact_motto">Play With Purpose</string>
+    <string name="jact_motto_caps">PLAY WITH PURPOSE</string>
     <string name="jact_register">Register</string>
     <string name="jact_username">Username</string>
     <string name="jact_password">Password</string>

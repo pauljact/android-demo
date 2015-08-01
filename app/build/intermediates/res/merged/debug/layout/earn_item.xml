@@ -30,7 +30,7 @@
     <!-- Earn Now Button -->
     <Button
    	    android:id="@+id/earn_now_button"
-   	    android:background="@drawable/button_selector_yellow"
+   	    android:background="@drawable/button_selector_jact_green"
    	    android:layout_width="200dp"
    	    android:layout_height="30dp"
    	    android:gravity="center"
@@ -46,6 +46,8 @@
         android:id="@+id/earn_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginRight="50dp"
+        android:layout_marginLeft="50dp"
         android:gravity="center_horizontal"
         android:background="@color/transparent"
         android:text="@string/earn_title_str"

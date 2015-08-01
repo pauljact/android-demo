@@ -20,6 +20,7 @@ public class JactTextView extends TextView {
     public JactTextView(Context context) {
         super(context);
     }
+
     @Override
     protected void onSizeChanged(int w, int h, int old_w, int old_h) {
       if (w <= 0 || ll_to_match_ == null || w >= ll_to_match_.getWidth()) return;
@@ -37,10 +38,11 @@ public class JactTextView extends TextView {
       // PHB Now matching width via Relative Layout
       //float new_width = (float) ll_to_match_.getWidth() * (float) 0.95;
       //this.setWidth((int) new_width);
-        Log.e("PHB TEMP", "JactTextView::onSizeChanged. LL width: " + ll_to_match_.getWidth() +
-                          ", TV width: " + this.getWidth());
-      this.setTextScaleX((float) ((float) 0.95 * this.getWidth()) / w);
+      //PHB_NEWEST  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JactTextView::onSizeChanged. LL width: " + ll_to_match_.getWidth() +
+      //PHB_NEWEST                    ", TV width: " + this.getWidth());
+      //PHB_NEWESTthis.setTextScaleX((float) ((float) 0.95 * this.getWidth()) / w);
       //this.setTextScaleX((float) ((float) ll_to_match_.getWidth() / w));
+      super.onSizeChanged(w, h, old_w, old_h);
     }
 
     public void SetLinearLayoutToMatch(JactLinearLayout to_match) {

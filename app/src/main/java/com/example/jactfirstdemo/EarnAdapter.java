@@ -53,11 +53,11 @@ public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implement
 	@Override
 	public void AlertPositionsReady (HashSet<Integer> positions) {
 		if (positions == null) {
-			Log.e("PHB ERROR", "EarnAdapter::alertPositionsReady. Null positions");
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnAdapter::alertPositionsReady. Null positions");
 			return;
 		}
 		if (positions.isEmpty()) {
-			Log.e("PHB ERROR", "EarnAdapter::alertPositionsReady. Empty positions");
+			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnAdapter::alertPositionsReady. Empty positions");
 			return;
 		}
 		boolean should_alert_state_change = false;
@@ -106,6 +106,7 @@ public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implement
             viewHolder.title_ = (TextView) vi.findViewById(R.id.earn_title);
             viewHolder.earn_now_ = (Button) vi.findViewById(R.id.earn_now_button);
             viewHolder.points_ = (TextView) vi.findViewById(R.id.earn_points);
+			viewHolder.words_ = (TextView) vi.findViewById(R.id.earn_words);
             viewHolder.nid_ = (TextView) vi.findViewById(R.id.earn_nid);
             viewHolder.img_ = (JactImageView) vi.findViewById(R.id.earn_image);
             vi.setTag(viewHolder);
@@ -122,7 +123,22 @@ public class EarnAdapter extends ArrayAdapter<EarnPageParser.EarnItem> implement
         }
         
         // Set Points.
-        holder.points_.setText(Integer.toString(earn_item.earn_points_) + " Points");
+        holder.points_.setText(Integer.toString(earn_item.earn_points_));
+		if (earn_item.already_earned_) {
+			holder.points_.setTextColor(parent_activity_.getResources().getColor(R.color.red_text));
+			holder.words_.setTextColor(parent_activity_.getResources().getColor(R.color.red_text));
+			holder.words_.setText("Earned");
+			holder.earn_now_.setText("Watch Again");
+			//PHB_OLDholder.earn_now_.setBackground(
+			//PHB_OLD	parent_activity_.getResources().getDrawable(R.drawable.button_selector_green));
+		} else {
+			holder.points_.setTextColor(parent_activity_.getResources().getColor(R.color.black));
+			holder.words_.setTextColor(parent_activity_.getResources().getColor(R.color.black));
+			holder.words_.setText("Earn");
+			holder.earn_now_.setText("Earn Now");
+			//PHB_OLDholder.earn_now_.setBackground(
+			//PHB_OLD		parent_activity_.getResources().getDrawable(R.drawable.button_selector_yellow));
+		}
 
         // Set Earn ID.
         holder.nid_.setText(Integer.toString(earn_item.nid_));

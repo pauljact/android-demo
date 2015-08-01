@@ -154,6 +154,8 @@
     <color name="button_blue_pressed">#2F33CCFF</color>
     <color name="button_green">#82D222</color>
     <color name="button_green_pressed">#2F00CC11</color>
+    <color name="button_jact_green">#9BCA0A</color>
+    <color name="button_jact_green_pressed">#2F9BCA0A</color>
     <!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.0.0/res/values/values.xml -->
     <eat-comment/>
     <color name="button_material_dark">#ff5a595b</color>
@@ -212,6 +214,7 @@
     <color name="hint_foreground_material_light">@color/bright_foreground_disabled_material_light</color>
     <!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/values/jact_colors.xml -->
     <eat-comment/>
+    <color name="jact_blue">#66AFE9</color>
     <color name="jact_gray">#767686</color>
     <color name="jact_light_gray">#262646</color>
     <color name="light_blue">#0077FF</color>
@@ -461,7 +464,7 @@
     <string name="billing_label">Checkout: Billing</string>
     <string name="billing_str">Billing</string>
     <string name="billing_use_same_addr_str">Use Same Address as Shipping</string>
-    <string name="cart_activity_label">Shopping Cart</string>
+    <string name="cart_activity_label">Cart</string>
     <string name="cart_items_str">Cart Items:</string>
     <string name="cart_str">Cart</string>
     <!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-cast/7.5.0/res/values/cast_strings.xml -->
@@ -578,6 +581,8 @@
     <string name="jact_logged_in_home_activity_label">Jact - Play With Purpose</string>
     <string name="jact_login">Login</string>
     <string name="jact_motto">Play With Purpose</string>
+    <string name="jact_motto_caps">PLAY WITH PURPOSE</string>
+    <string name="jact_my_profile">Profile</string>
     <string name="jact_password">Password</string>
     <string name="jact_price_str">JACT Price:</string>
     <string name="jact_register">Register</string>
@@ -585,7 +590,7 @@
     <string name="jact_username">Username</string>
     <string name="last_str">Last</string>
     <string name="max_quantity_str">Max Quantity:</string>
-    <string name="menu_about_jact">About Jact</string>
+    <string name="menu_about_jact">How it Works</string>
     <string name="menu_community">Community</string>
     <string name="menu_contact_us">Contact Us</string>
     <string name="menu_faq">FAQ</string>
@@ -622,6 +627,7 @@
     <string name="mr_user_route_category_name">Devices</string>
     <!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/values/strings.xml -->
     <eat-comment/>
+    <string name="my_profile_label">Profile</string>
     <string name="name_on_card_str">Name on Card</string>
     <string name="name_str">Name</string>
     <string name="nav_drawer_width">320dp</string>

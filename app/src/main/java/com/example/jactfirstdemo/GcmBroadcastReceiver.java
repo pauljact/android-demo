@@ -16,7 +16,7 @@ public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
     String foo = "";
     if (extras != null) foo = extras.toString();
     String intent_action = intent.getAction();
-	Log.e("PHB TEMP", "GcmBroadcastReceiver::onReceive. extras: " + foo + ", intent_action: " + intent_action);
+	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmBroadcastReceiver::onReceive. extras: " + foo + ", intent_action: " + intent_action);
     // END PHB TEMP
 	
 	// Explicitly specify that GcmIntentService will handle the intent.

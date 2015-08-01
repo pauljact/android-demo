@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 
 public class EarnRedeemActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   private static String url_;
+  JactWebViewClient webview_client_;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -35,11 +36,12 @@ public class EarnRedeemActivity extends JactActionBarActivity implements Process
     // Initialize url_ and title_ to dummy values if necessary (they should get re-written
     // to valid values before they are actually used).
     url_ = getIntent().getStringExtra(getString(R.string.earn_url_key));
-    Log.w("PHB TEMP", "EarnRedeemActivity::onCreate. Set redeem url to: " + url_);
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "EarnRedeemActivity::onCreate. Set redeem url to: " + url_);
     if (url_ == null || url_.isEmpty()) {
       EarnActivity.SetShouldRefreshEarnItems(true);
       startActivity(new Intent(this, EarnActivity.class));
     }
+    webview_client_ = new JactWebViewClient(this);
   }
     
   @Override
@@ -65,19 +67,14 @@ public class EarnRedeemActivity extends JactActionBarActivity implements Process
     // Get url, and set webview from it.
     WebView web_view = (WebView) findViewById(R.id.earn_redeem_webview);
     web_view.loadUrl(url_);
-    web_view.setWebViewClient(new WebViewClient() {
-    	@Override
-    	public void onPageFinished(WebView view, String url) {
-    		fadeAllViews(false);
-    	}
-    });
+    web_view.setWebViewClient(webview_client_);
     // Enable javascript, to display video.
     // UPDATE: Enabling javascript below still didn't allow the video to display. 
-    //WebSettings ws = web_view.getSettings();
-    //ws.setJavaScriptEnabled(true);
+    WebSettings ws = web_view.getSettings();
+    ws.setJavaScriptEnabled(true);
     
     // Set spinner (and hide WebView) until page has finished loading.
-    SetCartIcon(this);
+    GetCart(this);
     fadeAllViews(num_server_tasks_ > 0);
   }
 
@@ -119,5 +116,14 @@ public class EarnRedeemActivity extends JactActionBarActivity implements Process
   @Override
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
 	ProcessFailedCartResponse(this, status, extra_params);
+  }
+
+  @Override
+  // We overload doSomething to handle clicks on links in the WebView.
+  public boolean doSomething(String info) {
+    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "EarnRedeemActivity::doSomething. String: " + info);
+    EarnActivity.SetShouldRefreshEarnItems(true);
+    startActivity(new Intent(this, EarnActivity.class));
+    return true;
   }
 }
