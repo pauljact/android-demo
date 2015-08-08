@@ -1,4 +1,4 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,7 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.jactfirstdemo.ShoppingCartActivity.ItemToAddStatus;
+import com.jact.jactfirstdemo.ShoppingCartActivity.ItemToAddStatus;
 
 import android.graphics.Bitmap;
 import android.util.Log;

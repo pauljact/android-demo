@@ -1,9 +1,9 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import com.example.jactfirstdemo.JactImageView.UseCase;
+import com.jact.jactfirstdemo.JactImageView.UseCase;
  
 import android.content.Context;
 import android.graphics.Bitmap;

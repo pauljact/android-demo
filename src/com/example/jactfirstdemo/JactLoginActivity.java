@@ -1,4 +1,4 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,8 +24,8 @@ import android.widget.EditText;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.jactfirstdemo.JactLoggedInHomeActivity;
-import com.example.jactfirstdemo.R;
+import com.jact.jactfirstdemo.JactLoggedInHomeActivity;
+import com.jact.jactfirstdemo.R;
 
 public class JactLoginActivity extends FragmentActivity implements ProcessUrlResponseCallback {
   public static final String USERNAME_SEPERATOR = "PHB_NAME_SEP_PHB";

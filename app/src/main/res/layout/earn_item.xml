@@ -17,7 +17,7 @@
         android:background="@color/transparent"
         android:layout_marginRight="2dp">
         <!--android:background="@drawable/products_bg_selector"-->
-        <com.example.jactfirstdemo.JactImageView
+        <com.jact.jactfirstdemo.JactImageView
             android:id="@+id/earn_image"
             android:layout_width="200dp"
             android:layout_height="180dp"              

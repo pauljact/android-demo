@@ -1,7 +1,6 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import java.util.Comparator;
-import java.util.HashMap;
 
 import android.util.Log;
 

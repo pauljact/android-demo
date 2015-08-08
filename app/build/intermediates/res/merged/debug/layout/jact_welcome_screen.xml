@@ -18,7 +18,7 @@
     android:onClick="doLoginScreenClick"              
     android:clickable="true"
     android:background="@drawable/jact_background">
-    <com.example.jactfirstdemo.JactLinearLayout
+    <com.jact.jactfirstdemo.JactLinearLayout
    	    android:id="@+id/login_icon_and_name"
    	    android:layout_width="wrap_content"
    	    android:layout_height="wrap_content"
@@ -49,9 +49,9 @@
 		   	    android:textColor="@color/jact_gray"
 		   	    android:text="@string/jact_simple_name"
     			android:background="@color/transparent"/>
-	</com.example.jactfirstdemo.JactLinearLayout>
+	</com.jact.jactfirstdemo.JactLinearLayout>
 	
-   	<com.example.jactfirstdemo.JactTextView
+   	<com.jact.jactfirstdemo.JactTextView
    	    android:id="@+id/jact_motto_tv"
  	    android:layout_below="@+id/login_icon_and_name"
  	    android:layout_alignLeft="@+id/login_icon_and_name"
@@ -88,8 +88,8 @@
     	android:layout_width="fill_parent"
     	android:layout_height="wrap_content"
    	    android:layout_below="@+id/login_progress_bar"
-        android:layout_marginLeft="50dp"
-        android:layout_marginRight="50dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
 		android:layout_marginBottom="15dp"
 		android:paddingTop="5dp"
 		android:paddingBottom="5dp"
@@ -232,7 +232,7 @@
         android:id="@+id/jact_register_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-	    android:paddingRight="50dp"
+	    android:paddingRight="20dp"
         android:text="@string/jact_register"
         android:textSize="16sp"
         android:textColor="@color/light_blue"

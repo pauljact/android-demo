@@ -1,4 +1,4 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -11,9 +11,9 @@ import java.util.concurrent.Executors;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
-import com.example.jactfirstdemo.ShoppingCartActivity.CartAccessResponse;
-import com.example.jactfirstdemo.ShoppingCartActivity.ItemToAddStatus;
+import com.jact.jactfirstdemo.GetUrlTask.FetchStatus;
+import com.jact.jactfirstdemo.ShoppingCartActivity.CartAccessResponse;
+import com.jact.jactfirstdemo.ShoppingCartActivity.ItemToAddStatus;
 
 import android.content.Context;
 import android.content.SharedPreferences;

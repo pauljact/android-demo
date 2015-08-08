@@ -116,7 +116,7 @@
             android:layout_height="wrap_content"
             android:background="@color/transparent"
             android:textSize="15sp"
-            android:textColor="@color/black"
+            android:textColor="@color/red_text"
             android:textStyle="bold"
             android:text="@string/jact_price_str"/>
          <ImageView
@@ -133,7 +133,7 @@
             android:layout_height="wrap_content"
             android:background="@color/transparent"
             android:textSize="15sp"
-            android:textColor="@color/black"
+            android:textColor="@color/red_text"
             android:textStyle="bold"
             android:text="@string/dummy_text_view_text"/>
         </LinearLayout>

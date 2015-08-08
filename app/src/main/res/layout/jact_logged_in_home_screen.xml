@@ -151,7 +151,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/featured_rewards_rl"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="50dp"
         android:background="@color/transparent">
         <TextView
             android:id="@+id/featured_earn_title_tv"

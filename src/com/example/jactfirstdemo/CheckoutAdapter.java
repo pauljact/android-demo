@@ -1,4 +1,4 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 
-import com.example.jactfirstdemo.ShoppingCartActivity.CartAccessResponse;
-import com.example.jactfirstdemo.ShoppingUtils.Amount;
+import com.jact.jactfirstdemo.ShoppingCartActivity.CartAccessResponse;
+import com.jact.jactfirstdemo.ShoppingUtils.Amount;
 
 import android.content.Context;
 import android.graphics.Bitmap;

@@ -1,7 +1,7 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
-import com.example.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
+import com.jact.jactfirstdemo.GetUrlTask.FetchStatus;
+import com.jact.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
 
 import android.content.Intent;
 import android.content.res.Configuration;
