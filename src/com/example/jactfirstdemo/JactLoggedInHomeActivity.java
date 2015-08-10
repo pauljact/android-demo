@@ -1,11 +1,11 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
+import com.jact.jactfirstdemo.GetUrlTask.FetchStatus;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;

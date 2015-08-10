@@ -1,6 +1,6 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
+import com.jact.jactfirstdemo.GetUrlTask.FetchStatus;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;

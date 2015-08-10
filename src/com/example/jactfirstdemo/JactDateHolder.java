@@ -1,4 +1,4 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 public final class JactDateHolder {
 	public int day_;

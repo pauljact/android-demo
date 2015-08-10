@@ -10,13 +10,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="50dp"
-    android:background="@drawable/glossy">
+    android:background="@drawable/jact_background">
 	<Button
    	    android:id="@+id/new_user_btn"
    	    android:layout_width="wrap_content"
    	    android:layout_height="40dp"
    	    android:layout_marginTop="5dp"
         android:layout_marginLeft="12dp"
+		android:layout_marginBottom="15dp"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
    	    android:onClick="doRegisterClick"
@@ -27,13 +28,15 @@
 <ScrollView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_above="@id/new_user_btn">
+    android:layout_above="@id/new_user_btn"
+	android:layout_alignParentTop="true"
+	android:background="@drawable/jact_background">
 
 <LinearLayout
     android:id="@+id/new_user_content_frame"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/glossy"
+    android:background="@color/transparent"
     android:orientation="vertical">
     <!-- android:layout_marginTop="50dp"-->
     <TextView
@@ -57,7 +60,11 @@
         android:inputType="text"
    	    android:ems="10"                
     	android:clickable="false"
-    	android:imeOptions="actionDone"/>
+    	android:imeOptions="actionDone"
+		android:paddingTop="5dp"
+		android:paddingLeft="5dp"
+		android:paddingBottom="5dp"
+		android:background="@drawable/orange_border"/>
    	<TextView
    	    android:id="@+id/new_user_email_tv"
    	    android:layout_width="wrap_content"
@@ -79,7 +86,11 @@
         android:inputType="textEmailAddress"
    	    android:ems="10"                
     	android:clickable="false"
-    	android:imeOptions="actionDone"/>
+    	android:imeOptions="actionDone"
+		android:paddingTop="5dp"
+		android:paddingLeft="5dp"
+		android:paddingBottom="5dp"
+		android:background="@drawable/orange_border"/>
     <TextView
    	    android:id="@+id/new_user_password_tv"
    	    android:layout_width="wrap_content"
@@ -101,7 +112,11 @@
         android:inputType="textPassword"
    	    android:ems="10"                
     	android:clickable="false"
-    	android:imeOptions="actionDone"/>
+    	android:imeOptions="actionDone"
+		android:paddingTop="5dp"
+		android:paddingLeft="5dp"
+		android:paddingBottom="5dp"
+		android:background="@drawable/orange_border"/>
     <TextView
    	    android:id="@+id/new_user_password_confirm_tv"
    	    android:layout_width="wrap_content"
@@ -123,7 +138,11 @@
         android:inputType="textPassword"
    	    android:ems="10"                
     	android:clickable="false"
-    	android:imeOptions="actionDone"/>
+    	android:imeOptions="actionDone"
+		android:paddingTop="5dp"
+		android:paddingLeft="5dp"
+		android:paddingBottom="5dp"
+		android:background="@drawable/orange_border"/>
     <TextView
    	    android:id="@+id/new_user_icon_tv"
    	    android:layout_width="wrap_content"
@@ -136,15 +155,29 @@
    	    android:textStyle="bold"
    	    android:textColor="@color/black"
   		android:background="@color/transparent"/>
-    <Spinner
+    <LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="10dp"
+		android:background="@color/jact_blue">
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="1dp"
+		android:layout_marginRight="1dp"
+		android:layout_marginLeft="1dp"
+		android:layout_marginBottom="1dp"
+		android:background="@color/white">
+	<Spinner
     	android:id="@+id/new_user_default_icon_spinner"
     	android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
-        android:layout_marginTop="1dp"
-        android:layout_marginLeft="10dp"
+		android:layout_marginTop="1dp"
     	android:drawSelectorOnTop="true"
-    	android:prompt="@string/new_user_icon_prompt"
-    />
+    	android:prompt="@string/new_user_icon_prompt"/>
+	</LinearLayout>
+	</LinearLayout>
+	<!-- BHP Temporarily disabled
     <TextView
    	    android:id="@+id/new_user_choose_photo_tv"
    	    android:layout_width="wrap_content"
@@ -158,7 +191,17 @@
    	    android:textStyle="bold"
    	    android:textColor="@color/dark_blue"
   		android:background="@color/transparent"/>
-    
+    -->
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="1dp"
+		android:layout_marginLeft="10dp"
+		android:text="Visit www.jact.com to set user Avatar"
+		android:clickable="false"
+		android:textSize="16sp"
+		android:textColor="@color/black"
+		android:background="@color/transparent" />
     <ImageView
 	    android:id="@+id/new_user_temp_img"
 	    android:layout_height="50dp"

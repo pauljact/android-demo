@@ -1,4 +1,4 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -30,10 +30,10 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
-import com.example.jactfirstdemo.ShoppingUtils.Amount;
-import com.example.jactfirstdemo.ShoppingUtils.LineItem;
-import com.example.jactfirstdemo.ShoppingUtils.ShoppingCartInfo;
+import com.jact.jactfirstdemo.GetUrlTask.FetchStatus;
+import com.jact.jactfirstdemo.ShoppingUtils.Amount;
+import com.jact.jactfirstdemo.ShoppingUtils.LineItem;
+import com.jact.jactfirstdemo.ShoppingUtils.ShoppingCartInfo;
 
 public class ShoppingCartActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
 	private static final int MAX_CART_ITEMS = 10;

@@ -1,4 +1,4 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;

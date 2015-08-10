@@ -1,9 +1,8 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
-import java.util.HashMap;
 import java.util.List;
 
-import com.example.jactfirstdemo.ProductsAdapter.ProductViewHolder;
+import com.jact.jactfirstdemo.ProductsAdapter.ProductViewHolder;
 
 import android.app.Activity;
 import android.content.Context;

@@ -18,7 +18,7 @@
     android:onClick="doLoginScreenClick"              
     android:clickable="true"
     android:background="@drawable/jact_background">
-    <com.example.jactfirstdemo.JactLinearLayout
+    <com.jact.jactfirstdemo.JactLinearLayout
    	    android:id="@+id/login_icon_and_name"
    	    android:layout_width="wrap_content"
    	    android:layout_height="wrap_content"
@@ -49,24 +49,24 @@
 		   	    android:textColor="@color/jact_gray"
 		   	    android:text="@string/jact_simple_name"
     			android:background="@color/transparent"/>
-	</com.example.jactfirstdemo.JactLinearLayout>
+	</com.jact.jactfirstdemo.JactLinearLayout>
 	
-   	<com.example.jactfirstdemo.JactTextView
+   	<com.jact.jactfirstdemo.JactTextView
    	    android:id="@+id/jact_motto_tv"
  	    android:layout_below="@+id/login_icon_and_name"
  	    android:layout_alignLeft="@+id/login_icon_and_name"
 		android:layout_alignRight="@+id/login_icon_and_name"
-   	    android:layout_width="wrap_content"
+   	    android:layout_width="match_parent"
    	    android:layout_height="wrap_content"
 		android:gravity="center"
 		android:paddingTop="0dp"
-   	    android:paddingLeft="5dp"
+   	    android:paddingLeft="0dp"
   		android:onClick="doLoginScreenClick"                
   		android:clickable="true"
    	    android:textSize="14sp"
    	    android:textStyle="normal"
    	    android:textColor="@color/jact_light_gray"
-   	    android:text="@string/jact_motto"
+   	    android:text="@string/jact_motto_caps"
   		android:background="@color/transparent"/>
     <!-- </LinearLayout> -->
    	<ProgressBar
@@ -88,10 +88,15 @@
     	android:layout_width="fill_parent"
     	android:layout_height="wrap_content"
    	    android:layout_below="@+id/login_progress_bar"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+		android:layout_marginBottom="15dp"
+		android:paddingTop="5dp"
+		android:paddingBottom="5dp"
+		android:paddingLeft="5dp"
     	android:completionThreshold="1"
-   	    android:hint="@string/jact_username" />
+   	    android:hint="@string/jact_username"
+		android:background="@drawable/orange_border" />
    	<requestFocus
    	    android:layout_alignTop="@+id/username_autocomplete_tv"
    	    android:layout_alignParentLeft="true"/>
@@ -106,7 +111,7 @@
         android:visibility="invisible"
     	android:onClick="doLoginScreenClick"                
     	android:clickable="true"
-    	android:background="@color/transparent"    
+    	android:background="@color/transparent"
    	    android:text="@string/wrong_username"/>
    	<EditText
    	    android:id="@+id/jact_password"
@@ -116,11 +121,15 @@
    	    android:layout_alignLeft="@+id/username_autocomplete_tv"
    	    android:layout_alignRight="@+id/username_autocomplete_tv"
    	    android:ems="10"
+		android:paddingLeft="5dp"
+		android:paddingTop="5dp"
+		android:paddingBottom="5dp"
     	android:onClick="doLoginScreenClick"                
     	android:clickable="true"
     	android:imeOptions="actionDone"
    	    android:hint="@string/jact_password"
-   	    android:inputType="textPassword"/>
+   	    android:inputType="textPassword"
+		android:background="@drawable/orange_border"/>
 	<Button
    	    android:id="@+id/jact_login_button"
    	    android:layout_width="wrap_content"
@@ -133,7 +142,8 @@
 		android:textAllCaps="false"
    	    android:text="@string/jact_login"
    	    android:textColor="@color/white"
-   	    android:background="@drawable/button_selector_green"/>
+   	    android:background="@drawable/button_selector_jact_green"/>
+	<!-- BHP START
 	<LinearLayout
 		android:id="@+id/jact_alternate_signin_ll"
 		android:layout_width="match_parent"
@@ -151,7 +161,6 @@
 			android:layout_height="match_parent"
 			android:orientation="vertical"
 			android:gravity="left">
-		<!--<com.facebook.login.widget.LoginButton -->
 		<com.example.jactfirstdemo.JactFacebookButton
 			android:id="@+id/jact_facebook_signin_button"
 			android:layout_width="match_parent"
@@ -184,13 +193,15 @@
 			android:textAllCaps="false"
 			android:textColor="@color/white"
 			android:background="@color/transparent" />
-			<!--android:background="@drawable/button_selector_red-->
 		</LinearLayout>
 	</LinearLayout>
+	BHP END -->
+	<!-- BHP Replace the below line with this:
+	android:layout_below="@+id/jact_alternate_signin_ll"-->
 	<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-   	android:layout_below="@+id/jact_alternate_signin_ll"
+   	android:layout_below="@+id/jact_login_button"
     android:layout_alignLeft="@+id/jact_password"
     android:layout_alignRight="@+id/jact_password"
    	android:layout_marginTop="10dp"
@@ -203,7 +214,7 @@
         android:layout_height="wrap_content"
         android:text="@string/forgot_password_label"
         android:textSize="16sp"
-        android:textColor="@color/light_gray"
+        android:textColor="@color/light_blue"
         android:onClick="doForgotPassword"
     	android:background="@color/transparent"                
         android:clickable="true"/>
@@ -214,17 +225,17 @@
    	    android:layout_marginRight="10dp"
         android:text=" | "
         android:textSize="16sp"
-        android:textColor="@color/light_gray"
+        android:textColor="@color/light_blue"
     	android:background="@color/transparent"             
         android:clickable="false"/>
 	<TextView
         android:id="@+id/jact_register_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-	    android:paddingRight="50dp"
+	    android:paddingRight="20dp"
         android:text="@string/jact_register"
         android:textSize="16sp"
-        android:textColor="@color/light_gray"
+        android:textColor="@color/light_blue"
         android:onClick="doRegisterButtonClick"
     	android:background="@color/transparent"                
         android:clickable="true"/>

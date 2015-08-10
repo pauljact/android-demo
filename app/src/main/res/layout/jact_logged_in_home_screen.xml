@@ -151,7 +151,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/featured_rewards_rl"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="50dp"
         android:background="@color/transparent">
         <TextView
             android:id="@+id/featured_earn_title_tv"
@@ -239,6 +239,8 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
     	android:background="#CC111111"
-        android:listSelector="@drawable/drawer_bg_selector"
-/>
+        android:cacheColorHint="#00000000"
+        android:listSelector="#00000000"/>
+
+    <!--android:listSelector="@drawable/drawer_bg_selector"-->
 </android.support.v4.widget.DrawerLayout>

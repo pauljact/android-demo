@@ -1,9 +1,9 @@
-package com.example.jactfirstdemo;
+package com.jact.jactfirstdemo;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
-import com.example.jactfirstdemo.GetUrlTask.FetchStatus;
+import com.jact.jactfirstdemo.GetUrlTask.FetchStatus;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
