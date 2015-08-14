@@ -192,7 +192,7 @@ public class ProductsPageParser {
 	  item.promote_ = true;
 	} else {
 	  item.promote_ = false;
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsPageParse::ParseRewardsPromote", "Unrecognize Promote->Value tag: " + value);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ProductsPageParse::ParseRewardsPromote", "UnRecognize Promote->Value tag: " + value);
 	}
   }
 
