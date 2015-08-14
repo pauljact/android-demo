@@ -208,7 +208,6 @@ public class ProductsPageParser {
 	} else {
 	  item.max_quantity_ = value;
 	}
-    if (!JactActionBarActivity.IS_PRODUCTION) Log.w("ProductsPageParser", "MaxQuantity: " + value);
   }
   
   static private void ParseRewardsDrawingDate(JSONObject node, ProductItem item) {
