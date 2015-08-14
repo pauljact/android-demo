@@ -30,7 +30,7 @@ public class ViewOrdersActivity extends JactActionBarActivity implements Process
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
-    super.onCreate(savedInstanceState, R.string.checkout_label,
+    super.onCreate(savedInstanceState, R.string.menu_jact_my_orders,
     		       R.layout.checkout_mobile_layout,
     		       JactNavigationDrawer.ActivityIndex.CHECKOUT_VIA_MOBILE_SITE);
     
