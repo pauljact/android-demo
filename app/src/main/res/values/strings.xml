@@ -41,11 +41,14 @@
     <string name="menu_jact_my_profile">My Profile</string>
     <string name="jact_my_profile">Profile</string>
     <string name="menu_jact_my_orders">My Orders</string>
-    <string name="menu_about_jact">How it Works</string>
+    <string name="menu_about_jact">About Jact</string>
+    <string name="menu_how_jact_works">How it Works</string>
     <string name="menu_contact_us">Contact Us</string>
     <string name="menu_faq">FAQ</string>
-    <string name="menu_user_agreement">User Agreement</string>
-    <string name="menu_privacy_policy">Privacy Policy</string>
+    <string name="menu_user_agreement">Agreement</string>
+    <string name="menu_user_agreement_menu">User Agreement</string>
+    <string name="menu_privacy_policy_menu">Privacy Policy</string>
+    <string name="menu_privacy_policy">Policy</string>
     <string name="menu_logout">Sign Out</string>
     <string name="menu_menu">Menu</string>
     <!-- End Menu Options -->

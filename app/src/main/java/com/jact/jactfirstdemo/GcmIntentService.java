@@ -29,6 +29,7 @@ public class GcmIntentService extends IntentService {
   
   @Override
   protected void onHandleIntent(Intent intent) {
+      /* TODO(PHB): Uncomment when ready to use GCM.
       Bundle extras = intent.getExtras();
       GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
       // The getMessageType() intent parameter must be the intent you received
@@ -51,12 +52,10 @@ public class GcmIntentService extends IntentService {
           if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Non-null extras: " +
                             extras.toString() + ". GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE: " +
                             GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
-    	  /*
-           * Filter messages based on message type. Since it is likely that GCM
-           * will be extended in the future with new message types, just ignore
-           * any message types you're not interested in, or that you don't
-           * recognize.
-           */
+    	  // Filter messages based on message type. Since it is likely that GCM
+          // will be extended in the future with new message types, just ignore
+          // any message types you're not interested in, or that you don't
+          // recognize.
           if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(message_type)) {
               sendNotification("Send error: " + extras.toString());
               if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::onHandleEvent. Send error: " + extras.toString());
@@ -96,10 +95,12 @@ public class GcmIntentService extends IntentService {
       }
       // Release the wake lock provided by the WakefulBroadcastReceiver.
       GcmBroadcastReceiver.completeWakefulIntent(intent);
+      */
   }
   
   @TargetApi(16)
   private PendingIntent GetPendingIntentNew() {
+    /* TODO(PHB): Uncomment when ready to use GCM.
     if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::GetPendingIntentNew.");
 	Intent result_intent = new Intent(this, JactLoggedInHomeActivity.class);
 
@@ -111,19 +112,25 @@ public class GcmIntentService extends IntentService {
     stackBuilder.addNextIntent(result_intent);
     // Gets a PendingIntent containing the entire back stack
     return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+    */
+    return null;
   }
   
   private PendingIntent GetPendingIntentOld() {
+    /* TODO(PHB): Uncomment when ready to use GCM.
 	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::GetPendingIntentOld.");
 	Intent result_intent = new Intent(this, JactLoggedInHomeActivity.class);
     result_intent.putExtra(getString(R.string.was_logged_off_key), "true");
 	return PendingIntent.getActivity(this, 0, result_intent, 0);
+	*/
+    return null;
   }
 
   // Put the message into a notification and post it.
   // This is just one simple example of what you might choose to do with
   // a GCM message.
   private void sendNotification(String msg) {
+      /* TODO(PHB): Uncomment when ready to use GCM.
       if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::sendNotification. msg: " + msg);
       
       PendingIntent contentIntent = null;
@@ -163,10 +170,12 @@ public class GcmIntentService extends IntentService {
 
       notification_builder.setContentIntent(contentIntent);
       notification_manager_.notify(NOTIFICATION_ID, notification_builder.build());
+      */
   }
   
   private void HandleRegistration(Intent intent) {
 	// TODO(PHB): Implement this.
+    /* TODO(PHB): Uncomment when ready to use GCM.
 	String registration = intent.getStringExtra("registration_id");
 	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmIntentService::HandleRegistration. non-null registration: " + registration);
 	if (intent.getStringExtra("error") != null) {
@@ -200,5 +209,6 @@ public class GcmIntentService extends IntentService {
 	  // This should be done in a separate thread.
 	  // When done, remember that all registration is done.
 	}
+	*/
   }
 }

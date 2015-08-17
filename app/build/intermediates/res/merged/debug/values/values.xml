@@ -590,23 +590,26 @@
     <string name="jact_username">Username</string>
     <string name="last_str">Last</string>
     <string name="max_quantity_str">Max Quantity:</string>
-    <string name="menu_about_jact">How it Works</string>
+    <string name="menu_about_jact">About Jact</string>
     <string name="menu_community">Community</string>
     <string name="menu_contact_us">Contact Us</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_games">Games</string>
     <string name="menu_home">Home</string>
+    <string name="menu_how_jact_works">How it Works</string>
     <string name="menu_jact_my_orders">My Orders</string>
     <string name="menu_jact_my_profile">My Profile</string>
     <string name="menu_jact_points">0</string>
     <string name="menu_jact_points_logo">J</string>
     <string name="menu_logout">Sign Out</string>
     <string name="menu_menu">Menu</string>
-    <string name="menu_privacy_policy">Privacy Policy</string>
+    <string name="menu_privacy_policy">Policy</string>
+    <string name="menu_privacy_policy_menu">Privacy Policy</string>
     <string name="menu_profile">My Profile</string>
     <string name="menu_rewards">Rewards</string>
     <string name="menu_shopping_cart">Shopping Cart</string>
-    <string name="menu_user_agreement">User Agreement</string>
+    <string name="menu_user_agreement">Agreement</string>
+    <string name="menu_user_agreement_menu">User Agreement</string>
     <!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/build/intermediates/exploded-aar/com.facebook.android/facebook-android-sdk/4.1.0/res/values/values.xml -->
     <eat-comment/>
     <string name="messenger_send_button_text">Send</string>
