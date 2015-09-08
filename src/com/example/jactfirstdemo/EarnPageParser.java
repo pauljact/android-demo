@@ -1,4 +1,4 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import java.util.ArrayList;
 
@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-import com.jact.jactfirstdemo.ProductsPageParser.ProductItem;
+import com.jact.jactapp.ProductsPageParser.ProductItem;
 
 public class EarnPageParser {
   // Website node keys.

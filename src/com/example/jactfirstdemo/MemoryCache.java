@@ -1,4 +1,4 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;

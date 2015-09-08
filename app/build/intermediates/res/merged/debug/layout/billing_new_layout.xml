@@ -281,4 +281,4 @@
     android:dividerHeight="0dp"
     android:listSelector="@drawable/drawer_bg_selector" />
 
-</android.support.v4.widget.DrawerLayout><!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/layout/billing_new_layout.xml -->
+</android.support.v4.widget.DrawerLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/billing_new_layout.xml -->

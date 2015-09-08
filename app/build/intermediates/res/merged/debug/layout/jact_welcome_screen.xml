@@ -18,7 +18,7 @@
     android:onClick="doLoginScreenClick"              
     android:clickable="true"
     android:background="@drawable/jact_background">
-    <com.jact.jactfirstdemo.JactLinearLayout
+    <com.jact.jactapp.JactLinearLayout
    	    android:id="@+id/login_icon_and_name"
    	    android:layout_width="wrap_content"
    	    android:layout_height="wrap_content"
@@ -49,9 +49,9 @@
 		   	    android:textColor="@color/jact_gray"
 		   	    android:text="@string/jact_simple_name"
     			android:background="@color/transparent"/>
-	</com.jact.jactfirstdemo.JactLinearLayout>
+	</com.jact.jactapp.JactLinearLayout>
 	
-   	<com.jact.jactfirstdemo.JactTextView
+   	<com.jact.jactapp.JactTextView
    	    android:id="@+id/jact_motto_tv"
  	    android:layout_below="@+id/login_icon_and_name"
  	    android:layout_alignLeft="@+id/login_icon_and_name"
@@ -161,7 +161,7 @@
 			android:layout_height="match_parent"
 			android:orientation="vertical"
 			android:gravity="left">
-		<com.example.jactfirstdemo.JactFacebookButton
+		<com.example.jactapp.JactFacebookButton
 			android:id="@+id/jact_facebook_signin_button"
 			android:layout_width="match_parent"
 			android:layout_height="40dp"
@@ -241,4 +241,4 @@
         android:clickable="true"/>
    	</LinearLayout>
 </RelativeLayout>
-</LinearLayout><!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/layout/jact_welcome_screen.xml -->
+</LinearLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/jact_welcome_screen.xml -->

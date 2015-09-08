@@ -1,8 +1,8 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import java.util.List;
 
-import com.jact.jactfirstdemo.ProductsAdapter.ProductViewHolder;
+import com.jact.jactapp.ProductsAdapter.ProductViewHolder;
 
 import android.app.Activity;
 import android.content.Context;

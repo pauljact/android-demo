@@ -1,11 +1,11 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.jact.jactfirstdemo.ProductsAdapter.ProductViewHolder;
-import com.jact.jactfirstdemo.ShoppingUtils.Amount;
+import com.jact.jactapp.ProductsAdapter.ProductViewHolder;
+import com.jact.jactapp.ShoppingUtils.Amount;
 
 import android.graphics.Bitmap;
 import android.text.method.ScrollingMovementMethod;

@@ -1,4 +1,4 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;

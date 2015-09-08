@@ -1,10 +1,10 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import java.net.HttpCookie;
 import java.util.Arrays;
 import java.util.List;
 
-import com.jact.jactfirstdemo.GetUrlTask.FetchStatus;
+import com.jact.jactapp.GetUrlTask.FetchStatus;
 
 import android.app.Activity;
 import android.content.Intent;

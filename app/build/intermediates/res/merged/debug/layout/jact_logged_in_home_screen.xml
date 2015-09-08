@@ -243,4 +243,4 @@
         android:listSelector="#00000000"/>
 
     <!--android:listSelector="@drawable/drawer_bg_selector"-->
-</android.support.v4.widget.DrawerLayout><!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/layout/jact_logged_in_home_screen.xml -->
+</android.support.v4.widget.DrawerLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/jact_logged_in_home_screen.xml -->

@@ -7,4 +7,4 @@
     android:textSize="24sp"
     android:gravity="center"  
     android:textColor="@color/black"         
-    android:padding="4dp"/><!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/layout/jact_state_spinner_dropdown.xml -->
+    android:padding="4dp"/><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/jact_state_spinner_dropdown.xml -->

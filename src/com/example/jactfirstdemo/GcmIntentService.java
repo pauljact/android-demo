@@ -1,4 +1,4 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 

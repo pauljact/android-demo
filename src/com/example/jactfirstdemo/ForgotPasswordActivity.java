@@ -1,9 +1,9 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.jact.jactfirstdemo.GetUrlTask.FetchStatus;
+import com.jact.jactapp.GetUrlTask.FetchStatus;
 
 import android.content.Intent;
 import android.content.SharedPreferences;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.jact.jactfirstdemo"
-    android:versionCode="1"
+    package="com.jact.jactapp"
+    android:versionCode="3"
     android:versionName="1.0" >
 
     <uses-sdk
@@ -25,11 +25,10 @@
          receives Jact GCM messages)
     -->
     <permission
-        android:name="com.jact.jactfirstdemo.permission.C2D_MESSAGE"
+        android:name="com.jact.jactapp.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.jact.jactfirstdemo.permission.C2D_MESSAGE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -62,7 +61,7 @@
              permission to send messages to the Jact App.
         -->
         <receiver
-            android:name="com.jact.jactfirstdemo.GcmBroadcastReceiver"
+            android:name="com.jact.jactapp.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -70,7 +69,7 @@
                 <category android:name="com.jact.jactfirstdemo" />
             </intent-filter>
         </receiver>
-        <receiver android:name="com.jact.jactfirstdemo.OnBootBroadcastReceiver" >
+        <receiver android:name="com.jact.jactapp.OnBootBroadcastReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
@@ -78,10 +77,10 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.jact.jactfirstdemo.GcmIntentService" />
+        <service android:name="com.jact.jactapp.GcmIntentService" />
 
         <activity
-            android:name="com.jact.jactfirstdemo.JactLoginActivity"
+            android:name="com.jact.jactapp.JactLoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -90,187 +89,187 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.JactLoggedInHomeActivity"
+            android:name="com.jact.jactapp.JactLoggedInHomeActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoginActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoginActivity" >
 
             <!-- android:label="@string/jact_logged_in_home_activity_label" -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoginActivity" />
+                android:value="com.jact.jactapp.JactLoginActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.ProductsActivity"
+            android:name="com.jact.jactapp.ProductsActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.ShoppingCartActivity"
+            android:name="com.jact.jactapp.ShoppingCartActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.ShippingActivity"
+            android:name="com.jact.jactapp.ShippingActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.ShippingNewActivity"
+            android:name="com.jact.jactapp.ShippingNewActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.BillingNewActivity"
+            android:name="com.jact.jactapp.BillingNewActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.BillingActivity"
+            android:name="com.jact.jactapp.BillingActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.ReviewCartActivity"
+            android:name="com.jact.jactapp.ReviewCartActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.FaqActivity"
+            android:name="com.jact.jactapp.FaqActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.EarnActivity"
+            android:name="com.jact.jactapp.EarnActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.YouTubePlayerActivity"
+            android:name="com.jact.jactapp.YouTubePlayerActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.EarnActivity" >
+            android:parentActivityName="com.jact.jactapp.EarnActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.EarnActivity" />
+                android:value="com.jact.jactapp.EarnActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.EarnRedeemActivity"
+            android:name="com.jact.jactapp.EarnRedeemActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.EarnActivity" >
+            android:parentActivityName="com.jact.jactapp.EarnActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.EarnActivity" />
+                android:value="com.jact.jactapp.EarnActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.CheckoutActivity"
+            android:name="com.jact.jactapp.CheckoutActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.ViewOrdersActivity"
+            android:name="com.jact.jactapp.ViewOrdersActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.NewUserActivity"
+            android:name="com.jact.jactapp.NewUserActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoginActivity"
+            android:parentActivityName="com.jact.jactapp.JactLoginActivity"
             android:windowSoftInputMode="adjustPan" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoginActivity" />
+                android:value="com.jact.jactapp.JactLoginActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.ForgotPasswordActivity"
+            android:name="com.jact.jactapp.ForgotPasswordActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoginActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoginActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoginActivity" />
+                android:value="com.jact.jactapp.JactLoginActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.CommunityActivity"
+            android:name="com.jact.jactapp.CommunityActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
-            android:name="com.jact.jactfirstdemo.GamesActivity"
+            android:name="com.jact.jactapp.GamesActivity"
             android:icon="@drawable/ic_launcher"
             android:label="@string/empty_string"
             android:launchMode="singleTask"
-            android:parentActivityName="com.jact.jactfirstdemo.JactLoggedInHomeActivity" >
+            android:parentActivityName="com.jact.jactapp.JactLoggedInHomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jact.jactfirstdemo.JactLoggedInHomeActivity" />
+                android:value="com.jact.jactapp.JactLoggedInHomeActivity" />
         </activity>
         <activity
             android:name="com.facebook.FacebookActivity"
@@ -285,18 +284,6 @@
         <activity
             android:name="com.google.android.gms.ads.purchase.InAppPurchaseActivity"
             android:theme="@style/Theme.IAPTheme" />
-
-        <meta-data
-            android:name="com.google.android.gms.wallet.api.enabled"
-            android:value="true" />
-
-        <receiver
-            android:name="com.google.android.gms.wallet.EnableWalletOptimizationReceiver"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="com.google.android.gms.wallet.ENABLE_WALLET_OPTIMIZATION" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

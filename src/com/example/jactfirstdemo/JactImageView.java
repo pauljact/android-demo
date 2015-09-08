@@ -1,4 +1,4 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import android.content.Context;
 import android.graphics.Canvas;

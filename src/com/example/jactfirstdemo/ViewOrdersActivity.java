@@ -1,4 +1,4 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import java.net.HttpCookie;
 import java.util.Arrays;
@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.apache.http.cookie.Cookie;
 
-import com.jact.jactfirstdemo.GetUrlTask.FetchStatus;
-import com.jact.jactfirstdemo.JactNavigationDrawer.ActivityIndex;
+import com.jact.jactapp.GetUrlTask.FetchStatus;
+import com.jact.jactapp.JactNavigationDrawer.ActivityIndex;
 
 import android.app.Activity;
 import android.content.SharedPreferences;

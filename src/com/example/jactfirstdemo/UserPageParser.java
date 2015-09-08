@@ -1,8 +1,8 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import java.util.ArrayList;
 
-import com.jact.jactfirstdemo.ShoppingCartActivity.JactUserCompleteInfo;
+import com.jact.jactapp.ShoppingCartActivity.JactUserCompleteInfo;
 
 public class UserPageParser {
 	static public void ParseUserInfoFromWebpage(

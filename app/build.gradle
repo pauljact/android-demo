@@ -4,18 +4,18 @@ apply plugin: 'com.google.gms.google-services'
 android {
     compileSdkVersion 21
     buildToolsVersion "22.0.1"
-
     defaultConfig {
-        applicationId "com.jact.jactfirstdemo"
+        applicationId 'com.jact.jactapp'
         minSdkVersion 11
         targetSdkVersion 17
     }
-
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
+    }
+    productFlavors {
     }
 }
 

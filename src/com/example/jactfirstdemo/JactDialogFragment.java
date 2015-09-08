@@ -1,4 +1,4 @@
-package com.jact.jactfirstdemo;
+package com.jact.jactapp;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
