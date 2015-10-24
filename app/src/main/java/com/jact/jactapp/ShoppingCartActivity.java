@@ -360,6 +360,8 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
   @Override
   protected void onResume() {
 	  super.onResume();
+	  rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
+	  jact_shopping_cart_url_ = GetUrlTask.GetJactDomain() + "/rest/cart.json";
 	  num_failed_requests_ = 0;
 	  if (InitializeOnce()) {
 	    GetInitialShoppingCart();

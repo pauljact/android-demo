@@ -6,4 +6,4 @@
 	    android:textSize="14sp"
 	    android:gravity="center"  
 	    android:textColor="@color/black"         
-	    android:padding="2dp"/><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/jact_spinner_dropdown.xml -->
+	    android:padding="2dp"/>

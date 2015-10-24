@@ -35,4 +35,4 @@
           android:title="@string/menu_privacy_policy_menu" />
     <item android:id="@+id/menu_logout"
           android:title="@string/menu_logout" />
-</menu><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/menu/action_bar.xml -->
+</menu>

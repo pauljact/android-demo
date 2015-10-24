@@ -24,4 +24,4 @@
     	android:textColor="@color/black"/>
 	<!-- android:background="#00FFFFFF"
 	     style="@style/SpinnerStyle" -->
-</LinearLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/drop_down_layout.xml -->
+</LinearLayout>

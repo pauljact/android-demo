@@ -55,6 +55,7 @@ public class FaqActivity extends JactActionBarActivity implements ProcessUrlResp
   protected void onResume() {
     SetActivityId(title_resource_);
     super.onResume();
+    faq_url_ = GetUrlTask.GetJactDomain() + "/faq-page";
     //TextView ab_title = (TextView) findViewById(R.id.toolbar_title_tv);
     //ab_title.setText(title_);
     if (title_.equalsIgnoreCase(getString(R.string.menu_about_jact))) {

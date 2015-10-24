@@ -331,4 +331,4 @@
     android:background="#CC111111"
 	android:cacheColorHint="#00000000"
 	android:listSelector="#00000000"/>
-</android.support.v4.widget.DrawerLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/products_main.xml -->
+</android.support.v4.widget.DrawerLayout>

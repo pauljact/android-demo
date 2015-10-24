@@ -107,4 +107,4 @@
         android:background="#CC111111"
         android:listSelector="@drawable/drawer_bg_selector"
         />
-</android.support.v4.widget.DrawerLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/jact_logged_in_home_screen_old.xml -->
+</android.support.v4.widget.DrawerLayout>

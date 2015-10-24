@@ -27,6 +27,7 @@ public class GamesActivity extends JactActionBarActivity implements ProcessUrlRe
   @Override
   protected void onResume() {
 	super.onResume();
+    games_url_ = GetUrlTask.GetJactDomain() + "/games";
     navigation_drawer_.setActivityIndex(ActivityIndex.GAMES);
     
     // Set webview from games_url_.

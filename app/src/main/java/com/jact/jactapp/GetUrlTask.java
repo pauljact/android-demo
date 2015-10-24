@@ -93,8 +93,9 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  ERROR_NEW_USER_DUPLICATE_EMAIL,
   }
 
-  //static public final String JACT_DOMAIN = "https://uatm.jact.com:443";
+  static public final String JACT_DEBUG_DOMAIN = "https://uatm.jact.com:443";
   static public final String JACT_DOMAIN = "https://mobile.jact.com";
+  static private Boolean use_debug_server_ = false;
   static final String COOKIES_HEADER = "Set-Cookie";
   static private final String HEADER_NAME_VALUE_SEPERATOR = "_PHB_HEADER_NAME_VALUE_PHB_";
   static private final String FORM_NAME_VALUE_SEPERATOR = "_PHB_FORM_NAME_VALUE_PHB_";
@@ -122,7 +123,15 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
   }
 
   static public String GetJactDomain() {
-    return JACT_DOMAIN;
+    if (use_debug_server_) {
+      return JACT_DEBUG_DOMAIN;
+    } else {
+      return JACT_DOMAIN;
+    }
+  }
+
+  static public void SetServer(Boolean use_debug_server) {
+    use_debug_server_ = use_debug_server;
   }
 
   static public String PrintExtraParams(String extra_params) {
@@ -202,12 +211,16 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
   protected Void doInBackground(String... params) {      
     // Sanity check params.
     if (params.length < 1) {
-  	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. No url specified to fetch.");
+  	  if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("PHB ERROR", "GetUrlTask::doInBackground. No url specified to fetch.");
+      }
    	  status_ = FetchStatus.ERROR_PARAMS_LENGTH;
    	  return null;
     } else if (params.length < 2 ||
    		       (!params[1].equals("GET") && !params[1].equals("POST") && !params[1].equals("PUT"))) {
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::doInBackground. No connection type (GET, POST, or PUT) specified.");
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("PHB ERROR", "GetUrlTask::doInBackground. No connection type (GET, POST, or PUT) specified.");
+      }
       status_ = FetchStatus.ERROR_PARAMS_LENGTH;
       return null;
     }
@@ -236,6 +249,9 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
 	  // TODO(PHB) Auto-generated catch block
 	  e1.printStackTrace();
       status_ = FetchStatus.ERROR_BAD_URL_PARAMS;
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("GetUrlTask::doInBackground", "Bad url: " + url_);
+      }
 	  return null;
 	}
     String connection_type = params[1];  // Should be 'GET' or 'POST' or 'PUT'.
@@ -269,9 +285,11 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
     connection.setDoInput(true);
     connection.setDoOutput(connection_type.equals("POST") || connection_type.equals("PUT"));
     // PHB TEMP. Print request.
-    if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB", "GetUrlTask::execute. Doing " + connection_type + " to " + url_ +
-  	             "; and with extra task info: " +
-                 (params.length > 4 ? PrintExtraParams(params[4]) : ""));
+    if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.i("GetUrlTask::execute", "Doing " + connection_type + " to " + url_ +
+            "; and with extra task info: " +
+            (params.length > 4 ? PrintExtraParams(params[4]) : ""));
+    }
        	
     // Process POST/PUT parameters.
     if (params.length > 3 && params[3].contains(HEADER_FORM_SEPERATOR)) {

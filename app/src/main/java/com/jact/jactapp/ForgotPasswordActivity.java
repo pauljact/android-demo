@@ -55,6 +55,7 @@ public class ForgotPasswordActivity extends ActionBarActivity
   @Override
   protected void onResume() {
 	super.onResume();
+    forgot_password_url_ = GetUrlTask.GetJactDomain() + "/rest/user/request_new_password";
 	can_show_dialog_ = true;
 	is_password_reset_ = false;
 	GetUsernames();
@@ -214,7 +215,9 @@ public class ForgotPasswordActivity extends ActionBarActivity
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
 	fadeAllViews(false);
 	// TODO(PHB): Implement this for real, once Forgot Password is figured out.
-	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "ForgotPassword::ProcessFailedResponse. Status: " + status);
+	if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.e("ForgotPassword::ProcessFailedResponse", "Status: " + status);
+    }
 	if (status == FetchStatus.ERROR_UNRECOGNIZED_USERNAME) {
 	  UnrecognizedUsernameWarning();
 	} else {

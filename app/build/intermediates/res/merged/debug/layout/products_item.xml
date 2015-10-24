@@ -166,4 +166,4 @@
         android:visibility="invisible"/>
    <!-- END Empty Text Views, to hold Product ID, Summary, and Max Quantity -->
  
-</RelativeLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/products_item.xml -->
+</RelativeLayout>

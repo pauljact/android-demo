@@ -57,6 +57,9 @@ public class CheckoutActivity extends JactActionBarActivity implements ProcessUr
     
   @Override
   protected void onResume() {
+    checkout_url_ = GetUrlTask.GetJactDomain() + "/checkout/";
+    order_url_ = GetUrlTask.GetJactDomain() + "/user/" + jact_user_id_ + "/orders/";
+    jact_home_url_ = GetUrlTask.GetJactDomain();
 	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "CheckoutActivity::onResume");
 	super.onResume();
     navigation_drawer_.setActivityIndex(ActivityIndex.CHECKOUT_VIA_MOBILE_SITE);

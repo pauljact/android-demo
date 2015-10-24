@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:ns1="http://schemas.android.com/tools">
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string-array name="cc_types_array">
 	    <item>Card Type</item>
 	    <item>Visa</item>
@@ -104,13 +102,9 @@
 	    <item>2024</item>
 	    <item>2025</item>
 	</string-array>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <attr format="reference" name="drawerArrowStyle"/>
     <attr format="dimension" name="height"/>
     <attr format="boolean" name="isLightTheme"/>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <attr format="reference" name="mediaRouteButtonStyle"/>
     <attr format="reference" name="mediaRouteConnectingDrawable"/>
     <attr format="reference" name="mediaRouteOffDrawable"/>
@@ -118,8 +112,6 @@
     <attr format="reference" name="mediaRoutePauseDrawable"/>
     <attr format="reference" name="mediaRoutePlayDrawable"/>
     <attr format="reference" name="mediaRouteSettingsDrawable"/>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <attr format="string" name="title"/>
     <bool name="abc_action_bar_embed_tabs">true</bool>
     <bool name="abc_action_bar_embed_tabs_pre_jb">false</bool>
@@ -138,37 +130,25 @@
     <color name="background_floating_material_light">#ffeeeeee</color>
     <color name="background_material_dark">#ff303030</color>
     <color name="background_material_light">#ffeeeeee</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="black">#000000</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <color name="bright_foreground_disabled_material_dark">#80ffffff</color>
     <color name="bright_foreground_disabled_material_light">#80000000</color>
     <color name="bright_foreground_inverse_material_dark">@color/bright_foreground_material_light</color>
     <color name="bright_foreground_inverse_material_light">@color/bright_foreground_material_dark</color>
     <color name="bright_foreground_material_dark">@android:color/white</color>
     <color name="bright_foreground_material_light">@android:color/black</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="button_blue">#427292</color>
     <color name="button_blue_pressed">#2F33CCFF</color>
     <color name="button_green">#82D222</color>
     <color name="button_green_pressed">#2F00CC11</color>
     <color name="button_jact_green">#9BCA0A</color>
     <color name="button_jact_green_pressed">#2F9BCA0A</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <color name="button_material_dark">#ff5a595b</color>
     <color name="button_material_light">#ffd6d7d7</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="button_red">#F05000</color>
     <color name="button_red_pressed">#2FF05000</color>
     <color name="button_yellow">#FFAA00</color>
     <color name="button_yellow_pressed">#2FFFAA00</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.facebook.android/facebook-android-sdk/4.1.0/res/values/values.xml -->
-    <eat-comment/>
     <color name="com_facebook_blue">#3B5998</color>
     <color name="com_facebook_button_background_color">#415dae</color>
     <color name="com_facebook_button_background_color_disabled">#bdc1c9</color>
@@ -182,8 +162,6 @@
     <color name="com_facebook_likeboxcountview_text_color">#6a7180</color>
     <color name="com_facebook_likeview_text_color">#6a7180</color>
     <color name="com_facebook_share_button_text_color">#FFFFFF</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/7.8.0/res/values/common_colors.xml -->
-    <eat-comment/>
     <color name="common_action_bar_splitter">#d2d2d2</color>
     <color name="common_signin_btn_dark_text_default">@android:color/white</color>
     <color name="common_signin_btn_dark_text_disabled">#FFAAAAAA</color>
@@ -194,35 +172,23 @@
     <color name="common_signin_btn_light_text_disabled">#FFAAAAAA</color>
     <color name="common_signin_btn_light_text_focused">#FF737373</color>
     <color name="common_signin_btn_light_text_pressed">@android:color/white</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="dark_blue">#000088</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <color name="dim_foreground_disabled_material_dark">#80bebebe</color>
     <color name="dim_foreground_disabled_material_light">#80323232</color>
     <color name="dim_foreground_material_dark">#ffbebebe</color>
     <color name="dim_foreground_material_light">#ff323232</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="gray">#B6B6B6</color>
     <color name="gray_text">#343434</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <color name="highlighted_text_material_dark">#6680cbc4</color>
     <color name="highlighted_text_material_light">#66009688</color>
     <color name="hint_foreground_material_dark">@color/bright_foreground_disabled_material_dark</color>
     <color name="hint_foreground_material_light">@color/bright_foreground_disabled_material_light</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="jact_blue">#66AFE9</color>
     <color name="jact_gray">#767686</color>
     <color name="jact_light_gray">#262646</color>
     <color name="light_blue">#0077FF</color>
     <color name="light_gray">#464646</color>
     <color name="lighter_red">#DD0000</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <color name="link_text_material_dark">@color/material_deep_teal_200</color>
     <color name="link_text_material_light">@color/material_deep_teal_500</color>
     <color name="material_blue_grey_800">#ff37474f</color>
@@ -230,12 +196,8 @@
     <color name="material_blue_grey_950">#ff21272b</color>
     <color name="material_deep_teal_200">#ff80cbc4</color>
     <color name="material_deep_teal_500">#ff009688</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="mostly_translucent_gray">#25B6B6B4</color>
     <color name="orange">#FF8800</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <color name="primary_dark_material_dark">#ff000000</color>
     <color name="primary_dark_material_light">#ff757575</color>
     <color name="primary_material_dark">#ff212121</color>
@@ -244,12 +206,8 @@
     <color name="primary_text_default_material_light">#de000000</color>
     <color name="primary_text_disabled_material_dark">#4Dffffff</color>
     <color name="primary_text_disabled_material_light">#39000000</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="red">#FF0000</color>
     <color name="red_text">#FF2200</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <color name="ripple_material_dark">#4dffffff</color>
     <color name="ripple_material_light">#1f000000</color>
     <color name="secondary_text_default_material_dark">#b3ffffff</color>
@@ -260,16 +218,12 @@
     <color name="switch_thumb_disabled_material_light">#ffbdbdbd</color>
     <color name="switch_thumb_normal_material_dark">#ffbdbdbd</color>
     <color name="switch_thumb_normal_material_light">#fff1f1f1</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="translucent_black">#50000000</color>
     <color name="translucent_gray">#50B6B6B4</color>
     <color name="transparent">#00FFFFFF</color>
     <color name="turquois">#10bcc9</color>
     <color name="turquois_dark">#00627d</color>
     <color name="turquois_light">#10fcf9</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-wallet/7.8.0/res/values/wallet_colors.xml -->
-    <eat-comment/>
     <color name="wallet_bright_foreground_disabled_holo_light">#ffb2b2b2</color>
     <color name="wallet_bright_foreground_holo_dark">#fff3f3f3</color>
     <color name="wallet_bright_foreground_holo_light">#ff000000</color>
@@ -283,8 +237,6 @@
     <color name="wallet_hint_foreground_holo_light">#808080</color>
     <color name="wallet_holo_blue_light">#ff33b5e5</color>
     <color name="wallet_link_text_light">#0000ee</color>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_colors.xml -->
-    <eat-comment/>
     <color name="white">#FFFFFF</color>
     <color name="yellow">#FFFF00</color>
     <declare-styleable name="ActionBar"><attr name="navigationMode"><enum name="normal" value="0"/><enum name="listMode" value="1"/><enum name="tabMode" value="2"/></attr><attr name="displayOptions"><flag name="none" value="0"/><flag name="useLogo" value="0x1"/><flag name="showHome" value="0x2"/><flag name="homeAsUp" value="0x4"/><flag name="showTitle" value="0x8"/><flag name="showCustom" value="0x10"/><flag name="disableHome" value="0x20"/></attr><attr name="title"/><attr format="string" name="subtitle"/><attr format="reference" name="titleTextStyle"/><attr format="reference" name="subtitleTextStyle"/><attr format="reference" name="icon"/><attr format="reference" name="logo"/><attr format="reference" name="divider"/><attr format="reference" name="background"/><attr format="reference|color" name="backgroundStacked"/><attr format="reference|color" name="backgroundSplit"/><attr format="reference" name="customNavigationLayout"/><attr name="height"/><attr format="reference" name="homeLayout"/><attr format="reference" name="progressBarStyle"/><attr format="reference" name="indeterminateProgressStyle"/><attr format="dimension" name="progressBarPadding"/><attr name="homeAsUpIndicator"/><attr format="dimension" name="itemPadding"/><attr format="boolean" name="hideOnContentScroll"/><attr format="dimension" name="contentInsetStart"/><attr format="dimension" name="contentInsetEnd"/><attr format="dimension" name="contentInsetLeft"/><attr format="dimension" name="contentInsetRight"/><attr format="dimension" name="elevation"/><attr format="reference" name="popupTheme"/></declare-styleable>
@@ -302,7 +254,7 @@
     <declare-styleable name="LinearLayoutCompat_Layout"><attr name="android:layout_width"/><attr name="android:layout_height"/><attr name="android:layout_weight"/><attr name="android:layout_gravity"/></declare-styleable>
     <declare-styleable name="ListPopupWindow"><attr name="android:dropDownVerticalOffset"/><attr name="android:dropDownHorizontalOffset"/></declare-styleable>
     <declare-styleable name="LoadingImageView"><attr format="enum" name="imageAspectRatioAdjust"><enum name="none" value="0"/><enum name="adjust_width" value="1"/><enum name="adjust_height" value="2"/></attr><attr format="float" name="imageAspectRatio"/><attr format="boolean" name="circleCrop"/></declare-styleable>
-    <declare-styleable name="MapAttrs"><attr format="enum" name="mapType"><enum name="none" value="0"/><enum name="normal" value="1"/><enum name="satellite" value="2"/><enum name="terrain" value="3"/><enum name="hybrid" value="4"/></attr><attr format="float" name="cameraBearing"/><attr format="float" name="cameraTargetLat"/><attr format="float" name="cameraTargetLng"/><attr format="float" name="cameraTilt"/><attr format="float" name="cameraZoom"/><attr format="boolean" name="liteMode"/><attr format="boolean" name="uiCompass"/><attr format="boolean" name="uiRotateGestures"/><attr format="boolean" name="uiScrollGestures"/><attr format="boolean" name="uiTiltGestures"/><attr format="boolean" name="uiZoomControls"/><attr format="boolean" name="uiZoomGestures"/><attr format="boolean" name="useViewLifecycle"/><attr format="boolean" name="zOrderOnTop"/><attr format="boolean" name="uiMapToolbar"/></declare-styleable>
+    <declare-styleable name="MapAttrs"><attr format="enum" name="mapType"><enum name="none" value="0"/><enum name="normal" value="1"/><enum name="satellite" value="2"/><enum name="terrain" value="3"/><enum name="hybrid" value="4"/></attr><attr format="float" name="cameraBearing"/><attr format="float" name="cameraTargetLat"/><attr format="float" name="cameraTargetLng"/><attr format="float" name="cameraTilt"/><attr format="float" name="cameraZoom"/><attr format="boolean" name="liteMode"/><attr format="boolean" name="uiCompass"/><attr format="boolean" name="uiRotateGestures"/><attr format="boolean" name="uiScrollGestures"/><attr format="boolean" name="uiTiltGestures"/><attr format="boolean" name="uiZoomControls"/><attr format="boolean" name="uiZoomGestures"/><attr format="boolean" name="useViewLifecycle"/><attr format="boolean" name="zOrderOnTop"/><attr format="boolean" name="uiMapToolbar"/><attr format="boolean" name="ambientEnabled"/></declare-styleable>
     <declare-styleable name="MediaRouteButton"><attr format="reference" name="externalRouteEnabledDrawable"/><attr name="android:minWidth"/><attr name="android:minHeight"/></declare-styleable>
     <declare-styleable name="MenuGroup"><attr name="android:id"/><attr name="android:menuCategory"/><attr name="android:orderInCategory"/><attr name="android:checkableBehavior"/><attr name="android:visible"/><attr name="android:enabled"/></declare-styleable>
     <declare-styleable name="MenuItem"><attr name="android:id"/><attr name="android:menuCategory"/><attr name="android:orderInCategory"/><attr name="android:title"/><attr name="android:titleCondensed"/><attr name="android:icon"/><attr name="android:alphabeticShortcut"/><attr name="android:numericShortcut"/><attr name="android:checkable"/><attr name="android:checked"/><attr name="android:visible"/><attr name="android:enabled"/><attr name="android:onClick"/><attr name="showAsAction"><flag name="never" value="0"/><flag name="ifRoom" value="1"/><flag name="always" value="2"/><flag name="withText" value="4"/><flag name="collapseActionView" value="8"/></attr><attr format="reference" name="actionLayout"/><attr format="string" name="actionViewClass"/><attr format="string" name="actionProviderClass"/></declare-styleable>
@@ -322,8 +274,6 @@
     <declare-styleable name="com_facebook_like_view"><attr format="color" name="com_facebook_foreground_color"/><attr format="string" name="com_facebook_object_id"/><attr name="com_facebook_object_type"><enum name="unknown" value="0"/><enum name="open_graph" value="1"/><enum name="page" value="2"/></attr><attr name="com_facebook_style"><enum name="standard" value="0"/><enum name="button" value="1"/><enum name="box_count" value="2"/></attr><attr name="com_facebook_auxiliary_view_position"><enum name="bottom" value="0"/><enum name="inline" value="1"/><enum name="top" value="2"/></attr><attr name="com_facebook_horizontal_alignment"><enum name="center" value="0"/><enum name="left" value="1"/><enum name="right" value="2"/></attr></declare-styleable>
     <declare-styleable name="com_facebook_login_view"><attr format="boolean" name="com_facebook_confirm_logout"/><attr format="string" name="com_facebook_login_text"/><attr format="string" name="com_facebook_logout_text"/><attr name="com_facebook_tooltip_mode"><enum name="automatic" value="0"/><enum name="display_always" value="1"/><enum name="never_display" value="2"/></attr></declare-styleable>
     <declare-styleable name="com_facebook_profile_picture_view"><attr name="com_facebook_preset_size"><enum name="small" value="-2"/><enum name="normal" value="-3"/><enum name="large" value="-4"/></attr><attr format="boolean" name="com_facebook_is_cropped"/></declare-styleable>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <dimen name="abc_action_bar_content_inset_material">16dp</dimen>
     <dimen name="abc_action_bar_default_height_material">56dp</dimen>
     <dimen name="abc_action_bar_default_padding_material">4dp</dimen>
@@ -384,12 +334,8 @@
     <dimen name="abc_text_size_subtitle_material_toolbar">16dp</dimen>
     <dimen name="abc_text_size_title_material">20sp</dimen>
     <dimen name="abc_text_size_title_material_toolbar">20dp</dimen>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/dimens.xml -->
-    <eat-comment/>
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.facebook.android/facebook-android-sdk/4.1.0/res/values/values.xml -->
-    <eat-comment/>
     <dimen name="com_facebook_likeboxcountview_border_radius">3dp</dimen>
     <dimen name="com_facebook_likeboxcountview_border_width">1dp</dimen>
     <dimen name="com_facebook_likeboxcountview_caret_height">3dp</dimen>
@@ -409,22 +355,14 @@
     <dimen name="com_facebook_share_button_padding_top">12dp</dimen>
     <dimen name="com_facebook_share_button_text_size">16.0sp</dimen>
     <dimen name="com_facebook_tooltip_horizontal_padding">10dp</dimen>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <item name="dialog_fixed_height_major" type="dimen">80%</item>
     <item name="dialog_fixed_height_minor" type="dimen">100%</item>
     <item name="dialog_fixed_width_major" type="dimen">320dp</item>
     <item name="dialog_fixed_width_minor" type="dimen">320dp</item>
     <item format="float" name="disabled_alpha_material_dark" type="dimen">0.30</item>
     <item format="float" name="disabled_alpha_material_light" type="dimen">0.26</item>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/dimens.xml -->
-    <eat-comment/>
     <dimen name="jact_toolbar_height">60dp</dimen>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <dimen name="mr_media_route_controller_art_max_height">320dp</dimen>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <dimen name="notification_large_icon_height">64dp</dimen>
     <dimen name="notification_large_icon_width">64dp</dimen>
     <dimen name="notification_subtext_size">12dp</dimen>
@@ -433,11 +371,7 @@
     <item name="action_bar_spinner" type="id"/>
     <item name="action_menu_divider" type="id"/>
     <item name="action_menu_presenter" type="id"/>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-cast/7.8.0/res/values/cast_ids.xml -->
-    <eat-comment/>
     <item name="cast_notification_id" type="id"/>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <item name="home" type="id"/>
     <item name="progress_circular" type="id"/>
     <item name="progress_horizontal" type="id"/>
@@ -447,11 +381,7 @@
     <integer name="abc_config_activityShortDur">150</integer>
     <integer name="abc_max_action_buttons">2</integer>
     <integer name="cancel_button_image_alpha">127</integer>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/7.8.0/res/values/version.xml -->
-    <eat-comment/>
-    <integer name="google_play_services_version">7895000</integer>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
+    <integer name="google_play_services_version">8115000</integer>
     <integer name="status_bar_notification_info_maxnum">999</integer>
     <string name="abc_action_bar_home_description">Navigate home</string>
     <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
@@ -470,11 +400,7 @@
     <string name="abc_shareactionprovider_share_with">Share with</string>
     <string name="abc_shareactionprovider_share_with_application">Share with %s</string>
     <string name="abc_toolbar_collapse_description">Collapse</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/7.8.0/res/values/admob_strings.xml -->
-    <eat-comment/>
     <string name="accept">Accept</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string name="action_settings">Settings</string>
     <string name="add_to_cart">Add to Cart</string>
     <string name="addr_title_str">Or Select From a Saved Address:</string>
@@ -482,12 +408,8 @@
     <string name="all_earn">See all Earn</string>
     <string name="all_rewards">See all Rewards</string>
     <string name="app_name">JACT</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/7.8.0/res/values/auth_strings.xml -->
-    <eat-comment/>
     <string name="auth_google_play_services_client_facebook_display_name">Facebook</string>
     <string name="auth_google_play_services_client_google_display_name">Google</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string name="bill_to_str">Bill To:</string>
     <string name="billing_address_str">Billing Address</string>
     <string name="billing_label">Checkout: Billing</string>
@@ -496,13 +418,9 @@
     <string name="cart_activity_label">Cart</string>
     <string name="cart_items_str">Cart Items:</string>
     <string name="cart_str">Cart</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-cast/7.8.0/res/values/cast_strings.xml -->
-    <eat-comment/>
     <string name="cast_notification_connected_message">Connected to <ns1:g id="name">%1$s</ns1:g></string>
     <string name="cast_notification_connecting_message">Connecting to <ns1:g id="name">%1$s</ns1:g></string>
     <string name="cast_notification_disconnect">Disconnect</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string name="cc_crv_str">CRV</string>
     <string name="cc_info_str">Credit Card Info</string>
     <string name="cc_number_str">Card Number</string>
@@ -513,8 +431,6 @@
     <string name="choose_photo_from_phone">...Or choose photo from device</string>
     <string name="city_str">City</string>
     <string name="clear_cart">Clear Cart</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.facebook.android/facebook-android-sdk/4.1.0/res/values/values.xml -->
-    <eat-comment/>
     <string name="com_facebook_image_download_unknown_error">Unexpected error while downloading an image.</string>
     <string name="com_facebook_internet_permission_error_message">WebView login requires INTERNET permission</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest Error</string>
@@ -531,8 +447,6 @@
     <string name="com_facebook_send_button_text">Send</string>
     <string name="com_facebook_share_button_text">Share</string>
     <string name="com_facebook_tooltip_default">New! You\'re in control - choose what info you want to share with apps.</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/7.8.0/res/values/common_strings.xml -->
-    <eat-comment/>
     <string name="common_android_wear_notification_needs_update_text"><ns1:g id="app_name">%1$s</ns1:g> requires an update to the Android Wear app.</string>
     <string name="common_android_wear_update_text"><ns1:g id="app_name">%1$s</ns1:g> won\'t run unless you update the Android Wear app.</string>
     <string msgid="6006316683626838685" name="common_android_wear_update_title">Update Android Wear</string>
@@ -565,16 +479,10 @@
     <string name="common_open_on_phone">Open on phone</string>
     <string name="common_signin_button_text">Sign in</string>
     <string name="common_signin_button_text_long">Sign in with Google</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string name="community_label">Community</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/7.8.0/res/values/admob_strings.xml -->
-    <eat-comment/>
     <string name="create_calendar_message">Allow Ad to create a calendar event?</string>
     <string name="create_calendar_title">Create calendar event</string>
     <string name="decline">Decline</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string name="delete_addr_str">Delete Address</string>
     <string name="details">Details</string>
     <string name="drawing">Drawing</string>
@@ -599,12 +507,9 @@
     <string name="forgot_password_str">Username</string>
     <string name="forgot_username">Forgot Username</string>
     <string name="games_label">Games</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/generated/res/google-services/debug/values/values.xml -->
-    <eat-comment/>
-    <string name="gcm_defaultSenderId">176825502237</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
+    <string name="gcm_defaultSenderId">404003292102</string>
     <string name="go_to_earn_main_page">go_to_earn_main_page</string>
+    <string name="google_app_id">1:404003292102:android:83fc7456ec673dc0</string>
     <string name="google_signin_str">Sign-In with Google</string>
     <string name="hello_world">Hello world!</string>
     <string name="jact_logged_in_home_activity_label">Jact - Play With Purpose</string>
@@ -639,14 +544,8 @@
     <string name="menu_shopping_cart">Shopping Cart</string>
     <string name="menu_user_agreement">Agreement</string>
     <string name="menu_user_agreement_menu">User Agreement</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.facebook.android/facebook-android-sdk/4.1.0/res/values/values.xml -->
-    <eat-comment/>
     <string name="messenger_send_button_text">Send</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string name="month_str">Month</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <string name="mr_media_route_button_content_description">Cast</string>
     <string name="mr_media_route_chooser_searching">Searching for devices\u2026</string>
     <string name="mr_media_route_chooser_title">Connect to device</string>
@@ -657,8 +556,6 @@
     <string name="mr_media_route_controller_stop">Stop casting</string>
     <string name="mr_system_route_name">System</string>
     <string name="mr_user_route_category_name">Devices</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string name="my_profile_label">Profile</string>
     <string name="name_on_card_str">Name on Card</string>
     <string name="name_str">Name</string>
@@ -690,15 +587,9 @@
     <string name="shipping_label">Checkout: Shipping</string>
     <string name="shipping_str">Shipping</string>
     <string name="state_str">State</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <string name="status_bar_notification_info_overflow">999+</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/7.8.0/res/values/admob_strings.xml -->
-    <eat-comment/>
     <string name="store_picture_message">"Allow Ad to store image in Picture gallery?"</string>
     <string name="store_picture_title">Save image</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string name="street_str">Street</string>
     <string name="submit_str">Submit</string>
     <string name="ui_csrf_token">csrf_token</string>
@@ -722,11 +613,7 @@
     <string name="unknown_user">Welcome to Jact</string>
     <string name="user_points_dots">User Points: …</string>
     <string name="username">Username</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-wallet/7.8.0/res/values/wallet_strings.xml -->
-    <eat-comment/>
     <string name="wallet_buy_button_place_holder">Buy with Google</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/strings.xml -->
-    <eat-comment/>
     <string name="was_logged_off_key">logged_off</string>
     <string name="webview_title_key">webview_title_key</string>
     <string name="webview_url_key">webview_url_key</string>
@@ -734,21 +621,15 @@
     <string name="year_str">Year</string>
     <string name="youtube_id">youtube_id</string>
     <string name="zip_str">Zip Code</string>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_styles.xml -->
-    <eat-comment/>
     <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
         <item name="android:minWidth">0dip</item>
         <item name="android:paddingLeft">0dip</item>
         <item name="android:paddingRight">0dip</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="AlertDialog.AppCompat" parent="Base.AlertDialog.AppCompat"/>
     <style name="AlertDialog.AppCompat.Light" parent="Base.AlertDialog.AppCompat.Light"/>
     <style name="Animation.AppCompat.Dialog" parent="Base.Animation.AppCompat.Dialog"/>
     <style name="Animation.AppCompat.DropDownUp" parent="Base.Animation.AppCompat.DropDownUp"/>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/styles.xml -->
-    <eat-comment/>
     <style name="AppBaseTheme" parent="android:Theme.Light">
         <!--
             Theme customizations available in newer API levels can go in
@@ -759,8 +640,6 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="Base.AlertDialog.AppCompat" parent="android:Widget">
         <item name="android:layout">@layout/abc_alert_dialog_material</item>
         <item name="listLayout">@layout/abc_select_dialog_material</item>
@@ -1675,8 +1554,6 @@
         <item name="android:scaleType">center</item>
         <item name="android:background">?attr/selectableItemBackground</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_styles.xml -->
-    <eat-comment/>
     <style name="DrawerTextView" parent="DrawerTextViewBase">
         <!-- Inherits from DrawerTextViewBase; nothing new to add here
              (Additional style settings are added in the styles.xml
@@ -1749,8 +1626,6 @@
     <style name="JactPopupMenu" parent="@style/Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@color/light_blue</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.facebook.android/facebook-android-sdk/4.1.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="MessengerButton">
     <item name="android:clickable">true</item>
   </style>
@@ -1809,16 +1684,12 @@
     <style name="MessengerButtonText.White.Small">
     <item name="android:drawableLeft">@drawable/messenger_bubble_small_blue</item>
   </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_styles.xml -->
-    <eat-comment/>
     <style name="MyActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
     <item name="android:background" ns1:ignore="NewApi">@color/red</item>
     <item name="background">@color/red</item>
     <item name="colorPrimary">@color/dark_blue</item> 
 	<item name="colorPrimaryDark">@color/orange</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="Platform.AppCompat" parent="android:Theme">
         <item name="android:windowNoTitle">true</item>
 
@@ -1960,8 +1831,6 @@
     <style name="RtlOverlay.Widget.AppCompat.Toolbar.Button.Navigation" parent="Base.Widget.AppCompat.Toolbar.Button.Navigation">
         <item name="android:paddingLeft">@dimen/abc_action_bar_navigation_padding_start_material</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_styles.xml -->
-    <eat-comment/>
     <style name="SpinnerStyle" parent="@style/Widget.AppCompat.DropDownItem.Spinner">
        	<item name="android:layout_width">fill_parent</item>
        	<item name="android:layout_height">wrap_content</item>
@@ -1975,8 +1844,6 @@
         <item name="android:paddingBottom">0dp</item>
         <item name="android:popupBackground">@color/light_blue</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="TextAppearance.AppCompat" parent="Base.TextAppearance.AppCompat"/>
     <style name="TextAppearance.AppCompat.Body1" parent="Base.TextAppearance.AppCompat.Body1"/>
     <style name="TextAppearance.AppCompat.Body2" parent="Base.TextAppearance.AppCompat.Body2"/>
@@ -2066,8 +1933,6 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/7.8.0/res/values/admob_iap_style.xml -->
-    <eat-comment/>
     <style name="Theme.IAPTheme" parent="android:Theme">
     <item name="android:windowIsTranslucent">true</item>
     <item name="android:windowBackground">@android:color/transparent</item>
@@ -2076,8 +1941,6 @@
     <item name="android:windowIsFloating">true</item>
     <item name="android:backgroundDimEnabled">false</item>
   </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="Theme.MediaRouter" parent="">
         <item name="mediaRouteButtonStyle">@style/Widget.MediaRouter.MediaRouteButton</item>
 
@@ -2098,15 +1961,11 @@
         <item name="mediaRoutePlayDrawable">@drawable/mr_ic_play_light</item>
         <item name="mediaRoutePauseDrawable">@drawable/mr_ic_pause_light</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="ThemeOverlay.AppCompat" parent="Base.ThemeOverlay.AppCompat"/>
     <style name="ThemeOverlay.AppCompat.ActionBar" parent="Base.ThemeOverlay.AppCompat.ActionBar"/>
     <style name="ThemeOverlay.AppCompat.Dark" parent="Base.ThemeOverlay.AppCompat.Dark"/>
     <style name="ThemeOverlay.AppCompat.Dark.ActionBar" parent="Base.ThemeOverlay.AppCompat.Dark.ActionBar"/>
     <style name="ThemeOverlay.AppCompat.Light" parent="Base.ThemeOverlay.AppCompat.Light"/>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-wallet/7.8.0/res/values/wallet_styles.xml -->
-    <eat-comment/>
     <style name="WalletFragmentDefaultButtonTextAppearance">
         <item name="android:textColor">@color/wallet_primary_text_holo_light</item>
         <item name="android:textColorHighlight">@color/wallet_highlighted_text_holo_light</item>
@@ -2139,8 +1998,6 @@
         <item name="maskedWalletDetailsLogoTextColor">@color/wallet_bright_foreground_holo_dark</item>
         <item name="maskedWalletDetailsLogoImageType">google_wallet_classic</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="Widget.AppCompat.ActionBar" parent="Base.Widget.AppCompat.ActionBar">
     </style>
     <style name="Widget.AppCompat.ActionBar.Solid" parent="Base.Widget.AppCompat.ActionBar.Solid">
@@ -2232,8 +2089,6 @@
     <style name="Widget.AppCompat.TextView.SpinnerItem" parent="Base.Widget.AppCompat.TextView.SpinnerItem"/>
     <style name="Widget.AppCompat.Toolbar" parent="Base.Widget.AppCompat.Toolbar"/>
     <style name="Widget.AppCompat.Toolbar.Button.Navigation" parent="RtlOverlay.Widget.AppCompat.Toolbar.Button.Navigation"/>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/22.2.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="Widget.MediaRouter.Light.MediaRouteButton" parent="Widget.AppCompat.Light.ActionButton">
         <item name="android:minWidth">56dp</item>
         <item name="android:minHeight">48dp</item>
@@ -2250,8 +2105,6 @@
         <item name="android:contentDescription">@string/mr_media_route_button_content_description</item>
         <item name="externalRouteEnabledDrawable">@drawable/mr_ic_media_route_mono_dark</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.facebook.android/facebook-android-sdk/4.1.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="com_facebook_button" parent="@android:style/Widget.Button">
         <item name="android:background">@drawable/com_facebook_button_background</item>
         <item name="android:drawablePadding">6dp</item>
@@ -2283,13 +2136,9 @@
         <item name="android:drawableLeft">@null</item>
         <item name="android:textColor">#4b5164</item>
     </style>
-    <!-- From: file:/D:/GitHub/android-demo/app/src/main/res/values/jact_styles.xml -->
-    <eat-comment/>
     <style name="number_picker_style" parent="@android:style/Theme.NoTitleBar.Fullscreen">
     	<!-- <item name="selectionDivider">@drawable/empty_shape</item>-->
 	</style>
-    <!-- From: file:/D:/GitHub/android-demo/app/build/intermediates/exploded-aar/com.facebook.android/facebook-android-sdk/4.1.0/res/values/values.xml -->
-    <eat-comment/>
     <style name="tooltip_bubble_text">
 	    <item name="android:textColor">@android:color/white</item>
 	    <item name="android:gravity">left</item>

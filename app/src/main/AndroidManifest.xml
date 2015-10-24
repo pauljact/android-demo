@@ -25,7 +25,7 @@
     <permission
         android:name="com.jact.jactapp.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-    <uses-permission android:name="com.jact.jactfirstdemo.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.jact.jactapp.permission.C2D_MESSAGE" />
     
     <application
         android:allowBackup="true"
@@ -48,22 +48,71 @@
         -->
         <!-- Receivers for GCM. The android:permission below ensures only GCM has
              permission to send messages to the Jact App. -->
-        <receiver
-            android:name="com.jact.jactapp.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND" >
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="com.jact.jactfirstdemo" />
-            </intent-filter>
-        </receiver>
         <receiver android:name="com.jact.jactapp.OnBootBroadcastReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <category android:name="com.jact.jactfirstdemo" />
+                <category android:name="com.jact.jactapp" />
             </intent-filter>
         </receiver>
-        <service android:name="com.jact.jactapp.GcmIntentService" />
-        
+        <!-- Old (deprecated) GCM receiver and service; replaced with counterparts below
+        <receiver
+            android:name="com.jact.jactapp.GcmBroadcastReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <category android:name="com.jact.jactapp" />
+            </intent-filter>
+        </receiver>
+        <service android:name="com.jact.jactapp.GcmIntentService"
+                 android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        -->
+
+        <!-- The below services are the NEW way to use GCM. According to
+             https://developers.google.com/cloud-messaging/android/client
+             we could've removed the old code and replaced it with the NEW code;
+             instead, I've kept both. But really, I should've just migrated to
+             the new, which could've been done by:
+                  - In above receiver, replace
+                      android:name="com.jact.jactapp.GcmBroadcastReceiver"
+                    with
+                      android:name="com.google.android.gms.gcm.GcmReceiver"
+                  - Remove the GcmBroadcastReceiver.java file
+                  - Refactor GcmIntentService implementation to use JactGcmListenerService
+        -->
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <category android:name="com.jact.jactapp" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name="com.jact.jactapp.JactInstanceIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID"/>
+            </intent-filter>
+        </service>
+        <service
+            android:name="com.jact.jactapp.JactGcmListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <service android:name="com.jact.jactapp.GcmRegistrationIntentService"
+            android:exported="false">
+        </service>
+
         <activity
             android:name="com.jact.jactapp.JactLoginActivity"
             android:label="@string/app_name" >

@@ -28,6 +28,9 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   private static String user_agreement_url_;
   private static String about_jact_url_;
   private static String jact_my_profile_url_;
+
+  private static final Boolean use_old_gcm_ = false;
+  private static final Boolean use_new_gcm_ = true;
   
   public enum ActivityIndex {
     PROFILE,
@@ -75,7 +78,6 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     contact_us_url_ = GetUrlTask.GetJactDomain() + "/contact";
     privacy_policy_url_ = GetUrlTask.GetJactDomain() + "/privacy-policy";
     user_agreement_url_ = GetUrlTask.GetJactDomain() + "/user-agreement";
-    //PHB_OLDabout_jact_url_ = GetUrlTask.GetJactDomain() + "/about-jact";
     about_jact_url_ = GetUrlTask.GetJactDomain() + "/how-jact-works";
     jact_my_profile_url_ = GetUrlTask.GetJactDomain() + "/user";
     
@@ -95,7 +97,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
         //PHB_BUXnew IconAndText(R.drawable.jact_transparent, "Purchase BUX"),
         new IconAndText(R.drawable.earn_transparent, "Earn"),
         //PHB_GAMESnew IconAndText(R.drawable.games_transparent, "Games"),
-        //new IconAndText(R.drawable.community2_transparent, "Community"),
+        new IconAndText(R.drawable.community2_transparent, "Community"),
         new IconAndText(R.drawable.cart_white_transparent, "Shopping Cart")
     };
 
@@ -149,10 +151,10 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
       return 2;
     //PHB_GAMEScase GAMES:
     //PHB_GAMES  return 3;
-    //case COMMUNITY:
-    //  return 3;
-    case CHECKOUT_MAIN:
+    case COMMUNITY:
       return 3;
+    case CHECKOUT_MAIN:
+      return 4;
     default:
       return -1;
     }
@@ -204,9 +206,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 	      break;
 	    }
       	parent_activity_.fadeAllViews(true);
-        startWebViewActivity(jact_my_profile_url_,
-                             parent_activity_.getString(R.string.menu_jact_my_profile),
-                             R.string.my_profile_label);
+        jact_my_profile_url_ = GetUrlTask.GetJactDomain() + "/user";
+        startWebViewActivity(jact_my_profile_url_, parent_activity_.getString(R.string.menu_jact_my_profile), R.string.my_profile_label);
         break;
       case R.id.menu_orders:
         if (parent_activity_index_ == ActivityIndex.VIEW_ORDERS) {
@@ -222,8 +223,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(about_jact_url_, parent_activity_.getString(R.string.menu_about_jact),
-                             R.string.menu_about_jact);
+        about_jact_url_ = GetUrlTask.GetJactDomain() + "/how-jact-works";
+       	startWebViewActivity(about_jact_url_, parent_activity_.getString(R.string.menu_about_jact), R.string.menu_about_jact);
         break;
       case R.id.menu_contact_us:
 	    if (parent_activity_index_ == ActivityIndex.CONTACT_US) {
@@ -231,8 +232,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(contact_us_url_, parent_activity_.getString(R.string.menu_contact_us),
-                             R.string.menu_contact_us);
+        contact_us_url_ = GetUrlTask.GetJactDomain() + "/contact";
+       	startWebViewActivity(contact_us_url_, parent_activity_.getString(R.string.menu_contact_us), R.string.menu_contact_us);
        	break;
       case R.id.menu_faq:
   	    if (parent_activity_index_ == ActivityIndex.FAQ) {
@@ -240,8 +241,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(faq_url_, parent_activity_.getString(R.string.menu_faq),
-                             R.string.menu_faq);
+        faq_url_ = GetUrlTask.GetJactDomain() + "/faq-page";
+       	startWebViewActivity(faq_url_, parent_activity_.getString(R.string.menu_faq), R.string.menu_faq);
         break;
       case R.id.menu_user_agreement:
   	    if (parent_activity_index_ == ActivityIndex.USER_AGREEMENT) {
@@ -249,9 +250,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(user_agreement_url_,
-                             parent_activity_.getString(R.string.menu_user_agreement),
-                             R.string.menu_user_agreement);
+        user_agreement_url_ = GetUrlTask.GetJactDomain() + "/user-agreement";
+       	startWebViewActivity(user_agreement_url_, parent_activity_.getString(R.string.menu_user_agreement), R.string.menu_user_agreement);
         break;
       case R.id.menu_privacy_policy:
   	    if (parent_activity_index_ == ActivityIndex.PRIVACY_POLICY) {
@@ -259,9 +259,8 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   	      break;
   	    }
        	parent_activity_.fadeAllViews(true);
-       	startWebViewActivity(privacy_policy_url_,
-                             parent_activity_.getString(R.string.menu_privacy_policy),
-                             R.string.menu_privacy_policy);
+        privacy_policy_url_ = GetUrlTask.GetJactDomain() + "/privacy-policy";
+       	startWebViewActivity(privacy_policy_url_, parent_activity_.getString(R.string.menu_privacy_policy), R.string.menu_privacy_policy);
         break;
       case R.id.menu_logout:
        	parent_activity_.fadeAllViews(true);
@@ -295,7 +294,12 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   private void startLogoffActivity() {
 	// Stop the GCM Service running in the background (should not get updates if not
 	// logged in.
-	parent_activity_.stopService(new Intent(parent_activity_, GcmIntentService.class));
+    if (use_old_gcm_) {
+      parent_activity_.stopService(new Intent(parent_activity_, GcmIntentService.class));
+    }
+    if (use_new_gcm_) {
+      parent_activity_.stopService(new Intent(parent_activity_, JactGcmListenerService.class));
+    }
 	parent_activity_.SetLoggedOff();
 	  
     Intent login_intent =
@@ -327,15 +331,17 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
 //PHB_GAMESparent_activity_.startActivity(new Intent(parent_activity_, GamesActivity.class));
 //PHB_GAMES}
   
- // private void startCommunityActivity() {
-//    parent_activity_.startActivity(new Intent(parent_activity_, CommunityActivity.class));
- // }
+  private void startCommunityActivity() {
+    parent_activity_.startActivity(new Intent(parent_activity_, CommunityActivity.class));
+  }
   
   public void ProcessDrawerClickResponse(String webpage, String cookies) {
     // Only should have empty webpage if click was on 'My Profile'.
     if (webpage.equals("") && drawer_click_pos_ != 0) {
       // TODO(PHB): Handle failed GET.
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawClickResponse. Empty webpage.");
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("JactNavigationDrawer::ProcessDrawClickResponse", "Empty webpage.");
+      }
     } else if (drawer_click_pos_ == ActivityToDrawerIndex(parent_activity_index_)) {
       // Nothing to do; clicked on parent activity.
     } else if (drawer_click_pos_ == 0) {
@@ -362,13 +368,28 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
       // TODO(PHB): Handle the error of being here.
     //PHB_GAMES  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Games'.");
     } else if (drawer_click_pos_ == 3) {
-      // Position 4 corresponds to 'Community'. We should never be here, as a click on this
+      // Position 3 corresponds to 'Community'. We should never be here, as a click on this
       // drawer position should not have sent a request to the server here (rather,
       // CommunityActivity should have been started directly).
       // TODO(PHB): Handle the error of being here.
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawerClickResponse. Shouldn't be here for 'Community'.");
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("JactNavigationDrawer::ProcessDrawerClickResponse",
+              "Shouldn't be here for 'Community'.");
+      }
+    } else if (drawer_click_pos_ == 4) {
+      // Position 4 corresponds to 'Cart'. We should never be here, as a click on this
+      // drawer position should not have sent a request to the server here (rather,
+      // ShoppingCartActivity should have been started directly).
+      // TODO(PHB): Handle the error of being here.
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("JactNavigationDrawer::ProcessDrawerClickResponse",
+              "Shouldn't be here for 'Shopping Cart'.");
+      }
     } else {
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "JactNavigationDrawer::ProcessDrawClickResponse. Unexpected drawer pos: " + drawer_click_pos_);
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("JactNavigationDrawer::ProcessDrawClickResponse",
+              "Unexpected drawer pos: " + drawer_click_pos_);
+      }
     }
   }
 
@@ -385,6 +406,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
       ProcessDrawerClickResponse("", "");
     } else if (position == 1) {
       // Position '1' is for Rewards (Products). Start that activity.
+      rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
       new GetUrlTask((ProcessUrlResponseCallback) this, GetUrlTask.TargetType.JSON).execute(
               rewards_url_, "GET");
       parent_activity_.fadeAllViews(true);
@@ -399,16 +421,19 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
       //PHB_GAMES  parent_class_.parent_activity_.fadeAllViews(true);
       //PHB_GAMES  parent_class_.startGamesActivity();
     } else if (position == 3) {
-      // Position '4' is for Community. Start that activity.
+      // Position '3' is for Community. Start that activity.
       parent_activity_.fadeAllViews(true);
-   //   //startCommunityActivity();
-  //  } else if (position == 4) {
-      // Position '5' is for Shopping Cart. Start that activity.
+      startCommunityActivity();
+    } else if (position == 4) {
+      // Position '4' is for Shopping Cart. Start that activity.
       startCheckoutActivity();
       parent_activity_.fadeAllViews(true);
     } else {
       // Only 7 drawers expected. Error.
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB Error", "JactNavigationDrawer::onItemClick. Unexpected position: " + position);
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("JactNavigationDrawer::onItemClick",
+              "Unexpected position: " + position);
+      }
     }
   }
 

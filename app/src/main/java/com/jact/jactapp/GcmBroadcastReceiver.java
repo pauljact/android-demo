@@ -13,10 +13,13 @@ public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
   public void onReceive(Context context, Intent intent) {
 	// PHB TEMP
     Bundle extras = intent.getExtras();
-    String foo = "";
-    if (extras != null) foo = extras.toString();
+    String extras_str = "";
+    if (extras != null) extras_str = extras.toString();
     String intent_action = intent.getAction();
-	if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "GcmBroadcastReceiver::onReceive. extras: " + foo + ", intent_action: " + intent_action);
+	if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.i("GcmBroadcastReceiver::onReceive",
+            "Extras: " + extras_str + ", intent_action: " + intent_action);
+    }
     // END PHB TEMP
 	
 	// Explicitly specify that GcmIntentService will handle the intent.

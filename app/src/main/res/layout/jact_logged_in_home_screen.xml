@@ -15,19 +15,32 @@
     android:background="@color/white">
 
     <!-- Temp button for testing GCM Upstream (Device to Server) messages -->
-    <!--<Button
+    <Button
         android:id="@+id/send_gcm_upstream_msg"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="30dp"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="15dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
+        android:layout_alignParentLeft="true"
+        android:onClick="doEchoUpstreamMessageClick"
+        android:background="@drawable/button_selector_blue"
+        android:text="Echo GCM Message"
+        android:padding="5dp"
+        android:textColor="@color/black"/>
+    <Button
+        android:id="@+id/send_gcm_upstream_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="15dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         android:onClick="doSendUpstreamMessageClick"
         android:background="@drawable/button_selector_blue"
         android:text="Send GCM Message"
         android:padding="5dp"
-        android:textColor="@color/black"/>-->
+        android:textColor="@color/black"/>
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">

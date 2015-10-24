@@ -102,4 +102,4 @@
         android:background="@color/transparent"
         android:visibility="invisible"/>
  
-</LinearLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/earn_item.xml -->
+</LinearLayout>

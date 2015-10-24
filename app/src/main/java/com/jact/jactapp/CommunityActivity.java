@@ -27,6 +27,7 @@ public class CommunityActivity extends JactActionBarActivity implements ProcessU
   @Override
   protected void onResume() {
 	super.onResume();
+    community_url_ = GetUrlTask.GetJactDomain() + "/community";
     navigation_drawer_.setActivityIndex(ActivityIndex.COMMUNITY);
     
     // Set webview from community_url_.

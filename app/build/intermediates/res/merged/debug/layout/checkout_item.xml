@@ -147,4 +147,4 @@
         android:visibility="gone"/>
     </LinearLayout>
  
-</RelativeLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/checkout_item.xml -->
+</RelativeLayout>

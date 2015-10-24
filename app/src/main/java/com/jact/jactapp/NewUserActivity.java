@@ -72,6 +72,7 @@ public class NewUserActivity extends ActionBarActivity
   @Override
   protected void onResume() {
 	super.onResume();
+    new_user_url_ = GetUrlTask.GetJactDomain() + "/rest/user/register";
 	can_show_dialog_ = true;
 	SetAvatars();
 	if (should_clear_form_on_resume_) {
@@ -84,7 +85,6 @@ public class NewUserActivity extends ActionBarActivity
 
   @Override
   public void onBackPressed() {
-    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "ForgotPassword::onBackPressed");
     JactLoginActivity.SetRequireLogin(true);
     super.onBackPressed();
   }
@@ -408,6 +408,6 @@ public class NewUserActivity extends ActionBarActivity
 
   @Override
   public void onNothingSelected(AdapterView<?> parent) {
-		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB tEMP", "NewUserActivity::onNothingSelected.");
+		if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "NewUserActivity::onNothingSelected.");
   }
 }

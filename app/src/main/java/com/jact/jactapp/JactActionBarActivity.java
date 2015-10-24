@@ -76,6 +76,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
 	  
 	num_server_tasks_ = 0;
 	super.onResume();
+    jact_shopping_cart_url_ = GetUrlTask.GetJactDomain() + "/rest/cart.json";
     can_show_dialog_ = true;
     GetUserPoints();
   }

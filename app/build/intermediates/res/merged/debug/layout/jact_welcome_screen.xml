@@ -196,9 +196,12 @@
 		</LinearLayout>
 	</LinearLayout>
 	BHP END -->
+
 	<!-- BHP Replace the below line with this:
 	android:layout_below="@+id/jact_alternate_signin_ll"-->
+	<!-- LL for Forgot Password | Register links -->
 	<LinearLayout
+	android:id="@+id/forgot_password_ll"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
    	android:layout_below="@+id/jact_login_button"
@@ -240,5 +243,14 @@
     	android:background="@color/transparent"                
         android:clickable="true"/>
    	</LinearLayout>
+
+	<!-- Debugging checkbox, to toggle between uat/jact.com -->
+	<CheckBox android:id="@+id/jact_web_domain_url_checkbox"
+		android:layout_below="@+id/forgot_password_ll"
+		android:layout_alignLeft="@+id/jact_password"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Use UAT"
+		android:onClick="onUseUatCheckboxClicked"/>
 </RelativeLayout>
-</LinearLayout><!-- From: file:/D:/GitHub/android-demo/app/src/main/res/layout/jact_welcome_screen.xml -->
+</LinearLayout>

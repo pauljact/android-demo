@@ -22,6 +22,7 @@ import android.widget.RelativeLayout;
 public class ViewOrdersActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   private static String order_id_;
   private static String orders_url_;
+  private static String user_id_;
 
   public static synchronized void SetOrderId(String order_id) {
     order_id_ = order_id;
@@ -38,20 +39,26 @@ public class ViewOrdersActivity extends JactActionBarActivity implements Process
     if (order_id_ == null) order_id_ = "";
     orders_url_ = "";
     SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
-    String jact_user_id = user_info.getString(getString(R.string.ui_user_id), "");
-    if (!jact_user_id.isEmpty()) {
-      orders_url_ = GetUrlTask.GetJactDomain() + "/user/" + jact_user_id + "/orders/";
+    user_id_ = user_info.getString(getString(R.string.ui_user_id), "");
+    if (!user_id_.isEmpty()) {
+      orders_url_ = GetUrlTask.GetJactDomain() + "/user/" + user_id_ + "/orders/";
     }
   }
     
   @Override
   protected void onResume() {
 	super.onResume();
+    if (!user_id_.isEmpty()) {
+      orders_url_ = GetUrlTask.GetJactDomain() + "/user/" + user_id_ + "/orders/";
+    }
     navigation_drawer_.setActivityIndex(ActivityIndex.VIEW_ORDERS);
     
     // Sanity Check we're here legitimately.
     if (orders_url_.isEmpty()) {
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ViewOrdersActivity::onResume", "No user id found. Aborting call to View Orders.");
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("ViewOrdersActivity::onResume",
+              "No user id found. Aborting call to View Orders.");
+      }
       // TODO(PHB): Handle this failure case (i.e. should abort, going back to main Profile page).
       // For now, I just do onBackPressed, which maybe is correct?
       onBackPressed();
@@ -74,7 +81,10 @@ public class ViewOrdersActivity extends JactActionBarActivity implements Process
     		  cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain());
     }
     // Set webview from order_url_.
-    if (!JactActionBarActivity.IS_PRODUCTION) Log.i("ViewOrdersActivity::onResume", "Loading View Orders webpage with url: " + orders_url_ + order_id_);
+    if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.i("ViewOrdersActivity::onResume",
+            "Loading View Orders webpage with url: " + orders_url_ + order_id_);
+    }
     WebView web_view = (WebView) findViewById(R.id.checkout_mobile_webview);
     web_view.loadUrl(orders_url_ + order_id_);
     web_view.setWebViewClient(new JactWebViewClient(this));

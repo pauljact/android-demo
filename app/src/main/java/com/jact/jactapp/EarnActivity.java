@@ -69,6 +69,7 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   @Override
   protected void onResume() {
 	super.onResume();
+    earn_url_ = GetUrlTask.GetJactDomain() + "/rest/earn";
     num_failed_requests_ = 0;
     navigation_drawer_.setActivityIndex(ActivityIndex.EARN);
     // Set spinner (and hide WebView) until page has finished loading.
