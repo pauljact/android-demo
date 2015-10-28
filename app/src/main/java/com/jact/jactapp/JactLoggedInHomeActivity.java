@@ -106,7 +106,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   private static final Boolean use_old_gcm_ = false;
   private static final Boolean use_new_gcm_ = true;
   // Temporary GCM debugging buttons
+  private Button gcm_echo_msg_button_;
   private Button gcm_send_msg_button_;
+  private static final Boolean display_gcm_buttons_ = false;
 
   public ProductsImageLoader featured_image_loader_;
   public ProductsImageLoader earn_image_loader_;
@@ -248,7 +250,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     // to register the app with GCM.
     app_is_new_registered_w_jact_ = false;
     if (use_new_gcm_) {
-      startService(new Intent(this, JactGcmListenerService.class));
+      //PHB NOT NEEDED startService(new Intent(this, JactGcmListenerService.class));
       mRegistrationBroadcastReceiver_ = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -281,10 +283,12 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     }
     // Temp GCM Button
     gcm_send_msg_button_ = (Button) findViewById(R.id.send_gcm_upstream_msg);
-    if (JactActionBarActivity.IS_PRODUCTION) {
+    gcm_echo_msg_button_ = (Button) findViewById(R.id.echo_gcm_upstream_msg);
+    if (!display_gcm_buttons_ || (!use_old_gcm_ && !use_new_gcm_) ||
+        JactActionBarActivity.IS_PRODUCTION) {
       gcm_send_msg_button_.setVisibility(View.GONE);
+      gcm_echo_msg_button_.setVisibility(View.GONE);
     }
-    if (!use_old_gcm_ && !use_new_gcm_) gcm_send_msg_button_.setVisibility(View.GONE);
     // ================================= END GCM ===============================
   }
   
@@ -307,8 +311,10 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       getApplicationContext().sendBroadcast(new Intent("com.google.android.intent.action.MCS_HEARTBEAT"));
     }
     // Disable a temporary button if this is production code.
-    if (JactActionBarActivity.IS_PRODUCTION) {
+    if (!display_gcm_buttons_ || (!use_old_gcm_ && !use_new_gcm_) ||
+        JactActionBarActivity.IS_PRODUCTION) {
       gcm_send_msg_button_.setVisibility(View.GONE);
+      gcm_echo_msg_button_.setVisibility(View.GONE);
     }
     // Register mRegistrationBroadcastReceiver_ to receive broadcast messages (for when GCM
     // server responds to a registration request)
@@ -1462,7 +1468,8 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
           data.putString("my_message", "Hello World");
           data.putString("my_action", "com.google.android.gcm.demo.app.ECHO_NOW");
           String id = Integer.toString(msg_id_.incrementAndGet());
-          gcm_.send(GCM_PROJECT_NUMBER + "@gcm.googleapis.com", id, data);
+          gcm_.send(GCM_PROJECT_NUMBER + "@gcm.googleapis.com", "123", data);
+          //gcm_.send(GCM_PROJECT_NUMBER + "@gcm.googleapis.com", id, data);
           msg = "Sent message";
         } catch (IOException ex) {
           msg = "Error :" + ex.getMessage();

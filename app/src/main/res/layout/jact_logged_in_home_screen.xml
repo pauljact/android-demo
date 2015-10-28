@@ -16,7 +16,7 @@
 
     <!-- Temp button for testing GCM Upstream (Device to Server) messages -->
     <Button
-        android:id="@+id/send_gcm_upstream_msg"
+        android:id="@+id/echo_gcm_upstream_msg"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:layout_marginTop="5dp"

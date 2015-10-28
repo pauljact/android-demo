@@ -3,14 +3,21 @@ package com.jact.jactapp;
 import com.jact.jactapp.GetUrlTask.FetchStatus;
 import com.jact.jactapp.JactNavigationDrawer.ActivityIndex;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+
+import java.net.HttpCookie;
+import java.util.Arrays;
+import java.util.List;
 
 public class CommunityActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   private static String community_url_;
@@ -27,6 +34,23 @@ public class CommunityActivity extends JactActionBarActivity implements ProcessU
   @Override
   protected void onResume() {
 	super.onResume();
+
+    // Set cookies for WebView.
+    SharedPreferences user_info = getSharedPreferences(
+            getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+    String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+    List<String> cookie_headers = Arrays.asList(cookies.split(GetUrlTask.COOKIES_SEPERATOR));
+    HttpCookie cookie = null;
+    for (String cookie_str : cookie_headers) {
+      cookie = HttpCookie.parse(cookie_str).get(0);
+    }
+    if (cookie != null) {
+      CookieManager cookie_manager = CookieManager.getInstance();
+      cookie_manager.setCookie(
+              community_url_,
+              cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain());
+    }
+
     community_url_ = GetUrlTask.GetJactDomain() + "/community";
     navigation_drawer_.setActivityIndex(ActivityIndex.COMMUNITY);
     

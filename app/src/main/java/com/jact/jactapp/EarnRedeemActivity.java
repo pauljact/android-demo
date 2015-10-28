@@ -34,7 +34,9 @@ public class EarnRedeemActivity extends JactActionBarActivity implements Process
     // Initialize url_ and title_ to dummy values if necessary (they should get re-written
     // to valid values before they are actually used).
     url_ = getIntent().getStringExtra(getString(R.string.earn_url_key));
-    if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "EarnRedeemActivity::onCreate. Set redeem url to: " + url_);
+    if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.w("EarnRedeemActivity::onCreate", "Set redeem url to: " + url_);
+    }
     if (url_ == null || url_.isEmpty()) {
       EarnActivity.SetShouldRefreshEarnItems(true);
       startActivity(new Intent(this, EarnActivity.class));
@@ -119,7 +121,9 @@ public class EarnRedeemActivity extends JactActionBarActivity implements Process
   @Override
   // We overload doSomething to handle clicks on links in the WebView.
   public boolean doSomething(String info) {
-    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "EarnRedeemActivity::doSomething. String: " + info);
+    if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.e("PHB TEMP", "EarnRedeemActivity::doSomething. String: " + info);
+    }
     EarnActivity.SetShouldRefreshEarnItems(true);
     startActivity(new Intent(this, EarnActivity.class));
     return true;
