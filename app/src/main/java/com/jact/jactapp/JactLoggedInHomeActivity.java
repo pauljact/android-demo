@@ -105,7 +105,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   private static Boolean app_is_new_registered_w_jact_;
   private static final Boolean use_old_gcm_ = false;
   private static final Boolean use_new_gcm_ = true;
-  // Temporary GCM debugging buttons
+  // Temporary GCM debugging buttons.
   private Button gcm_echo_msg_button_;
   private Button gcm_send_msg_button_;
   private static final Boolean display_gcm_buttons_ = false;
