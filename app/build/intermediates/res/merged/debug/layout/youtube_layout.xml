@@ -12,12 +12,19 @@
     android:layout_height="match_parent"
     android:layout_marginTop="50dp"
     android:background="@drawable/glossy">
-    
+
+    <com.google.android.youtube.player.YouTubePlayerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/youtubePlayerView">
+    </com.google.android.youtube.player.YouTubePlayerView> <!-- PHBBHP -->
+    <!--PHBBHP
     <fragment
       android:name="com.google.android.youtube.player.YouTubePlayerFragment"
       android:id="@+id/youtube_fragment"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"/>
+      -->
     <!-- 
     <FrameLayout
         android:id="@+id/youtube_fragment"

@@ -30,6 +30,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -138,6 +139,8 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   private static String current_youtube_url_;
   private static int current_earn_nid_;
   private static int num_failed_requests_;
+
+  private static final String EARN_REDEEM_URL_BASE = "/node/";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -301,6 +304,18 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     register_app_url_ = GetUrlTask.GetJactDomain() + "/rest/push_notifications";
     num_failed_requests_ = 0;
     allow_click_actions_ = true;
+
+    // If user is returning to Jact after just having watched an Earn Video, take them to the
+    // EarnRedeemActivity.
+    if (EarnActivity.GetEarnVideoWatched() > 0) {
+      String url = GetUrlTask.GetJactDomain() + EARN_REDEEM_URL_BASE + Integer.toString(EarnActivity.GetEarnVideoWatched());
+      EarnActivity.SetEarnVideoWatched(-1);
+      Intent intent = new Intent(this, EarnRedeemActivity.class);
+      intent.putExtra(getString(R.string.earn_url_key), url);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLIHA::onResume url: " + url);
+      startActivity(intent);
+      return;
+    }
 	
 	// Make sure Google Play is on user's device (so they can use GCM).
 	if (use_old_gcm_ || use_new_gcm_) {
@@ -956,7 +971,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     Intent youtube_intent = new Intent(this, YouTubePlayerActivity.class);
     youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
     YouTubePlayerActivity.SetEarnId(nid);
-    startActivity(youtube_intent);
+    //PHBBHP startActivity(youtube_intent);
+    EarnActivity.SetEarnVideoWatched(nid);
+    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + youtube_id))); //PHBBHP
   }
 
   private void Popup(String title, String message) {

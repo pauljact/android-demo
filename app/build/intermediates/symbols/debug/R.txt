@@ -1259,8 +1259,8 @@ int id username_autocomplete_tv 0x7f0d011c
 int id userpoints_pic 0x7f0d014f
 int id withText 0x7f0d0021
 int id wrap_content 0x7f0d0024
+int id youtubePlayerView 0x7f0d01f8
 int id youtube_content_frame 0x7f0d01f7
-int id youtube_fragment 0x7f0d01f8
 int id youtube_progress_bar 0x7f0d01f9
 int integer abc_config_activityDefaultDur 0x7f0a0001
 int integer abc_config_activityShortDur 0x7f0a0002

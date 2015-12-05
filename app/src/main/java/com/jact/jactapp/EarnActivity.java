@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
@@ -48,6 +49,11 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   private static int current_earn_nid_;
   private static int num_failed_requests_;
 
+  //PHBBHP Only needed if we play Earn Videos via external video player, instead of via
+  // YouTubePlayerActivity
+  private static int earn_video_watched_;
+  private static final String EARN_REDEEM_URL_BASE = "/node/";
+
   // DEPRECATED. The following strings are no longer needed.
   //private static final String QUOTE = "\"";
   //private static final String HREF_MARKER = "<a href=" + QUOTE + "earn/";
@@ -64,11 +70,21 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
     earn_url_ = GetUrlTask.GetJactDomain() + "/rest/earn";
     is_current_already_earned_ = false;
     current_youtube_url_ = "";
+    earn_video_watched_ = -1;
   }
   
   @Override
   protected void onResume() {
 	super.onResume();
+    if (earn_video_watched_ > 0) {
+      String url = GetUrlTask.GetJactDomain() + EARN_REDEEM_URL_BASE + Integer.toString(earn_video_watched_);
+      earn_video_watched_ = -1;
+      Intent intent = new Intent(this, EarnRedeemActivity.class);
+      intent.putExtra(getString(R.string.earn_url_key), url);
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "EarnActivity::onResume url: " + url);
+      startActivity(intent);
+      return;
+    }
     earn_url_ = GetUrlTask.GetJactDomain() + "/rest/earn";
     num_failed_requests_ = 0;
     navigation_drawer_.setActivityIndex(ActivityIndex.EARN);
@@ -83,6 +99,14 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
     } else {
       fadeAllViews(true);
     }
+  }
+
+  public static void SetEarnVideoWatched(int nid) {
+    earn_video_watched_ = nid;
+  }
+
+  public static int GetEarnVideoWatched() {
+    return earn_video_watched_;
   }
   
   public static void SetShouldRefreshEarnItems(boolean value) {
@@ -134,7 +158,9 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
     if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "Setting youtube id: " + youtube_id);
     youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
     YouTubePlayerActivity.SetEarnId(nid);
-    startActivity(youtube_intent);
+    //PHBBHPstartActivity(youtube_intent);
+    earn_video_watched_ = nid;
+    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + youtube_id))); //PHBBHP
   }
 
   private void Popup(String title, String message) {

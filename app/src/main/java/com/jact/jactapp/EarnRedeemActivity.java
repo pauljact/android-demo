@@ -48,6 +48,12 @@ public class EarnRedeemActivity extends JactActionBarActivity implements Process
   protected void onResume() {
 	super.onResume();
 
+    url_ = getIntent().getStringExtra(getString(R.string.earn_url_key));
+    if (url_ == null || url_.isEmpty()) {
+      EarnActivity.SetShouldRefreshEarnItems(true);
+      startActivity(new Intent(this, EarnActivity.class));
+    }
+
     // Set cookies for WebView.
 	SharedPreferences user_info = getSharedPreferences(
         getString(R.string.ui_master_file), Activity.MODE_PRIVATE);

@@ -2831,8 +2831,8 @@ containing a value of this type.
         public static final int userpoints_pic=0x7f0d014f;
         public static final int withText=0x7f0d0021;
         public static final int wrap_content=0x7f0d0024;
+        public static final int youtubePlayerView=0x7f0d01f8;
         public static final int youtube_content_frame=0x7f0d01f7;
-        public static final int youtube_fragment=0x7f0d01f8;
         public static final int youtube_progress_bar=0x7f0d01f9;
     }
     public static final class integer {

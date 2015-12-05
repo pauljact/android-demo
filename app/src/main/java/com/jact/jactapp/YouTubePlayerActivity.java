@@ -1,5 +1,7 @@
 package com.jact.jactapp;
 
+import com.google.android.youtube.player.YouTubeBaseActivity;
+import com.google.android.youtube.player.YouTubePlayerView;
 import com.jact.jactapp.GetUrlTask.FetchStatus;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,8 +22,12 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStyle;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerFragment;
 
+//PHBBHP https://code.google.com/p/gdata-issues/issues/detail?id=7586&q=status%3A24946256&colspec=API%20ID%20Type%20Status%20Priority%20Stars%20Summary
+/* PHBHBP
 public class YouTubePlayerActivity extends JactActionBarActivity
                                    implements ProcessUrlResponseCallback {
+PHBBHP*/
+public class YouTubePlayerActivity extends YouTubeBaseActivity {
   private YouTubePlayer youtube_player_;
   private String youtube_id_;
   private static int earn_id_;
@@ -34,10 +40,14 @@ public class YouTubePlayerActivity extends JactActionBarActivity
   private void LoadYoutubePlayer() {
 	if (youtube_player_ == null || youtube_id_ == null || youtube_id_.isEmpty()) {
 	  // TODO(PHB): Handle this.
-	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "YouTubePlayerActivity::LoadYoutubePlayer. Null parameters.");
+	  if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("PHB ERROR", "YouTubePlayerActivity::LoadYoutubePlayer. Null parameters.");
+      }
 	  return;
 	}
-	if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::LoadYoutubePlayer. About to load url: " + youtube_id_);
+	if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.w("PHB TEMP", "YouTubePlayerActivity::LoadYoutubePlayer. About to load url: " + youtube_id_);
+    }
     youtube_player_.setFullscreen(true);
     youtube_player_.loadVideo(youtube_id_);
     youtube_player_.play();
@@ -46,9 +56,14 @@ public class YouTubePlayerActivity extends JactActionBarActivity
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set layout.
+    /*PHBBHP
     super.onCreate(savedInstanceState, R.string.earn_label,
-		       R.layout.youtube_layout,
+               R.layout.youtube_layout,
 		       JactNavigationDrawer.ActivityIndex.EARN);
+    PHBBHP*/
+    getLayoutInflater().setFactory(this);// PHBBHP
+    super.onCreate(savedInstanceState);  // PHBBHP
+    setContentView(R.layout.youtube_layout);  // PHBBHP
     //playlist_event_listener_ = new EarnPlaylistEventListener();
     player_state_change_listener_ = new EarnPlayerStateChangeListener();
     playback_event_listener_ = new EarnPlaybackEventListener();
@@ -62,35 +77,54 @@ public class YouTubePlayerActivity extends JactActionBarActivity
 	// Get Youtube ID to load.
     youtube_id_ = getIntent().getStringExtra(getString(R.string.youtube_id));
     // Setup youtube player fragment.
-    YouTubePlayerFragment youTubePlayerFragment =
-        (YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtube_fragment);
-    youTubePlayerFragment.initialize(DEVELOPER_KEY, new OnInitializedListener() {
+    //PHBBHP YouTubePlayerFragment youTubePlayerFragment =
+    //PHBBHP    (YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtube_fragment);
+    //PHBBHP youTubePlayerFragment.initialize(DEVELOPER_KEY, new OnInitializedListener() {
+    YouTubePlayerView playerView = (YouTubePlayerView) findViewById(R.id.youtubePlayerView);  // PHBBHP
+    playerView.initialize(DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {  // PHBBHP
         @Override
         public void onInitializationSuccess(
         	YouTubePlayer.Provider provider, YouTubePlayer player, boolean wasRestored) {
+          // PHBBHP New.
+          player.setFullscreen(true);
+          player.setShowFullscreenButton(true);
+          player.setPlayerStyle(YouTubePlayer.PlayerStyle.MINIMAL);
+          player.setPlayerStateChangeListener(player_state_change_listener_);
+          player.setPlaybackEventListener(playback_event_listener_);
+          if (!wasRestored) {
+            player.loadVideo(youtube_id_);
+          }
+          // PHBBHP END New.
+
+          /* PHBBHP
           youtube_player_ = player;
           //player.setPlaylistEventListener(playlist_event_listener_);
           youtube_player_.setPlayerStateChangeListener(player_state_change_listener_);
           youtube_player_.setPlaybackEventListener(playback_event_listener_);
           youtube_player_.setPlayerStyle(PlayerStyle.MINIMAL);
-          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "YouTubePlayerActivity::onInitializationSucess. wasRestored: " + wasRestored);
+          if (!JactActionBarActivity.IS_PRODUCTION) {
+            Log.e("PHB TEMP", "YouTubePlayerActivity::onInitializationSucess. wasRestored: " + wasRestored);
+          }
           if (!wasRestored) {
             youtube_player_ = player;
         	LoadYoutubePlayer();
           }
+          PHBBHP*/
         }
         
         @Override
         public void onInitializationFailure(Provider provider, YouTubeInitializationResult result) {
-          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "YouTubePlayerActivity::onInitializationFailure. result: " + result.toString());
+          if (!JactActionBarActivity.IS_PRODUCTION) {
+            Log.e("PHB ERROR", "YouTubePlayerActivity::onInitializationFailure. result: " + result.toString());
+          }
           ReturnToEarn();
             // PHB Copied.
         }
     });
     
     // Set spinner (and hide WebView) until page has finished loading.
-    SetCartIcon(this);
-    fadeAllViews(num_server_tasks_ > 0);
+    //PHBBHP SetCartIcon(this);
+    //PHBBHP fadeAllViews(num_server_tasks_ > 0);
   }
   
   public static void SetEarnId(int nid) {
@@ -100,7 +134,7 @@ public class YouTubePlayerActivity extends JactActionBarActivity
   protected void ReturnToEarn() {
 	onBackPressed();
   }
-
+/*PHBBHP
   @Override
   public void fadeAllViews(boolean should_fade) {
     ProgressBar spinner = (ProgressBar) findViewById(R.id.youtube_progress_bar);
@@ -143,14 +177,16 @@ public class YouTubePlayerActivity extends JactActionBarActivity
 	  dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");
 	}
   }
-  
+  PHBBHP*/
+
   protected void StartRedeemActivity() {
     Intent intent = new Intent(this, EarnRedeemActivity.class);
     intent.putExtra(getString(R.string.earn_url_key),
                     GetUrlTask.GetJactDomain() + EARN_REDEEM_URL_BASE + Integer.toString(earn_id_));
     startActivity(intent);
   }
-  
+
+  /*PHBBHP
   public void doDialogOkClick(View view) {
   	// Close Dialog window.
   	dialog_.dismiss();
@@ -161,35 +197,46 @@ public class YouTubePlayerActivity extends JactActionBarActivity
 	// Close Dialog window.
 	dialog_.dismiss();
   }
+  PHBBHP*/
 
   private final class EarnPlaybackEventListener implements PlaybackEventListener {
     @Override
     public void onPlaying() {
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onPlaying.");
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.w("PHB TEMP", "YouTubePlayerActivity::onPlaying.");
+      }
     }
 
     @Override
     public void onBuffering(boolean isBuffering) {
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onBuffering. \t\t" +
-                        (isBuffering ? "BUFFERING " : "NOT BUFFERING "));
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.w("PHB TEMP", "YouTubePlayerActivity::onBuffering. \t\t" +
+                (isBuffering ? "BUFFERING " : "NOT BUFFERING "));
+      }
     }
 
     @Override
     public void onStopped() {
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onStopped. \tSTOPPED");
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.w("PHB TEMP", "YouTubePlayerActivity::onStopped. \tSTOPPED");
+      }
     }
 
     @Override
     public void onPaused() {
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onPaused. \tPAUSED");
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.w("PHB TEMP", "YouTubePlayerActivity::onPaused. \tPAUSED");
+      }
     }
 
     @Override
     public void onSeekTo(int endPositionMillis) {
-    	if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onSeekTo. Current time: " +
-                          youtube_player_.getCurrentTimeMillis() + ". See to time: " +
-    			          endPositionMillis);
-    	PopupWarning();
+    	if (!JactActionBarActivity.IS_PRODUCTION) {
+          Log.w("PHB TEMP", "YouTubePlayerActivity::onSeekTo. Current time: " +
+                  youtube_player_.getCurrentTimeMillis() + ". See to time: " +
+                  endPositionMillis);
+        }
+    	//PHBBHP PopupWarning();
     }
   }
 
@@ -199,31 +246,41 @@ public class YouTubePlayerActivity extends JactActionBarActivity
     @Override
     public void onLoading() {
       playerState = "LOADING";
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onLoading. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.w("PHB TEMP", "YouTubePlayerActivity::onLoading. " + playerState);
+      }
     }
 
     @Override
     public void onLoaded(String videoId) {
       playerState = String.format("LOADED %s", videoId);
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onLoaded. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.w("PHB TEMP", "YouTubePlayerActivity::onLoaded. " + playerState);
+      }
     }
 
     @Override
     public void onAdStarted() {
       playerState = "AD_STARTED";
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onAdStarted. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.w("PHB TEMP", "YouTubePlayerActivity::onAdStarted. " + playerState);
+      }
     }
 
     @Override
     public void onVideoStarted() {
       playerState = "VIDEO_STARTED";
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onVideoStarted. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.w("PHB TEMP", "YouTubePlayerActivity::onVideoStarted. " + playerState);
+      }
     }
 
     @Override
     public void onVideoEnded() {
       playerState = "VIDEO_ENDED";
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "YouTubePlayerActivity::onVideoEnded. " + playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.w("PHB TEMP", "YouTubePlayerActivity::onVideoEnded. " + playerState);
+      }
       if (has_skipped_ahead_) {
     	ReturnToEarn();
       } else {
@@ -238,7 +295,9 @@ public class YouTubePlayerActivity extends JactActionBarActivity
         // When this error occurs the player is released and can no longer be used.
         youtube_player_ = null;
       }
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("YouTubePlayerActivity::onError", playerState);
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("YouTubePlayerActivity::onError", playerState);
+      }
     }
   }
 }
