@@ -9,6 +9,7 @@
     <string name="earn_label">Earn</string>
     <string name="games_label">Games</string>
     <string name="community_label">Community</string>
+    <string name="youtube_webview_label">Earn</string>
     <string name="forgot_password_label">Forgot Password</string>
     <string name="forgot_username">Forgot Username</string>
     <string name="new_user_label">Register</string>
@@ -23,6 +24,7 @@
     <string name="webview_url_key">webview_url_key</string>
     <string name="webview_title_key">webview_title_key</string>
     <string name="earn_url_key">earn_url_key</string>
+    <string name="earn_page_url">ear_page_url</string>
     <!-- End SharedPreferences Keys -->
     
     <!-- XML Keys -->

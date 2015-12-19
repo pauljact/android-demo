@@ -492,6 +492,7 @@
     <string name="dummy_text_view_text">Empty</string>
     <string name="earn_label">Earn</string>
     <string name="earn_now">Earn Now</string>
+    <string name="earn_page_url">ear_page_url</string>
     <string name="earn_title_str">Earn Title</string>
     <string name="earn_url_key">earn_url_key</string>
     <string name="email">E-mail Address</string>
@@ -620,6 +621,7 @@
     <string name="wrong_username">Wrong username or password</string>
     <string name="year_str">Year</string>
     <string name="youtube_id">youtube_id</string>
+    <string name="youtube_webview_label">Earn</string>
     <string name="zip_str">Zip Code</string>
     <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
         <item name="android:minWidth">0dip</item>

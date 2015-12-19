@@ -968,12 +968,22 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   }
 
   private void StartYoutubeActivity(String youtube_id, int nid) {
-    Intent youtube_intent = new Intent(this, YouTubePlayerActivity.class);
-    youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
-    YouTubePlayerActivity.SetEarnId(nid);
-    //PHBBHP startActivity(youtube_intent);
-    EarnActivity.SetEarnVideoWatched(nid);
-    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + youtube_id))); //PHBBHP
+    if (EarnActivity.GetYouTubePlayerFlag()) {
+      Intent youtube_intent = new Intent(this, YouTubePlayerActivity.class);
+      youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
+      YouTubePlayerActivity.SetEarnId(nid);
+      startActivity(youtube_intent);
+    } else if (EarnActivity.GetYouTubeFlag()) {
+      EarnActivity.SetEarnVideoWatched(nid);
+      startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://www.youtube.com/watch?v=" + youtube_id)));
+    } else if (EarnActivity.GetWebViewFlag()) {
+      Intent intent = new Intent(this, YouTubeWebViewActivity.class);
+      intent.putExtra(getString(R.string.earn_page_url), "star-trek-beyond-trailer");
+      startActivity(intent);
+    } else if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.e("JLIHA::StartYouTubeActivity", "All flags false.");
+    }
   }
 
   private void Popup(String title, String message) {

@@ -243,7 +243,19 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.jact.jactapp.EarnActivity" />
         </activity>
-        
+
+        <activity
+            android:name="com.jact.jactapp.YouTubeWebViewActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/empty_string"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
+            android:parentActivityName="com.jact.jactapp.EarnActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.jact.jactapp.EarnActivity" />
+        </activity>
+
         <activity
             android:name="com.jact.jactapp.EarnRedeemActivity"
         	android:icon="@drawable/ic_launcher"

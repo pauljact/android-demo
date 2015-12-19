@@ -53,6 +53,9 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   // YouTubePlayerActivity
   private static int earn_video_watched_;
   private static final String EARN_REDEEM_URL_BASE = "/node/";
+  private static final boolean stream_video_via_youtube_player_api_ = false;
+  private static final boolean stream_video_via_youtube_ = false;
+  private static final boolean stream_video_via_webview_ = true;
 
   // DEPRECATED. The following strings are no longer needed.
   //private static final String QUOTE = "\"";
@@ -152,15 +155,31 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   	    this, R.layout.earn_item, earn_list_, "Earn_Activity");
     list_.setAdapter(adapter_);
   }
-  
+
+  public static boolean GetYouTubePlayerFlag() {return stream_video_via_youtube_player_api_;}
+  public static boolean GetYouTubeFlag() { return stream_video_via_youtube_;}
+  public static boolean GetWebViewFlag() {return stream_video_via_webview_;}
+
   private void StartYoutubeActivity(String youtube_id, int nid) {
-    Intent youtube_intent = new Intent(this, YouTubePlayerActivity.class);
-    if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "Setting youtube id: " + youtube_id);
-    youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
-    YouTubePlayerActivity.SetEarnId(nid);
-    //PHBBHPstartActivity(youtube_intent);
-    earn_video_watched_ = nid;
-    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + youtube_id))); //PHBBHP
+    if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.w("PHB TEMP", "Setting youtube id: " + youtube_id);
+    }
+    if (stream_video_via_youtube_player_api_) {
+      Intent youtube_intent = new Intent(this, YouTubePlayerActivity.class);
+      youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
+      YouTubePlayerActivity.SetEarnId(nid);
+      startActivity(youtube_intent);
+    } else if (stream_video_via_youtube_) {
+      earn_video_watched_ = nid;
+      startActivity(new Intent(Intent.ACTION_VIEW,
+                               Uri.parse("http://www.youtube.com/watch?v=" + youtube_id)));
+    } else if (stream_video_via_webview_) {
+      Intent intent = new Intent(this, YouTubeWebViewActivity.class);
+      intent.putExtra(getString(R.string.earn_page_url), "star-trek-beyond-trailer");
+      startActivity(intent);
+    } else if (!JactActionBarActivity.IS_PRODUCTION) {
+      Log.e("EarnActivity::StartYouTubeActivity", "All flags false.");
+    }
   }
 
   private void Popup(String title, String message) {
