@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-class JactDialogFragment extends DialogFragment {
+public class JactDialogFragment extends DialogFragment {
 	private String title_;
 	private String message_;
 	private String button_one_text_;
@@ -20,6 +20,7 @@ class JactDialogFragment extends DialogFragment {
 	  title_ = "";
 	  message_ = "";
 	}
+    /* Can't use non-default constructors for DialogFragment subclasses.
 	public JactDialogFragment(String title) {
 	  title_ = title;
 	  message_ = "";
@@ -28,7 +29,16 @@ class JactDialogFragment extends DialogFragment {
 	  title_ = title;
 	  message_ = message;
 	}
-	
+	*/
+
+    public void SetTitle(String title) {
+        title_ = title;
+    }
+
+    public void SetMessage(String message) {
+        message_ = message;
+    }
+
 	public void SetButtonOneText(String text) {
 	  button_one_text_ = text; 
 	}

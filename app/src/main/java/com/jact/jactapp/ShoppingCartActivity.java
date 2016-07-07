@@ -872,7 +872,8 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 	  vibe.vibrate(JactConstants.VIBRATION_DURATION);
 	  if (can_show_dialog_) {
-	    dialog_ = new JactDialogFragment("Are You Sure You Want to Remove All Items From Your Cart?");
+	    dialog_ = new JactDialogFragment();
+		dialog_.SetTitle("Are You Sure You Want to Remove All Items From Your Cart?");
 	    dialog_.SetButtonOneText("Cancel");
 	    dialog_.SetButtonTwoText("OK");
 	    dialog_.show(getSupportFragmentManager(), CLEAR_CART_TAG);

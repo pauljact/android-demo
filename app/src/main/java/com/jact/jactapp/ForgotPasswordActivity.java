@@ -141,7 +141,8 @@ public class ForgotPasswordActivity extends ActionBarActivity
   
   private void EmptyEditTextWarning() {
 	if (can_show_dialog_) {
-	  dialog_ = new JactDialogFragment("Enter Username or Email Address");
+	  dialog_ = new JactDialogFragment();
+      dialog_.SetTitle("Enter Username or Email Address");
 	  dialog_.show(getSupportFragmentManager(), "Empty_username");
 	}
   }
@@ -153,8 +154,9 @@ public class ForgotPasswordActivity extends ActionBarActivity
       return;
     }
     if (can_show_dialog_) {
-	  dialog_ = new JactDialogFragment("Username '" + username + "' Does Not Exist",
-		  	                           "Enter valid username, or sign up as a new user");
+	  dialog_ = new JactDialogFragment();
+      dialog_.SetTitle("Username '" + username + "' Does Not Exist");
+      dialog_.SetMessage("Enter valid username, or sign up as a new user");
 	  dialog_.show(getSupportFragmentManager(), "Bad_username");
     }
   }
@@ -198,7 +200,8 @@ public class ForgotPasswordActivity extends ActionBarActivity
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
     if (extra_params.indexOf(FORGOT_PASSWORD_TASK) == 0) {
       if (can_show_dialog_) {
-        dialog_ = new JactDialogFragment("Further Instructions Have Been Sent to Your Email");
+        dialog_ = new JactDialogFragment();
+        dialog_.SetTitle("Further Instructions Have Been Sent to Your Email");
         dialog_.show(getSupportFragmentManager(), "Successful_password_reset");
       }
       is_password_reset_ = true;
@@ -222,8 +225,9 @@ public class ForgotPasswordActivity extends ActionBarActivity
 	  UnrecognizedUsernameWarning();
 	} else {
 	  if (can_show_dialog_) {
-        dialog_ = new JactDialogFragment("Unable to Reach Jact",
-                                         "Check internet connection, and try again.");
+        dialog_ = new JactDialogFragment();
+        dialog_.SetTitle("Unable to Reach Jact");
+        dialog_.SetMessage("Check internet connection, and try again.");
         dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
 	  }
 	}

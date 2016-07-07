@@ -872,9 +872,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       Popup("Unable to find Video", "Try again later.");
     } else if (is_current_already_earned_) {
       if (can_show_dialog_) {
-        dialog_ =
-            new JactDialogFragment("Already Earned Points for this Item",
-                                   "Watching again will not earn you more points. Watch Anyway?");
+        dialog_ = new JactDialogFragment();
+        dialog_.SetTitle("Already Earned Points for this Item");
+        dialog_.SetMessage("Watching again will not earn you more points. Watch Anyway?");
         dialog_.SetButtonOneText("Cancel");
         dialog_.SetButtonTwoText("OK");
         dialog_.show(getSupportFragmentManager(), EARN_DIALOG_WARNING);
@@ -915,8 +915,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     } else if (is_current_already_earned_) {
       if (can_show_dialog_) {
         dialog_ =
-                new JactDialogFragment("Already Earned Points for this Item",
-                        "Watching again will not earn you more points. Watch Anyway?");
+                new JactDialogFragment();
+        dialog_.SetTitle("Already Earned Points for this Item");
+        dialog_.SetMessage("Watching again will not earn you more points. Watch Anyway?");
         dialog_.SetButtonOneText("Cancel");
         dialog_.SetButtonTwoText("OK");
         dialog_.show(getSupportFragmentManager(), EARN_DIALOG_WARNING);

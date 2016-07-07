@@ -591,7 +591,8 @@ public class JactLoginActivity extends FragmentActivity implements
     if (status == GetUrlTask.FetchStatus.ERROR_403 ||
     	status == GetUrlTask.FetchStatus.ERROR_BAD_USERNAME_OR_PASSWORD) {
       if (can_show_dialog_) {
-    	dialog_ = new JactDialogFragment("Wrong Username or Password");
+    	dialog_ = new JactDialogFragment();
+        dialog_.SetTitle("Wrong Username or Password");
     	dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog_403");
       }
       TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
@@ -599,7 +600,8 @@ public class JactLoginActivity extends FragmentActivity implements
       tv.setVisibility(View.VISIBLE);
     } else if (status == GetUrlTask.FetchStatus.ERROR_BAD_POST_PARAMS) {
       if (can_show_dialog_) {
-    	dialog_ = new JactDialogFragment("Must Enter Username and Password");
+    	dialog_ = new JactDialogFragment();
+        dialog_.SetTitle("Must Enter Username and Password");
     	dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog_Post_Params");
       }
       TextView tv = (TextView) JactLoginActivity.this.findViewById(R.id.login_error_textview);
@@ -607,9 +609,9 @@ public class JactLoginActivity extends FragmentActivity implements
       tv.setVisibility(View.VISIBLE);
     } else {
       if (can_show_dialog_) {
-        dialog_ = new JactDialogFragment(
-            "Unable to Reach Jact",
-            "Check internet connection, and try again.");
+        dialog_ = new JactDialogFragment();
+        dialog_.SetTitle("Unable to Reach Jact");
+        dialog_.SetMessage("Check internet connection, and try again.");
         dialog_.show(getSupportFragmentManager(), "Bad_Login_Dialog");
       }
       /*FragmentTransaction ft = getSupportFragmentManager().beginTransaction();

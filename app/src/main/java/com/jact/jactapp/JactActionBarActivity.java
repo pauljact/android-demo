@@ -342,7 +342,9 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   protected void DisplayPopupWithButtonsFragment(String title, String message, String id, String button_one, String button_two) {
     if (can_show_dialog_ && !is_popup_showing_) {
       is_popup_showing_ = true;
-      dialog_ = new JactDialogFragment(title, message);
+      dialog_ = new JactDialogFragment();
+      dialog_.SetTitle(title);
+      dialog_.SetMessage(message);
       if (button_one != null && !button_one.isEmpty()) {
         dialog_.SetButtonOneText(button_one);
       }
@@ -359,7 +361,9 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   protected void DisplayPopupFragment(String title, String message, String id) {
 	if (can_show_dialog_ && !is_popup_showing_) {
       is_popup_showing_ = true;
-  	  dialog_ = new JactDialogFragment(title, message);
+  	  dialog_ = new JactDialogFragment();
+      dialog_.SetTitle(title);
+      dialog_.SetMessage(message);
   	  dialog_.show(getSupportFragmentManager(), id);
 	} else {
 	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::DisplayPopupFragment",
@@ -370,7 +374,8 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   protected void DisplayPopupFragment(String title, String id) {
 	if (can_show_dialog_ && !is_popup_showing_) {
       is_popup_showing_ = true;
-  	  dialog_ = new JactDialogFragment(title);
+  	  dialog_ = new JactDialogFragment();
+      dialog_.SetTitle(title);
   	  dialog_.show(getSupportFragmentManager(), id);
 	} else {
 	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::DisplayPopupFragment",

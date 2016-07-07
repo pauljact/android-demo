@@ -171,7 +171,9 @@ public class YouTubePlayerActivity extends YouTubeBaseActivity {
 
   private void PopupWarning() {
 	if (can_show_dialog_) {
-	  dialog_ = new JactDialogFragment("Warning", "You won't earn points if you skip ahead");
+	  dialog_ = new JactDialogFragment();
+	  dialog_.SetTitle("Warning");
+	  dialog_.SetMessage("You won't earn points if you skip ahead");
 	  dialog_.SetButtonOneText("Cancel");
 	  dialog_.SetButtonTwoText("Ok");
 	  dialog_.show(getSupportFragmentManager(), "Unable_to_update_cart");

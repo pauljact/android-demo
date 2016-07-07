@@ -272,14 +272,17 @@ public class NewUserActivity extends ActionBarActivity
   
   private void EmptyEditTextWarning(String warning) {
 	if (can_show_dialog_) {
-	  dialog_ = new JactDialogFragment(warning);
+	  dialog_ = new JactDialogFragment();
+      dialog_.SetTitle(warning);
 	  dialog_.show(getSupportFragmentManager(), warning);
 	}
   }
   
   private void EmptyEditTextWarning(String title, String warning) {
 	if (can_show_dialog_) {
-	  dialog_ = new JactDialogFragment(title, warning);
+	  dialog_ = new JactDialogFragment();
+      dialog_.SetTitle(title);
+      dialog_.SetMessage(warning);
 	  dialog_.show(getSupportFragmentManager(), title);
 	}
   }
