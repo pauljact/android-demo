@@ -1,6 +1,7 @@
 package com.jact.jactapp;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,6 +13,9 @@ public class EarnPageParser {
   // Website node keys.
   private static final String TITLE_NODE = "node_title";
   private static final String NID_NODE = "nid";
+  private static final String PLAY_NODE = "Play";
+  private static final String PLAY_IMG_URL = "Earn_Banner";
+  private static final String URL_NODE = "url";
   private static final String EARNED_FLAG = "flagging_flagged";
   private static final String YOUTUBE_ID_NODE = "YouTube_ID";
   private static final String YOUTUBE_ID_NODE_TWO = "YouTube ID";
@@ -30,11 +34,66 @@ public class EarnPageParser {
 	String img_url_;
 	int earn_points_;
     boolean already_earned_;
+    Boolean is_play_;
   }
   
   static private boolean ParseTitle(String title, EarnItem item) {
     if (title == null || title.isEmpty()) return false;
     item.title_ = title;
+    return true;
+  }
+
+  static private boolean ParseIsPlay(String play_node, EarnItem item) {
+    if (play_node == null || play_node.isEmpty()) {
+      return false;
+    }
+    try {
+      JSONObject play_object = new JSONObject(play_node);
+      String url = play_object.getString(URL_NODE);
+      if (url == null || url.isEmpty()) {
+        if (!JactActionBarActivity.IS_PRODUCTION) {
+          Log.e("EarnPageParser::ParseIsPlay", "Unable to parse URL of Play Tag: " + play_node);
+        }
+        return false;
+      }
+      item.is_play_ = true;
+      item.youtube_url_ = url;
+    } catch (JSONException e) {
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("EarnPageParser::ParseIsPlay", "Unable to parse Play Node: " + play_node +
+              ". Error: " + e.getMessage());
+      }
+      try {
+        JSONArray items = new JSONArray(play_node);
+        if (items.length() == 0) {
+          item.is_play_ = false;
+          return true;
+        }
+        if (items.length() != 1) {
+          if (!JactActionBarActivity.IS_PRODUCTION) {
+            Log.e("EarnPageParser::ParseIsPlay", "Expected a single Play url, found " +
+                    Integer.toString(items.length()) + ": " + play_node);
+          }
+          return false;
+        }
+        JSONObject play_item = items.getJSONObject(0);
+        String url = play_item.getString(URL_NODE);
+        if (url == null || url.isEmpty()) {
+          if (!JactActionBarActivity.IS_PRODUCTION) {
+            Log.e("EarnPageParser::ParseIsPlay", "Unable to parse URL of Play Tag: " + play_node);
+          }
+          return false;
+        }
+        item.is_play_ = true;
+        item.youtube_url_ = url;
+      } catch (JSONException ex) {
+        if (!JactActionBarActivity.IS_PRODUCTION) {
+          Log.e("EarnPageParser::ParseIsPlay", "Unable to parse Play Node via Array: " + play_node +
+                  ". Error: " + e.getMessage());
+        }
+        return false;
+      }
+    }
     return true;
   }
   
@@ -114,13 +173,15 @@ public class EarnPageParser {
     try {
       item.earn_points_ = Integer.parseInt(points.substring(0, points_suffix));
     } catch (NumberFormatException e) {
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParsePoints. Unable to parse points as an int: " + points);
+      if (!JactActionBarActivity.IS_PRODUCTION) {
+        Log.e("PHB ERROR", "EarnPageParser::ParsePoints. Unable to parse points as an int: " + points);
+      }
       return false;
     }
     return true;
   }
   
-  static public void ParseEarnPage(String response, ArrayList<EarnItem> earn_list) {
+  static public void ParseEarnPage(String response, ArrayList<EarnItem> earn_list, Map<Integer, Boolean> is_play) {
     try {
       JSONArray items = new JSONArray(response);
       for (int i = 0; i < items.length(); i++) {
@@ -143,7 +204,7 @@ public class EarnPageParser {
 
         // Parse Already Earned flag.
         ParseAlreadyEarned(item.getInt(EARNED_FLAG), earn_item);
-        
+
         // Parse Youtube Url.
         boolean found_id = false;
         if (item.has(YOUTUBE_ID_NODE)) {
@@ -156,25 +217,62 @@ public class EarnPageParser {
         } else if (item.has(YOUTUBE_ID_NODE_TWO)) {
           if (!ParseYoutubeUrl(item.getString(YOUTUBE_ID_NODE_TWO), earn_item)) {
             if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube id: " +
- 		                        item.getString(YOUTUBE_ID_NODE));
+ 		                        item.getString(YOUTUBE_ID_NODE_TWO));
           } else {
         	found_id = true;
           }
         }
-        if (!found_id) {
+        if (!found_id && item.has(YOUTUBE_URL_NODE)) {
           // Try getting youtube id the old way.
           if (!ParseYoutubeUrlOld(item.getString(YOUTUBE_URL_NODE), earn_item)) {
-            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse youtube url: " +
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse old youtube url: " +
 	                           item.getString(YOUTUBE_URL_NODE));
             return;
           }
         }
-        
-        // Parse Image Url.
-        if (!ParseImageUrl(item.getString(IMG_URL_NODE), earn_item)) {
-            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseEarnPage",
-                  "Unable to parse title: " + item.getString(IMG_URL_NODE));
+
+        // Parse Play tag.
+        if (item.has(PLAY_NODE)) {
+          if (!ParseIsPlay(item.getString(PLAY_NODE), earn_item)) {
+            if (!JactActionBarActivity.IS_PRODUCTION) {
+              Log.e("PHB ERROR", "EarnPageParser::ParseEarnPage. Unable to parse Play Tag: " +
+                    item.getString(PLAY_NODE));
+            }
             return;
+          }
+        } else {
+          earn_item.is_play_ = false;
+        }
+        is_play.put(earn_item.nid_, earn_item.is_play_);
+        if (!JactActionBarActivity.IS_PRODUCTION) {
+          Log.e("PHB TEMP", "EarnPageParser::PLAY. For nid " + Integer.toString(earn_item.nid_) +
+                            ", is Play: " + earn_item.is_play_);
+        }
+
+        // Parse Image Url.
+        if (!item.has(IMG_URL_NODE)) {
+          if (earn_item.is_play_) {
+            // Currently, "Play" items (HTML5 games) thumbnails are handled differently (see below).
+          } else {
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseEarnPage",
+                    "Unable to parse image  url: Tag '" + IMG_URL_NODE + "' not present.");
+            continue;
+          }
+        } else if (!ParseImageUrl(item.getString(IMG_URL_NODE), earn_item)) {
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseEarnPage",
+                  "Unable to parse image url: " + item.getString(IMG_URL_NODE));
+            return;
+        }
+        if (earn_item.is_play_ && item.has(PLAY_IMG_URL)) {
+          if (!ParseImageUrl(item.getString(PLAY_IMG_URL), earn_item)) {
+            if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseEarnPage",
+                    "Unable to parse play image url: " + item.getString(PLAY_IMG_URL));
+            return;
+          }
+        } else if (earn_item.is_play_) {
+          if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnPageParser::ParseEarnPage",
+                  "Unable to parse play image url: Tag '" + PLAY_IMG_URL + "' not present.");
+          continue;
         }
         
         // Parse Points.

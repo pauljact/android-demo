@@ -6,9 +6,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.jact.jactapp.GetUrlTask.FetchStatus;
@@ -97,7 +100,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   private final static String GCM_PROJECT_ID = "robust-carver-93112";
   private final static String GCM_PROJECT_NUMBER = "404003292102";
   private GoogleCloudMessaging gcm_;
-  private BroadcastReceiver mRegistrationBroadcastReceiver_;
+  private static BroadcastReceiver mRegistrationBroadcastReceiver_;
   private static String android_reg_id_;
   private static String android_new_reg_id_;
   AtomicInteger msg_id_ = new AtomicInteger();
@@ -115,6 +118,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   public ProductsImageLoader earn_image_loader_;
   private static ArrayList<ProductsPageParser.ProductItem> featured_rewards_;
   private static ArrayList<EarnPageParser.EarnItem> featured_earn_;
+  private static Map<Integer, Boolean> featured_earn_play_ids_;
   private LinearLayout featured_rewards_ll_;
   private LinearLayout featured_earn_ll_;
   //private static ArrayList<FeatureRewardsLayoutItem> featured_rewards_layouts_;
@@ -222,29 +226,22 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     next_drawing_bar_.setVisibility(View.INVISIBLE);
 
     // =================================== GCM =================================
-    // GCM OLD:
-    // Start the Service that will run in background and handle GCM interactions.
     app_is_registered_w_jact_ = false;
     register_app_url_ = GetUrlTask.GetJactDomain() + "/rest/push_notifications";
     if (use_new_gcm_ || use_old_gcm_) {
       gcm_ = GoogleCloudMessaging.getInstance(this);
     }
-    if ((use_old_gcm_ || use_new_gcm_)&& CheckPlayServices()) {
+    if ((use_old_gcm_ || use_new_gcm_) && CheckPlayServices()) {
       android_reg_id_ = GetRegistrationId(getApplicationContext());
 
       if (android_reg_id_.isEmpty()) {
-        if (!JactActionBarActivity.IS_PRODUCTION) {
-          Log.e("PHB TEMP", "JLIHA::onCreate. Old GCM calling 'RegisterInBackground'");
-        }
         RegisterInBackground();
       } else {
-        if (!JactActionBarActivity.IS_PRODUCTION) {
-          Log.e("PHB TEMP", "JLIHA::onCreate. Old GCM calling 'RegisterAppWithJactServerForGcm'" +
-                ". android_reg_id_: " + android_reg_id_);
-        }
         RegisterAppWithJactServerForGcm(false, android_reg_id_);
       }
     }
+    // GCM OLD:
+    // Start the Service that will run in background and handle GCM interactions.
     if (use_old_gcm_) {
       startService(new Intent(this, GcmIntentService.class));
     }
@@ -253,7 +250,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     // to register the app with GCM.
     app_is_new_registered_w_jact_ = false;
     if (use_new_gcm_) {
-      //PHB NOT NEEDED startService(new Intent(this, JactGcmListenerService.class));
+      // NOT NEEDED startService(new Intent(this, JactGcmListenerService.class));
       mRegistrationBroadcastReceiver_ = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -263,18 +260,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
           if (sentToken) {
             String token = sharedPreferences.getString("new_gcm_token", "");
             if (!token.isEmpty()) {
-              if (!JactActionBarActivity.IS_PRODUCTION) {
-                Log.e("PHB TEMP", "JLIHA::BroadcastReceiver::onReceive. Registering token w/ Jact Server: " + token);
-              }
               android_new_reg_id_ = token;
               RegisterAppWithJactServerForGcm(true, token);
-            } else {
-              if (!JactActionBarActivity.IS_PRODUCTION) {
-                Log.e("PHB TEMP", "JLIHA::BroadcastReceiver::onReceive. Unable to register empty token w/ Jact Server");
-              }
             }
-          } else if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB TEMP", "JLIHA::BroadcastReceiver::onReceive. Registration token error.");
           }
         }
       };
@@ -312,12 +300,31 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       EarnActivity.SetEarnVideoWatched(-1);
       Intent intent = new Intent(this, EarnRedeemActivity.class);
       intent.putExtra(getString(R.string.earn_url_key), url);
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "JLIHA::onResume url: " + url);
       startActivity(intent);
       return;
     }
-	
-	// Make sure Google Play is on user's device (so they can use GCM).
+
+    // Register mRegistrationBroadcastReceiver_ to receive broadcast messages (for when GCM
+    // server responds to a registration request)
+    if (use_new_gcm_) {
+      LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver_,
+              new IntentFilter("registrationComplete"));
+    }
+
+    // Check if user disabled GCM.
+    SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+    String user_disabled_gcm = user_info.getString(getString(R.string.gcm_disabled_key), "false");
+    boolean gcm_disabled =
+            (user_disabled_gcm != null) && user_disabled_gcm.equalsIgnoreCase("true");
+    if (gcm_disabled) {
+      if (use_old_gcm_) {
+        stopService(new Intent(this, GcmIntentService.class));
+      }
+      if (use_new_gcm_) {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver_);
+      }
+    }
+    // Make sure Google Play is on user's device (so they can use GCM).
 	if (use_old_gcm_ || use_new_gcm_) {
       CheckPlayServices();
       // The below two lines were added to improve frequency of heartbeat, see e.g.
@@ -331,16 +338,10 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       gcm_send_msg_button_.setVisibility(View.GONE);
       gcm_echo_msg_button_.setVisibility(View.GONE);
     }
-    // Register mRegistrationBroadcastReceiver_ to receive broadcast messages (for when GCM
-    // server responds to a registration request)
-    if (use_new_gcm_) {
-      LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver_,
-              new IntentFilter("registrationComplete"));
-    }
     
 	// Check if the Logged-In State is ready (all user info has already been fetched).
-    SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
-    String was_logged_off = user_info.getString(getString(R.string.was_logged_off_key), "");
+    SharedPreferences user_info_for_gcm = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+    String was_logged_off = user_info_for_gcm.getString(getString(R.string.was_logged_off_key), "");
     String was_logged_off_other_check = getIntent().getStringExtra(getString(R.string.was_logged_off_key));
     boolean was_logged_off_other_check_bool =
     	(was_logged_off_other_check != null) && was_logged_off_other_check.equalsIgnoreCase("true");
@@ -432,6 +433,10 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     }
   }
 
+  public static BroadcastReceiver GetGcmReceiver() {
+    return mRegistrationBroadcastReceiver_;
+  }
+
   protected void SetRewardsRightArrow() {
     if (featured_rewards_layouts_ == null || scroll_view_ == null) {
       right_caret_tv_.setVisibility(View.INVISIBLE);
@@ -478,9 +483,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     ShoppingUtils.LineItem item = new ShoppingUtils.LineItem();
     ProductsActivity.MessageHolder holder = new ProductsActivity.MessageHolder();
     if (!ProductsActivity.doAddToCartClick(featured_rewards_listener_, item, holder)) {
-      if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB TEMP", "JLIHA::doAddToCartClick. Not adding item here");
-      }
       if (holder.title_ != null && !holder.title_.isEmpty()) {
         if (holder.message_ != null && !holder.message_.isEmpty()) {
           DisplayPopupFragment(holder.title_, holder.message_, "Bad_Add_Product_Dialog");
@@ -503,10 +505,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   }
   private void AddLineItem(ShoppingUtils.LineItem line_item) {
     if (line_item == null) return;
-    if (!JactActionBarActivity.IS_PRODUCTION) {
-      Log.e("PHB TEMP", "JLIHA::AddLineItem. Adding line item:\n" +
-              ShoppingUtils.PrintLineItemHumanReadable(line_item));
-    }
 
     // Need cookies and csrf_token to create server's cart.
     SharedPreferences user_info = getSharedPreferences(
@@ -525,15 +523,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     ShoppingCartActivity.CartAccessResponse response = new ShoppingCartActivity.CartAccessResponse();
     if (!ShoppingCartActivity.AccessCart(
             ShoppingCartActivity.CartAccessType.GET_ORDER_ID, response)) {
-      if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB ERROR", "JLIHA::AddLineItem. Failed to get order id.");
-      }
       return;
     }
     line_item.order_id_ = response.order_id_;
-    if (!JactActionBarActivity.IS_PRODUCTION) {
-      Log.e("PHB TEMP", "JLIHA::AddLineItem. Just fetched order_id: " + line_item.order_id_);
-    }
 
     String csrf_token = user_info.getString(getString(R.string.ui_csrf_token), "");
     if (csrf_token.isEmpty()) {
@@ -756,7 +748,8 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
   private void SetFeaturedEarnList(String webpage) {
     featured_earn_ = new ArrayList<EarnPageParser.EarnItem>();
-    EarnPageParser.ParseEarnPage(webpage, featured_earn_);
+    featured_earn_play_ids_ = Collections.synchronizedMap(new HashMap<Integer, Boolean>());
+    EarnPageParser.ParseEarnPage(webpage, featured_earn_, featured_earn_play_ids_);
     if (featured_earn_.isEmpty()) {
       if (!JactActionBarActivity.IS_PRODUCTION) {
         Log.w("JLIHA::SetFeaturedEarnList", "No Earn items found from webpage:\n" + webpage);
@@ -888,7 +881,11 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         is_popup_showing_ = true;
       }
     } else {
-      StartYoutubeActivity(current_youtube_url_, nid);
+      if (featured_earn_play_ids_.get(nid)) {
+        StartPlayActivity(current_youtube_url_);
+      } else {
+        StartYoutubeActivity(current_youtube_url_, nid);
+      }
     }
   }
 
@@ -932,7 +929,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
   public void doDialogCancelClick(View view) {
     // Close Dialog window.
-    super.doDialogOkClick(view);
+    super.doDialogCancelClick(view);
   }
 
   public void doDialogOkClick(View view) {
@@ -984,6 +981,10 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     } else if (!JactActionBarActivity.IS_PRODUCTION) {
       Log.e("JLIHA::StartYouTubeActivity", "All flags false.");
     }
+  }
+
+  private void StartPlayActivity(String url) {
+    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
   }
 
   private void Popup(String title, String message) {
@@ -1207,10 +1208,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
                     featured_earn_.get(position).img_url_,
                     holder.img_, position, true);
             featured_earn_layouts_.get(position).invalidate();
-          } else {
-            if (!JactActionBarActivity.IS_PRODUCTION) {
-              Log.e("PHB TEMP", "JLIHA::AlertPositionsReady. Earn image is null for pos: " + position);
-            }
           }
         } else if (featured_earn_layouts_ == null) {
           if (!JactActionBarActivity.IS_PRODUCTION) {
@@ -1260,10 +1257,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 //=============================================================================
 
   private void RegisterAppWithJactServerForGcm(boolean from_new, String token) {
-    if (!JactActionBarActivity.IS_PRODUCTION) {
-      Log.e("PHB TEMP", "JLIHA::RegisterAppWithJactServerForGcm. from_new: " + from_new + ", token: " + token);
-    }
-
     // First check if app is already registered with Jact; if so, nothing to do.
     if (!from_new && app_is_registered_w_jact_) return;
     if (from_new && app_is_new_registered_w_jact_) return;
@@ -1390,9 +1383,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     new AsyncTask<Void, String, String>() {
         @Override
         protected String doInBackground(Void... params) {
-          if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB TEMP", "JLIHA::RegisterInBackground::doInBackground.");
-          }
           String msg = "";
           try {
             if (gcm_ == null) {
@@ -1428,9 +1418,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
         @Override
         protected void onPostExecute(String msg) {
-          if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB TEMP", "JLHA::RegisterInBackground::onPostExecute. msg: " + msg);
-          }
           //mDisplay.append(msg + "\n");
         }
     }.execute(null, null, null);
@@ -1443,9 +1430,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
    * using the 'from' address in the message.
    */
   private void SendRegistrationIdToBackend() {
-	if (!JactActionBarActivity.IS_PRODUCTION) {
-      Log.e("PHB TEMP", "JLHA::SendRegistrationIdToBackend");
-    }
     /*
     if (!use_old_gcm_) return;
 	Intent registration_intent = new Intent("com.google.android.c2dm.intent.REGISTER");
@@ -1464,9 +1448,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
    * @param regId registration ID
    */
   private void StoreRegistrationId(Context context, String regId) {
-	  if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB TEMP", "JLHA::StoreRegistrationId");
-      }
       final SharedPreferences prefs = GetGCMPreferences(context);
       int appVersion = GetAppVersion(context);
       if (!JactActionBarActivity.IS_PRODUCTION) {
@@ -1480,15 +1461,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
   // Temporarily testing sending upstream message from App to Jact GCM.
   public void doEchoUpstreamMessageClick(final View view) {
-    if (!JactActionBarActivity.IS_PRODUCTION) {
-      Log.e("PHB TEMP", "JLIHA::doSendUpstreamMessageClick.");
-    }
     new AsyncTask<Void, String, String>() {
       @Override
       protected String doInBackground(Void... params) {
-        if (!JactActionBarActivity.IS_PRODUCTION) {
-          Log.e("PHB TEMP", "JLHA::doSendUpstreamMessageClick");
-        }
         String msg = "";
         try {
           Bundle data = new Bundle();
@@ -1506,15 +1481,11 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
 
       @Override
       protected void onPostExecute(String msg) {
-        if (!JactActionBarActivity.IS_PRODUCTION) {
-          Log.e("PHB TEMP", "JLIHA::onSendUpstreamMessageClick::onPostExecute. msg: " + msg);
-        }
       }
     }.execute(null, null, null);
   }
 
   public void doSendUpstreamMessageClick(final View view) {
-    //PHBfinal String ttl = "1000000";
     final String ttl = "";
     final Bundle data = new Bundle();
     data.putString("Foo Key", "Foo Value");
@@ -1528,24 +1499,13 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
               gcm_.send(GCM_PROJECT_NUMBER + "@gcm.googleapis.com", "FOO Jact Message",
                       Long.parseLong(ttl), data);
             } catch (NumberFormatException ex) {
-              if (!JactActionBarActivity.IS_PRODUCTION) {
-                Log.e("PHB TEMP",
-                      "Error sending upstream message: could not parse ttl\n" + ex);
-              }
               return "Error sending upstream message: could not parse ttl";
             }
           } else {
             gcm_.send(GCM_PROJECT_NUMBER + "@gcm.googleapis.com", "FOO JACT Message", data);
           }
-          if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB TEMP", "Successfully sent upstream message");
-          }
           return null;
         } catch (IOException ex) {
-
-          if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB TEMP", "Error sending upstream message:\n" + ex);
-          }
           return "Error sending upstream message:" + ex.getMessage();
         }
       }
@@ -1553,9 +1513,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       @Override
       protected void onPostExecute(String result) {
         if (result != null) {
-          if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB TEMP", "Send UpstreamMessage::onPostExecute. Result: " + result);
-          }
         }
       }
     }.execute(null, null, null);
@@ -1573,20 +1530,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   @Override
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
     if (extra_params.isEmpty()) {
-      if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: JactLoggedInHomeActivity has multiple calls " +
-                "to GetUrlTask; in order to properly handle the response, " +
-                "must specify desired action via extra_params");
-      }
     } else if (extra_params.indexOf(NEW_REGISTER_APP_W_JACT_VIA_REST) == 0) {
-      if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB TEMP", "JLIHA::ProcessUrlResponse::NEW_REGISTER_APP_W_JACT_VIA_REST. Message: " + webpage);
-      }
       app_is_new_registered_w_jact_ = true;
     } else if (extra_params.indexOf(REGISTER_APP_W_JACT_VIA_REST) == 0) {
-      if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB TEMP", "JLIHA::ProcessUrlResponse::REGISTER_APP_W_JACT_VIA_REST. Message: " + webpage);
-      }
       app_is_registered_w_jact_ = true;
     } else if (extra_params.indexOf(GET_COOKIES_THEN_NEW_REGISTER_APP) == 0) {
       SaveCookies(cookies);
@@ -1639,26 +1585,16 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         if (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 &&
                 !ShoppingUtils.ParseLineItemFromAddLineItemPage(line_item, new_line_items)) {
           // TODO(PHB): Handle this error (e.g. popup warning to user).
-          if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
-          }
           return;
         } else if (extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 &&
                 !ShoppingUtils.ParseLineItemFromUpdateLineItemPage(line_item, new_line_items)) {
           // TODO(PHB): Handle this error (e.g. popup warning to user).
-          if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
-          }
           return;
         }
         if (new_line_items.size() != 1 ||
                 !ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.UPDATE_LINE_ITEM,
                         new_line_items.get(0))) {
           // TODO(PHB): Handle this error (e.g. popup warning to user).
-          if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse cart response. " +
-                  "Num new line items: " + new_line_items.size() + "; Webpage response:\n" + webpage);
-          }
           return;
         }
         DisplayPopupFragment("Added Item to Cart", "Finally_added_item");
@@ -1666,10 +1602,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         fadeAllViews(false);
       } catch (JSONException e) {
         // TODO(PHB): Handle this error (e.g. popup warning to user).
-        if (!JactActionBarActivity.IS_PRODUCTION) {
-          Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Unable to parse add line-item response " +
-                "from server. Exception: " + e.getMessage() + "; webpage response:\n" + webpage);
-        }
         return;
       }
     } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
@@ -1686,9 +1618,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       } else if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0) {
         if (!ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.SET_CART_FROM_WEBPAGE, webpage)) {
           // TODO(PHB): Handle this gracefully (pop-up a dialog).
-          if (!JactActionBarActivity.IS_PRODUCTION) {
-            Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Create_cart: Unable to parse cart response:\n" + webpage);
-          }
           return;
         }
       }
@@ -1715,16 +1644,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   @Override
   public void ProcessUrlResponse(Bitmap pic, String cookies, String extra_params) {
     if (extra_params.isEmpty()) {
-      if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: JactLoggedInHomeActivity has multiple calls " +
-              "to GetUrlTask; in order to properly handle the response, " +
-              "must specify desired action via extra_params");
-      }
     } else {
-        if (!JactActionBarActivity.IS_PRODUCTION) {
-          Log.e("PHB ERROR", "JLIHA::ProcessUrlResponse. Error: Unrecognized extra params: " +
-                GetUrlTask.PrintExtraParams(extra_params));
-        }
     }
     num_server_tasks_--;
 	if (num_server_tasks_ == 0) {
@@ -1740,17 +1660,10 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
     num_failed_requests_++;
 	// TODO(PHB): Implement this.
-	if (!JactActionBarActivity.IS_PRODUCTION) {
-      Log.e("PHB ERROR", "JLIHA::ProcessFailedResponse. Status: " + status);
-    }
     if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
       GetCookiesThenGetCart(this);
       return;
     } else if (extra_params.indexOf(NEW_REGISTER_APP_W_JACT_VIA_REST) == 0) {
-      if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB TEMP", "JLIHA::ProcessFailedResponse::NEW_REGISTER_APP_W_JACT_VIA_REST. Status: " +
-                status + "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params));
-      }
       if (status == GetUrlTask.FetchStatus.ERROR_CSRF_FAILED) {
         SharedPreferences user_info = getSharedPreferences(
                 getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
@@ -1758,10 +1671,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         ShoppingUtils.GetCsrfToken(this, cookies, GET_CSRF_THEN_NEW_REGISTER_APP);
       }
     } else if (extra_params.indexOf(NEW_REGISTER_APP_W_JACT_VIA_REST) == 0) {
-      if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB TEMP", "JLIHA::ProcessFailedResponse::NEW_REGISTER_APP_W_JACT_VIA_REST. Status: " +
-                status + "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params));
-      }
       if (status == GetUrlTask.FetchStatus.ERROR_CSRF_FAILED) {
         SharedPreferences user_info = getSharedPreferences(
                 getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
@@ -1769,10 +1678,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         ShoppingUtils.GetCsrfToken(this, cookies, GET_CSRF_THEN_NEW_REGISTER_APP);
       }
     } else if (extra_params.indexOf(REGISTER_APP_W_JACT_VIA_REST) == 0) {
-      if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("PHB TEMP", "JLIHA::ProcessFailedResponse::REGISTER_APP_W_JACT_VIA_REST. Status: " +
-              status + "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params));
-      }
       if (status == GetUrlTask.FetchStatus.ERROR_CSRF_FAILED) {
         SharedPreferences user_info = getSharedPreferences(
                 getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
@@ -1796,10 +1701,6 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
           // Nothing to do.
         }
       } else {
-        if (!JactActionBarActivity.IS_PRODUCTION) {
-          Log.e("PHB TEMP", "JLIHA::ProcessFailedResponse. Status: " + status +
-                "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params));
-        }
       }
     } else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) >= 0) {
       SharedPreferences user_info = getSharedPreferences(

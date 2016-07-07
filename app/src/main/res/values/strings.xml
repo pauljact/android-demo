@@ -24,7 +24,8 @@
     <string name="webview_url_key">webview_url_key</string>
     <string name="webview_title_key">webview_title_key</string>
     <string name="earn_url_key">earn_url_key</string>
-    <string name="earn_page_url">ear_page_url</string>
+    <string name="earn_page_url">earn_page_url</string>
+    <string name="gcm_disabled_key">gcm_disabled</string>
     <!-- End SharedPreferences Keys -->
     
     <!-- XML Keys -->
@@ -52,6 +53,7 @@
     <string name="menu_privacy_policy_menu">Privacy Policy</string>
     <string name="menu_privacy_policy">Policy</string>
     <string name="menu_logout">Sign Out</string>
+    <string name="menu_gcm_disabled">Jact Notifications</string>
     <string name="menu_menu">Menu</string>
     <!-- End Menu Options -->
     
@@ -180,6 +182,7 @@
     <string name="user_points_dots">User Points: &#8230;</string>
     <string name="go_to_earn_main_page">go_to_earn_main_page</string>
     <string name="facebook_app_id">254319494681206</string>
+    <string name="gcm_disable_dialog">GCM_DISABLE_DIALOG</string>
     <!-- End Miscellaneous -->
     
     <!-- Quantity 0-10 -->

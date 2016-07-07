@@ -33,6 +33,8 @@
           android:title="@string/menu_user_agreement_menu" />
     <item android:id="@+id/menu_privacy_policy"
           android:title="@string/menu_privacy_policy_menu" />
+    <item android:id="@+id/menu_gcm_disabled"
+          android:title="@string/menu_gcm_disabled" />
     <item android:id="@+id/menu_logout"
           android:title="@string/menu_logout" />
 </menu>

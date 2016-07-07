@@ -4,10 +4,13 @@ import com.jact.jactapp.GetUrlTask.FetchStatus;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
@@ -28,6 +31,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
   private static String user_agreement_url_;
   private static String about_jact_url_;
   private static String jact_my_profile_url_;
+  private static JactDialogFragment dialog_;
 
   private static final Boolean use_old_gcm_ = false;
   private static final Boolean use_new_gcm_ = true;
@@ -266,6 +270,9 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
        	parent_activity_.fadeAllViews(true);
     	startLogoffActivity();
         break;
+      case R.id.menu_gcm_disabled:
+        PopupDisableGcm();
+        break;
       default:
         found_match = false;
     }
@@ -290,7 +297,20 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     FaqActivity.SetUrlAndTitle(url, title, title_resource_id);
     parent_activity_.startActivity(new Intent(parent_activity_, FaqActivity.class));
   }
-  
+
+  private void PopupDisableGcm() {
+    // Get current state of GCM.
+    boolean currently_disabled = parent_activity_.GetGcmDisabled();
+
+    if (currently_disabled) {
+      parent_activity_.DisplayPopupWithButtonsFragment(
+              "Enable Jact Notifications?", "", parent_activity_.getString(R.string.gcm_disable_dialog), "Cancel", "OK");
+    } else {
+      parent_activity_.DisplayPopupWithButtonsFragment(
+              "Disable Jact Notifications?", "", parent_activity_.getString(R.string.gcm_disable_dialog), "Cancel", "OK");
+    }
+  }
+
   private void startLogoffActivity() {
 	// Stop the GCM Service running in the background (should not get updates if not
 	// logged in.

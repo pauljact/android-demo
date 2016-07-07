@@ -186,19 +186,6 @@ public class YouTubePlayerActivity extends YouTubeBaseActivity {
     startActivity(intent);
   }
 
-  /*PHBBHP
-  public void doDialogOkClick(View view) {
-  	// Close Dialog window.
-  	dialog_.dismiss();
-  	has_skipped_ahead_ = true;
-  }
-
-  public void doDialogCancelClick(View view) {
-	// Close Dialog window.
-	dialog_.dismiss();
-  }
-  PHBBHP*/
-
   private final class EarnPlaybackEventListener implements PlaybackEventListener {
     @Override
     public void onPlaying() {

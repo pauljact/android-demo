@@ -912,8 +912,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	}
 	
 	public void doDialogCancelClick(View view) {
-	  // Close Dialog window.
-	  dialog_.dismiss();
+	  super.doDialogCancelClick(view);
 	}
 	
 	public void doDialogOkClick(View view) {
@@ -922,8 +921,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  if (dialog_.getTag() != null && dialog_.getTag().equals(CLEAR_CART_TAG)) {
 		ClearCart();
 	  }
-	  // Close Dialog window.
-	  dialog_.dismiss();
+	  super.doDialogOkClick(view);
 	}
 	
 	private void ProcessShippingInfoResponse(String webpage, String cookies) {

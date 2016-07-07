@@ -26,9 +26,11 @@
         android:name="com.jact.jactapp.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
     <uses-permission android:name="com.jact.jactapp.permission.C2D_MESSAGE" />
-    
+
+    <!-- PHB New 6/1/2016, added the hardwareAccelerated=true to allow app to play HTML5 game in web view -->
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/JactMainTheme" >

@@ -4,9 +4,11 @@ import com.jact.jactapp.GetUrlTask.FetchStatus;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -28,7 +30,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   protected JactDialogFragment dialog_;
   protected int activity_id_;
   protected static final String USER_POINTS = "user_points";
-  public static final boolean IS_PRODUCTION = false;
+  public static final boolean IS_PRODUCTION = true;
 	
   protected void onCreate(Bundle savedInstanceState, int activity_id,
 		                  int layout, JactNavigationDrawer.ActivityIndex index) {
@@ -264,7 +266,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
    	String username = user_info.getString(getString(R.string.ui_username), "");
    	String password = user_info.getString(getString(R.string.ui_password), "");
     ShoppingUtils.RefreshCookies(
-        callback, username, password, ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK);  
+            callback, username, password, ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK);
   }
   
   protected void GetCookiesThenClearCart(ProcessUrlResponseCallback callback) {
@@ -273,7 +275,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
    	String username = user_info.getString(getString(R.string.ui_username), "");
    	String password = user_info.getString(getString(R.string.ui_password), "");
     ShoppingUtils.RefreshCookies(
-        callback, username, password, ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK);  
+            callback, username, password, ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK);
   }
   
   protected void ProcessCartResponse(ProcessUrlResponseCallback callback,
@@ -322,6 +324,38 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
     }
   }
 
+
+  public boolean GetGcmDisabled() {
+    SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+    String user_disabled_gcm = user_info.getString(getString(R.string.gcm_disabled_key), "false");
+    return (user_disabled_gcm != null) && user_disabled_gcm.equalsIgnoreCase("true");
+  }
+
+  private void SetGcmDisabled(boolean disabled) {
+    SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
+    SharedPreferences.Editor editor = user_info.edit();
+    String is_disabled = disabled ? "true" : "false";
+    editor.putString(getString(R.string.gcm_disabled_key), is_disabled);
+    editor.commit();
+  }
+
+  protected void DisplayPopupWithButtonsFragment(String title, String message, String id, String button_one, String button_two) {
+    if (can_show_dialog_ && !is_popup_showing_) {
+      is_popup_showing_ = true;
+      dialog_ = new JactDialogFragment(title, message);
+      if (button_one != null && !button_one.isEmpty()) {
+        dialog_.SetButtonOneText(button_one);
+      }
+      if (button_two != null && !button_two.isEmpty()) {
+        dialog_.SetButtonTwoText(button_two);
+      }
+      dialog_.show(getSupportFragmentManager(), id);
+    } else {
+      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("JactActionBarActivity::DisplayPopupWithButtonsFragment",
+              "Unable to show PopUp with title: " + title + " and message: " + message);
+    }
+  }
+
   protected void DisplayPopupFragment(String title, String message, String id) {
 	if (can_show_dialog_ && !is_popup_showing_) {
       is_popup_showing_ = true;
@@ -345,9 +379,38 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   }
   
   public void doDialogOkClick(View view) {
-	  // Close Dialog window.
-      is_popup_showing_ = false;
-	  dialog_.dismiss();
+    // Handle "OK" pressed on Enable/Disable Jact Notifications.
+    if (dialog_.getTag() != null && dialog_.getTag().equals(getString(R.string.gcm_disable_dialog))) {
+      // Get current state of GCM.
+      boolean currently_disabled = GetGcmDisabled();
+
+      if (currently_disabled) {
+        // Old state was disabled; re-enable.
+        SetGcmDisabled(false);
+        LocalBroadcastManager.getInstance(this).registerReceiver(JactLoggedInHomeActivity.GetGcmReceiver(),
+                new IntentFilter("registrationComplete"));
+        if (!JactActionBarActivity.IS_PRODUCTION) {
+          Log.e("PHB TEMP", "DIALOG OK: GCM Re-Enabled");
+        }
+      } else {
+        // Old state was enabled; disable.
+        SetGcmDisabled(true);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(JactLoggedInHomeActivity.GetGcmReceiver());
+        if (!JactActionBarActivity.IS_PRODUCTION) {
+          Log.e("PHB TEMP", "DIALOG OK: GCM Disabled");
+        }
+      }
+    }
+
+	// Close Dialog window.
+    is_popup_showing_ = false;
+	dialog_.dismiss();
+  }
+
+  public void doDialogCancelClick(View view) {
+    // Close Dialog window.
+    is_popup_showing_ = false;
+    dialog_.dismiss();
   }
 
   @Override

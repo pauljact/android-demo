@@ -1,6 +1,9 @@
 package com.jact.jactapp;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.jact.jactapp.GetUrlTask.FetchStatus;
 import com.jact.jactapp.JactNavigationDrawer.ActivityIndex;
@@ -37,6 +40,7 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   private ListView list_;
   private EarnAdapter adapter_;
   private static ArrayList<EarnPageParser.EarnItem> earn_list_;
+  private static Map<Integer, Boolean> play_items_by_nid_;
 
   private static final String EARN_DIALOG_WARNING = "earn_dialog_warning";
   private static final String FETCH_EARN_PAGE_TASK = "fetch_earn_page_task";
@@ -49,13 +53,13 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   private static int current_earn_nid_;
   private static int num_failed_requests_;
 
-  //PHBBHP Only needed if we play Earn Videos via external video player, instead of via
+  // Only needed if we play Earn Videos via external video player, instead of via
   // YouTubePlayerActivity
   private static int earn_video_watched_;
   private static final String EARN_REDEEM_URL_BASE = "/node/";
-  private static final boolean stream_video_via_youtube_player_api_ = false;
+  private static final boolean stream_video_via_youtube_player_api_ = true;
   private static final boolean stream_video_via_youtube_ = false;
-  private static final boolean stream_video_via_webview_ = true;
+  private static final boolean stream_video_via_webview_ = false;
 
   // DEPRECATED. The following strings are no longer needed.
   //private static final String QUOTE = "\"";
@@ -84,7 +88,6 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
       earn_video_watched_ = -1;
       Intent intent = new Intent(this, EarnRedeemActivity.class);
       intent.putExtra(getString(R.string.earn_url_key), url);
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB TEMP", "EarnActivity::onResume url: " + url);
       startActivity(intent);
       return;
     }
@@ -146,7 +149,8 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
 
   public synchronized void ParseYoutubeVideoList(String webpage) {
     earn_list_ = new ArrayList<EarnPageParser.EarnItem>();
-    EarnPageParser.ParseEarnPage(webpage, earn_list_);
+    play_items_by_nid_ = Collections.synchronizedMap(new HashMap<Integer, Boolean>());
+    EarnPageParser.ParseEarnPage(webpage, earn_list_, play_items_by_nid_);
     
     list_ = (ListView) findViewById(R.id.earn_list);
 
@@ -161,9 +165,6 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   public static boolean GetWebViewFlag() {return stream_video_via_webview_;}
 
   private void StartYoutubeActivity(String youtube_id, int nid) {
-    if (!JactActionBarActivity.IS_PRODUCTION) {
-      Log.w("PHB TEMP", "Setting youtube id: " + youtube_id);
-    }
     if (stream_video_via_youtube_player_api_) {
       Intent youtube_intent = new Intent(this, YouTubePlayerActivity.class);
       youtube_intent.putExtra(getString(R.string.youtube_id), youtube_id);
@@ -180,6 +181,10 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
     } else if (!JactActionBarActivity.IS_PRODUCTION) {
       Log.e("EarnActivity::StartYouTubeActivity", "All flags false.");
     }
+  }
+
+  private void StartPlayActivity(String url) {
+    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
   }
 
   private void Popup(String title, String message) {
@@ -249,7 +254,11 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
         is_popup_showing_ = true;
       }
     } else {
-      StartYoutubeActivity(current_youtube_url_, current_earn_nid_);
+      if (play_items_by_nid_.get(nid)) {
+        StartPlayActivity(current_youtube_url_);
+      } else {
+        StartYoutubeActivity(current_youtube_url_, current_earn_nid_);
+      }
     }
   }
   
@@ -283,7 +292,11 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
         is_popup_showing_ = true;
       }
     } else {
-      StartYoutubeActivity(current_youtube_url_, current_earn_nid_);
+      if (play_items_by_nid_.get(nid)) {
+        StartPlayActivity(current_youtube_url_);
+      } else {
+        StartYoutubeActivity(current_youtube_url_, current_earn_nid_);
+      }
     }
   }
 
