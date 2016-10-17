@@ -183,6 +183,8 @@ public class NewUserActivity extends ActionBarActivity
 	username_et.setText("");
 	EditText email_et = (EditText) findViewById(R.id.new_user_email_et);
     email_et.setText("");
+    EditText zip_et = (EditText) findViewById(R.id.new_user_zip_et);
+    zip_et.setText("");
 	EditText password_et = (EditText) findViewById(R.id.new_user_password_et);
     password_et.setText("");
 	EditText pass2_et = (EditText) findViewById(R.id.new_user_password_confirm_et);
@@ -222,6 +224,8 @@ public class NewUserActivity extends ActionBarActivity
       EmptyEditTextWarning("Invalid Email: Spaces not allowed");
       return;
     }
+    EditText zip_et = (EditText) findViewById(R.id.new_user_zip_et);
+    String zip = zip_et.getText().toString().trim();
 	EditText password_et = (EditText) findViewById(R.id.new_user_password_et);
     String password = password_et.getText().toString().trim();
     if (password.isEmpty()) {
@@ -245,10 +249,10 @@ public class NewUserActivity extends ActionBarActivity
     }
     
     // TODO(PHB): Add avatar selection.   
-    SendRequest(username, email, password, pass2, avatar_id);
+    SendRequest(username, email, zip, password, pass2, avatar_id);
   }
   
-  private void SendRequest(String username, String email, String password, String pass2, String avatar_id) {
+  private void SendRequest(String username, String email, String zip_code, String password, String pass2, String avatar_id) {
 	GetUrlTask task = new GetUrlTask(this, GetUrlTask.TargetType.JSON);
 	GetUrlTask.UrlParams params = new GetUrlTask.UrlParams();
 	params.url_ = new_user_url_;
@@ -259,6 +263,7 @@ public class NewUserActivity extends ActionBarActivity
     ArrayList<String> form_info = new ArrayList<String>();
     form_info.add(GetUrlTask.CreateFormInfo("name", username));
     form_info.add(GetUrlTask.CreateFormInfo("mail", email));
+    form_info.add(GetUrlTask.CreateFormInfo("zip", zip_code));
     form_info.add(GetUrlTask.CreateFormInfo("pass", password));
     //PHBform_info.add(GetUrlTask.CreateFormInfo("pass%5Bpass1%5D", password));
     //PHBform_info.add(GetUrlTask.CreateFormInfo("pass%5Bpass2%5D", pass2));

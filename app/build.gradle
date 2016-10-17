@@ -1,11 +1,10 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 23
+    buildToolsVersion '23.0.3'
     defaultConfig {
-        applicationId 'com.jact.jactapp'
+        applicationId 'com.example.jactfirstdemo'
         minSdkVersion 11
         targetSdkVersion 17
         multiDexEnabled true
@@ -18,14 +17,20 @@ android {
     }
     productFlavors {
     }
+    dexOptions {
+      javaMaxHeapSize "2g"
+    }
 }
 
 repositories { mavenCentral() }
 
 dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.google.android.gms:play-services:8.1.0'
+    compile 'com.google.android.gms:play-services:9.2.0'
+    compile 'com.google.android.gms:play-services-analytics:9.2.0'
     compile 'com.facebook.android:facebook-android-sdk:4.1.0'
     compile files('libs/commons-io-2.4.jar')
     compile files('libs/YouTubeAndroidPlayerApi.jar')
 }
+
+apply plugin: 'com.google.gms.google-services'

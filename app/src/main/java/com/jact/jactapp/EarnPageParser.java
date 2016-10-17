@@ -60,8 +60,9 @@ public class EarnPageParser {
       item.youtube_url_ = url;
     } catch (JSONException e) {
       if (!JactActionBarActivity.IS_PRODUCTION) {
-        Log.e("EarnPageParser::ParseIsPlay", "Unable to parse Play Node: " + play_node +
-              ". Error: " + e.getMessage());
+        Log.w("EarnPageParser::ParseIsPlay", "Unable to parse Play Node: " + play_node +
+              ". Error: '" + e.getMessage() +
+              "'. Attempting to parse as JSONArray instead of JSONObject...");
       }
       try {
         JSONArray items = new JSONArray(play_node);
@@ -244,10 +245,6 @@ public class EarnPageParser {
           earn_item.is_play_ = false;
         }
         is_play.put(earn_item.nid_, earn_item.is_play_);
-        if (!JactActionBarActivity.IS_PRODUCTION) {
-          Log.e("PHB TEMP", "EarnPageParser::PLAY. For nid " + Integer.toString(earn_item.nid_) +
-                            ", is Play: " + earn_item.is_play_);
-        }
 
         // Parse Image Url.
         if (!item.has(IMG_URL_NODE)) {

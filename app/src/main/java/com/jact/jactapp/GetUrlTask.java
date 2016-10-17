@@ -2,6 +2,7 @@ package com.jact.jactapp;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,12 +13,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.util.ByteArrayBuffer;
+//PHBimport org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -589,8 +591,12 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
   }
 
   private String ParseResultAsString(InputStream is) {
+    // Convert the InputStream into a string
+    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+    return s.hasNext() ? s.next() : "";
+
+      /* PHB DEPRECATED as of Marshmallow
     try {
-      // Convert the InputStream into a string
       BufferedInputStream bis = new BufferedInputStream(is);
       ByteArrayBuffer baf = new ByteArrayBuffer(50);
       int len;
@@ -600,6 +606,18 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
       }
       String webPage = new String(baf.toByteArray());
       return webPage;
+      */
+      /* PHB the following was an attempt to replace the deprecated ByteArrayBuffer,
+         but it didn't work (weird characters were appended to the end of the string).
+      BufferedInputStream bis = new BufferedInputStream(is);
+      ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+      byte[] data = new byte[4096];
+      int current = 0;
+
+      while((current = bis.read(data,0,data.length)) != -1){
+        buffer.write(data,0,current);
+      }
+      return new String(data);
     } catch (IOException e) {
       if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "GetUrlTask::ParseResultAsString. Error reading returned webpage:\n" + e.getMessage());
   	  if (e.getMessage().indexOf("Read timed out") >= 0) {
@@ -607,6 +625,7 @@ public class GetUrlTask extends AsyncTask<String, Void, Void> {
   	  }
   	  return "";
     }
+      */
   }
 	  
   protected void onPostExecute(Void result) {

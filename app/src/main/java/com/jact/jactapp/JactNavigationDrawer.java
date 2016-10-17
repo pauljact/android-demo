@@ -328,7 +328,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     parent_activity_.startActivity(login_intent);
   }
  
-  private void startMyProfileActivity() {
+  private void startLoggedInHomeActivity() {
     parent_activity_.startActivity(new Intent(parent_activity_, JactLoggedInHomeActivity.class));
   }
  
@@ -366,7 +366,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
       // Nothing to do; clicked on parent activity.
     } else if (drawer_click_pos_ == 0) {
       // Start 'My Profile' activity.
-      startMyProfileActivity();
+      startLoggedInHomeActivity();
     } else if (drawer_click_pos_ == 1) {
       // Start 'ProductsActivity' (for Rewards).
       Intent products_activity =
@@ -420,7 +420,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     if (position == ActivityToDrawerIndex(parent_activity_index_)) {
       // Nothing to do except close drawer.
     } else if (position == 0) {
-      // Position '0' is for 'My Profile. Start 'JactLoggedInHomeActivity'.
+      // Position '0' is for 'HOME'. Start 'JactLoggedInHomeActivity'.
       // Must be done via parent_class, which has access to the parent_activity.
       parent_activity_.fadeAllViews(true);
       ProcessDrawerClickResponse("", "");
@@ -473,7 +473,7 @@ public class JactNavigationDrawer implements ProcessUrlResponseCallback {
     TextView text_view_;
   }
 
-  public class JactMenuAdapter extends ArrayAdapter<IconAndText> {
+    public class JactMenuAdapter extends ArrayAdapter<IconAndText> {
 	    JactActionBarActivity context_;
 	    private int layout_res_id_;
 	    private IconAndText items_[] = null;

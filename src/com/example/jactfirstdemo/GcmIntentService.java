@@ -37,8 +37,8 @@ public class GcmIntentService extends IntentService {
       // in your BroadcastReceiver.
       String message_type = gcm.getMessageType(intent);
       String intent_action = intent.getAction();
-      Log.e("PHB Temp", "GcmIntentService::onHandleIntent. message_type: " +
-                        message_type + ", intent_action: " + intent_action);
+      Log.i("GcmIntentService::onHandleIntent",
+            "Message_type: " + message_type + ", intent_action: " + intent_action);
       if (intent_action == null) {
     	// TODO(PHB): Handle this case.
         Log.e("PHB Temp", "GcmIntentService::onHandleIntent. Null intent_action.");

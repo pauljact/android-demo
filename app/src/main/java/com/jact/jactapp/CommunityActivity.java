@@ -1,5 +1,7 @@
 package com.jact.jactapp;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.jact.jactapp.GetUrlTask.FetchStatus;
 import com.jact.jactapp.JactNavigationDrawer.ActivityIndex;
 
@@ -21,6 +23,7 @@ import java.util.List;
 
 public class CommunityActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   private static String community_url_;
+  private Tracker mTracker;  // For google analytics
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -29,11 +32,21 @@ public class CommunityActivity extends JactActionBarActivity implements ProcessU
 		       R.layout.community_layout,
 		       JactNavigationDrawer.ActivityIndex.COMMUNITY);
     community_url_ = GetUrlTask.GetJactDomain() + "/community";
+
+    // For Google Analytics tracking.
+    // Obtain the shared Tracker instance.
+    JactAnalyticsApplication application = (JactAnalyticsApplication) getApplication();
+    mTracker = application.getDefaultTracker();
   }
     
   @Override
   protected void onResume() {
 	super.onResume();
+
+    // For Google Analytics.
+    mTracker.setScreenName("Image~Community");
+    mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
 
     // Set cookies for WebView.
     SharedPreferences user_info = getSharedPreferences(
@@ -52,7 +65,7 @@ public class CommunityActivity extends JactActionBarActivity implements ProcessU
     }
 
     community_url_ = GetUrlTask.GetJactDomain() + "/community";
-    navigation_drawer_.setActivityIndex(ActivityIndex.COMMUNITY);
+    //PHBnavigation_drawer_.setActivityIndex(ActivityIndex.COMMUNITY);
     
     // Set webview from community_url_.
     WebView web_view = (WebView) findViewById(R.id.community_webview);

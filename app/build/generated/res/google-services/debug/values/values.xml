@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="gcm_defaultSenderId">404003292102</string>
-    <string name="google_app_id">1:404003292102:android:83fc7456ec673dc0</string>
+    <string name="default_web_client_id" translatable="false">176825502237-jcngfsk3ng7svp4vq4pq5p7sv8dhbja8.apps.googleusercontent.com</string>
+    <string name="ga_trackingId" translatable="false">UA-85084812-1</string>
+    <string name="gcm_defaultSenderId" translatable="false">176825502237</string>
+    <string name="google_api_key" translatable="false">AIzaSyDDcH8RS0YiPDNAVWCZTbl-DdCxmDUM7PA</string>
+    <string name="google_app_id" translatable="false">1:176825502237:android:f051112a2cbab615</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDDcH8RS0YiPDNAVWCZTbl-DdCxmDUM7PA</string>
 </resources>

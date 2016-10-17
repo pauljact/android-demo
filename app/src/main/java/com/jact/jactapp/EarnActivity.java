@@ -1,10 +1,15 @@
 package com.jact.jactapp;
 
+import java.net.HttpCookie;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.jact.jactapp.GetUrlTask.FetchStatus;
 import com.jact.jactapp.JactNavigationDrawer.ActivityIndex;
 
@@ -19,6 +24,9 @@ import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.webkit.CookieManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -48,6 +56,7 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   private static final String GET_COOKIES_THEN_FEATURED_EARN_TASK = "get_cookies_then_featured_earn";
   private static final String GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK = "get_cookies_then_youtube_urls_task";
   private static String earn_url_;
+  private static String mobile_earn_url_;
   private static boolean is_current_already_earned_;
   private static String current_youtube_url_;
   private static int current_earn_nid_;
@@ -61,6 +70,8 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   private static final boolean stream_video_via_youtube_ = false;
   private static final boolean stream_video_via_webview_ = false;
 
+  private Tracker mTracker;  // For google analytics
+
   // DEPRECATED. The following strings are no longer needed.
   //private static final String QUOTE = "\"";
   //private static final String HREF_MARKER = "<a href=" + QUOTE + "earn/";
@@ -69,41 +80,91 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    // Set layout.
-    super.onCreate(savedInstanceState, R.string.earn_label,
-		           R.layout.earn_layout,
-		           JactNavigationDrawer.ActivityIndex.EARN);
+    if (JactActionBarActivity.USE_MOBILE_SITE) {
+      // Set layout.
+      super.onCreate(savedInstanceState, R.string.earn_label,
+              R.layout.earn_wrapper_layout,
+              JactNavigationDrawer.ActivityIndex.EARN);
+    } else {
+      // Set layout.
+      super.onCreate(savedInstanceState, R.string.earn_label,
+              R.layout.earn_layout,
+              JactNavigationDrawer.ActivityIndex.EARN);
+    }
     should_refresh_earn_items_ = true;
     earn_url_ = GetUrlTask.GetJactDomain() + "/rest/earn";
     is_current_already_earned_ = false;
     current_youtube_url_ = "";
     earn_video_watched_ = -1;
+    mobile_earn_url_ = GetUrlTask.GetJactDomain() + "/earn";
+
+    // For Google Analytics tracking.
+    // Obtain the shared Tracker instance.
+    JactAnalyticsApplication application = (JactAnalyticsApplication) getApplication();
+    mTracker = application.getDefaultTracker();
   }
   
   @Override
   protected void onResume() {
 	super.onResume();
-    if (earn_video_watched_ > 0) {
-      String url = GetUrlTask.GetJactDomain() + EARN_REDEEM_URL_BASE + Integer.toString(earn_video_watched_);
-      earn_video_watched_ = -1;
-      Intent intent = new Intent(this, EarnRedeemActivity.class);
-      intent.putExtra(getString(R.string.earn_url_key), url);
-      startActivity(intent);
-      return;
-    }
+    mobile_earn_url_ = GetUrlTask.GetJactDomain() + "/earn";
     earn_url_ = GetUrlTask.GetJactDomain() + "/rest/earn";
     num_failed_requests_ = 0;
-    navigation_drawer_.setActivityIndex(ActivityIndex.EARN);
-    // Set spinner (and hide WebView) until page has finished loading.
-    GetCart(this);
-    if (should_refresh_earn_items_) {
-      FetchEarnPage();
-    }
-    should_refresh_earn_items_ = true;
-    if (num_server_tasks_ == 0) {
-      fadeAllViews(false);
+
+    // For Google Analytics.
+    mTracker.setScreenName("Image~Earn");
+    mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+    //PHBnavigation_drawer_.setActivityIndex(ActivityIndex.EARN);
+    if (JactActionBarActivity.USE_MOBILE_SITE) {
+      // Set cookies for WebView.
+      SharedPreferences user_info = getSharedPreferences(
+              getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+      String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+      List<String> cookie_headers = Arrays.asList(cookies.split(GetUrlTask.COOKIES_SEPERATOR));
+      HttpCookie cookie = null;
+      for (String cookie_str : cookie_headers) {
+        cookie = HttpCookie.parse(cookie_str).get(0);
+      }
+      if (cookie != null) {
+        CookieManager cookie_manager = CookieManager.getInstance();
+        cookie_manager.setCookie(
+                mobile_earn_url_,
+                cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain());
+      }
+
+      // Set webview from mobile_earn_url_.
+      WebView web_view = (WebView) findViewById(R.id.earn_wrapper_webview);
+      web_view.loadUrl(mobile_earn_url_);
+      web_view.setWebViewClient(new WebViewClient() {
+        @Override
+        public void onPageFinished(WebView view, String url) {
+          fadeAllViews(false);
+        }
+      });
+      // Set spinner (and hide WebView) until page has finished loading.
+      GetCart(this);
+      fadeAllViews(num_server_tasks_ > 0);
     } else {
-      fadeAllViews(true);
+      if (earn_video_watched_ > 0) {
+        String url = GetUrlTask.GetJactDomain() + EARN_REDEEM_URL_BASE + Integer.toString(earn_video_watched_);
+        earn_video_watched_ = -1;
+        Intent intent = new Intent(this, EarnRedeemActivity.class);
+        intent.putExtra(getString(R.string.earn_url_key), url);
+        startActivity(intent);
+        return;
+      }
+      // Set spinner (and hide WebView) until page has finished loading.
+      GetCart(this);
+      if (should_refresh_earn_items_) {
+        FetchEarnPage();
+      }
+      should_refresh_earn_items_ = true;
+      if (num_server_tasks_ == 0) {
+        fadeAllViews(false);
+      } else {
+        fadeAllViews(true);
+      }
     }
   }
 
@@ -302,38 +363,59 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
 
   @Override
   public void fadeAllViews(boolean should_fade) {
-    ProgressBar spinner = (ProgressBar) findViewById(R.id.earn_progress_bar);
-    AlphaAnimation alpha;
-    if (should_fade) {
-      spinner.setVisibility(View.VISIBLE);
-      alpha = new AlphaAnimation(0.5F, 0.5F);
+    if (JactActionBarActivity.USE_MOBILE_SITE) {
+      ProgressBar spinner = (ProgressBar) findViewById(R.id.earn_wrapper_progress_bar);
+      AlphaAnimation alpha;
+      if (should_fade) {
+        spinner.setVisibility(View.VISIBLE);
+        alpha = new AlphaAnimation(0.5F, 0.5F);
+      } else {
+        spinner.setVisibility(View.INVISIBLE);
+        alpha = new AlphaAnimation(1.0F, 1.0F);
+      }
+      // The AlphaAnimation will make the whole content frame transparent
+      // (so that none of the views show).
+      alpha.setDuration(0); // Make animation instant
+      alpha.setFillAfter(true); // Tell it to persist after the animation ends
+      RelativeLayout layout = (RelativeLayout) findViewById(R.id.earn_wrapper_content_frame);
+      layout.startAnimation(alpha); // Add animation to the layout.
     } else {
-      spinner.setVisibility(View.INVISIBLE);
-      alpha = new AlphaAnimation(1.0F, 1.0F);
+      ProgressBar spinner = (ProgressBar) findViewById(R.id.earn_progress_bar);
+      AlphaAnimation alpha;
+      if (should_fade) {
+        spinner.setVisibility(View.VISIBLE);
+        alpha = new AlphaAnimation(0.5F, 0.5F);
+      } else {
+        spinner.setVisibility(View.INVISIBLE);
+        alpha = new AlphaAnimation(1.0F, 1.0F);
+      }
+      // The AlphaAnimation will make the whole content frame transparent
+      // (so that none of the views show).
+      alpha.setDuration(0); // Make animation instant
+      alpha.setFillAfter(true); // Tell it to persist after the animation ends
+      RelativeLayout layout = (RelativeLayout) findViewById(R.id.earn_content_frame);
+      layout.startAnimation(alpha); // Add animation to the layout.
     }
-    // The AlphaAnimation will make the whole content frame transparent
-    // (so that none of the views show).
-    alpha.setDuration(0); // Make animation instant
-    alpha.setFillAfter(true); // Tell it to persist after the animation ends
-    RelativeLayout layout = (RelativeLayout) findViewById(R.id.earn_content_frame);
-    layout.startAnimation(alpha); // Add animation to the layout.
   }
   
   @Override
   public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
-	if (extra_params.indexOf(FETCH_EARN_PAGE_TASK) == 0) {
-	  num_server_tasks_--;
-	  ParseYoutubeVideoList(webpage);
-  	  if (num_server_tasks_ == 0) {
-  		SetCartIcon(this);
-  		if (num_server_tasks_ == 0) {
-  		  fadeAllViews(false);
-  		}
-  	  }
-    } else if (extra_params.indexOf(GET_COOKIES_THEN_FEATURED_EARN_TASK) == 0) {
-      SaveCookies(cookies);
-      FetchEarnPage(cookies);
-	// DEPRECATED. These values shouldn't ever be present anymore.
+    if (JactActionBarActivity.USE_MOBILE_SITE) {
+      ProcessCartResponse(this, webpage, cookies, extra_params);
+    } else {
+      if (extra_params.indexOf(FETCH_EARN_PAGE_TASK) == 0) {
+        num_server_tasks_--;
+        ParseYoutubeVideoList(webpage);
+        if (num_server_tasks_ == 0) {
+          SetCartIcon(this);
+          if (num_server_tasks_ == 0) {
+            fadeAllViews(false);
+          }
+        }
+      } else if (extra_params.indexOf(GET_COOKIES_THEN_FEATURED_EARN_TASK) == 0) {
+        SaveCookies(cookies);
+        FetchEarnPage(cookies);
+        // DEPRECATED. These values shouldn't ever be present anymore.
 	/*
 	} else if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK) ||
                extra_params.equals(GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK)) {
@@ -351,8 +433,9 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   		  fadeAllViews(false);
   		}
   	  }*/
-    } else {
-	  ProcessCartResponse(this, webpage, cookies, extra_params);
+      } else {
+        ProcessCartResponse(this, webpage, cookies, extra_params);
+      }
     }
   }
 
@@ -363,21 +446,25 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
 
   @Override
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
-    num_failed_requests_++;
-	if (extra_params.indexOf(FETCH_EARN_PAGE_TASK) == 0) {
-      num_server_tasks_--;
-      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("EarnActivity::ProcessFailedResponse", "Failed to fetch Earn Page.");
-      Popup("Unable to Reach Jact", "Check Internet Connection, and try again.");
-  	  if (num_server_tasks_ == 0) {
-  		SetCartIcon(this);
-  		if (num_server_tasks_ == 0) {
-  		  fadeAllViews(false);
-  		}
-  	  }
-    } else if (extra_params.indexOf(GET_COOKIES_THEN_FEATURED_EARN_TASK) == 0) {
-      if (num_failed_requests_ > 5) return;
-      FetchEarnPage();
-  	// DEPRECATED.
+    if (JactActionBarActivity.USE_MOBILE_SITE) {
+      ProcessFailedCartResponse(this, status, extra_params);
+    } else {
+      num_failed_requests_++;
+      if (extra_params.indexOf(FETCH_EARN_PAGE_TASK) == 0) {
+        num_server_tasks_--;
+        if (!JactActionBarActivity.IS_PRODUCTION)
+          Log.e("EarnActivity::ProcessFailedResponse", "Failed to fetch Earn Page.");
+        Popup("Unable to Reach Jact", "Check Internet Connection, and try again.");
+        if (num_server_tasks_ == 0) {
+          SetCartIcon(this);
+          if (num_server_tasks_ == 0) {
+            fadeAllViews(false);
+          }
+        }
+      } else if (extra_params.indexOf(GET_COOKIES_THEN_FEATURED_EARN_TASK) == 0) {
+        if (num_failed_requests_ > 5) return;
+        FetchEarnPage();
+        // DEPRECATED.
   	/*
 	} else if (extra_params.equals(FETCH_YOUTUBE_URLS_TASK) ||
     	extra_params.equals(GET_COOKIES_THEN_FETCH_YOUTUBE_URLS_TASK)) {
@@ -393,8 +480,9 @@ public class EarnActivity extends JactActionBarActivity implements ProcessUrlRes
   		  fadeAllViews(false);
   		}
   	  }*/
-    } else {
-	  ProcessFailedCartResponse(this, status, extra_params);
+      } else {
+        ProcessFailedCartResponse(this, status, extra_params);
+      }
     }
   }
   

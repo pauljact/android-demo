@@ -91,6 +91,32 @@
 		android:paddingLeft="5dp"
 		android:paddingBottom="5dp"
 		android:background="@drawable/orange_border"/>
+   	<TextView
+   	    android:id="@+id/new_user_zip_tv"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginLeft="10dp"
+   	    android:text="@string/zip_str"                
+    		android:clickable="false"
+   	    android:textSize="20sp"
+   	    android:textStyle="bold"
+   	    android:textColor="@color/black"
+    		android:background="@color/transparent"/>	
+   	<EditText
+   	    android:id="@+id/new_user_zip_et"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_marginTop="1dp"
+        android:layout_marginLeft="10dp"
+        android:inputType="textEmailAddress"
+   	    android:ems="10"                
+      	android:clickable="false"
+      	android:imeOptions="actionDone"
+		android:paddingTop="5dp"
+		android:paddingLeft="5dp"
+		android:paddingBottom="5dp"
+		android:background="@drawable/orange_border"/>
     <TextView
    	    android:id="@+id/new_user_password_tv"
    	    android:layout_width="wrap_content"

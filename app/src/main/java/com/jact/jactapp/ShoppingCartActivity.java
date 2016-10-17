@@ -1,14 +1,17 @@
 package com.jact.jactapp;
 
+import java.net.HttpCookie;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -26,12 +29,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.webkit.CookieManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.jact.jactapp.GetUrlTask.FetchStatus;
 import com.jact.jactapp.ShoppingUtils.Amount;
 import com.jact.jactapp.ShoppingUtils.LineItem;
@@ -42,6 +50,7 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	// TODO(PHB): Update string below with actual target.
 	private static String rewards_url_;
 	private static String jact_shopping_cart_url_;
+	private static String mobile_cart_url_;
 	private static final String GET_SHIPPING_INFO_TASK = "get_shipping_info_task";
 	private static final String GET_REWARDS_PAGE_TASK = "get_rewards_page_task";
 	private static final String DATE_PREFIX = "Drawing Date: ";
@@ -60,6 +69,8 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	private static ArrayList<String> items_to_remove_;
 	private ListView items_listview_;
 	private CheckoutAdapter adapter_;
+
+	private Tracker mTracker;  // For google analytics
 	
 	public enum CardType {
 		NO_TYPE,
@@ -349,12 +360,25 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    // Set layout.
-    super.onCreate(savedInstanceState, R.string.cart_activity_label,
-			R.layout.checkout_layout,
-			JactNavigationDrawer.ActivityIndex.CHECKOUT_MAIN);
-    rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
-    jact_shopping_cart_url_ = GetUrlTask.GetJactDomain() + "/rest/cart.json";
+	  if (JactActionBarActivity.USE_MOBILE_SITE) {
+		  // Set layout.
+		  super.onCreate(savedInstanceState, R.string.cart_activity_label,
+				  R.layout.checkout_wrapper_layout,
+				  JactNavigationDrawer.ActivityIndex.CHECKOUT_MAIN);
+	  } else {
+		  // Set layout.
+		  super.onCreate(savedInstanceState, R.string.cart_activity_label,
+				  R.layout.checkout_layout,
+				  JactNavigationDrawer.ActivityIndex.CHECKOUT_MAIN);
+	  }
+	  rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
+	  jact_shopping_cart_url_ = GetUrlTask.GetJactDomain() + "/rest/cart.json";
+	  mobile_cart_url_ = GetUrlTask.GetJactDomain() + "/cart";
+
+	  // For Google Analytics tracking.
+	  // Obtain the shared Tracker instance.
+	  JactAnalyticsApplication application = (JactAnalyticsApplication) getApplication();
+	  mTracker = application.getDefaultTracker();
   }
 
   @Override
@@ -362,79 +386,138 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 	  super.onResume();
 	  rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
 	  jact_shopping_cart_url_ = GetUrlTask.GetJactDomain() + "/rest/cart.json";
-	  num_failed_requests_ = 0;
-	  if (InitializeOnce()) {
-	    GetInitialShoppingCart();
-	  }
-	  // Re-enable parent activity before transitioning to the next activity.
-	  // This ensures e.g. that when user hits 'back' button, the screen
-	  // is 'active' (not faded) when the user returns.
-	  view_has_been_loaded_ = false;
-	  ResetNumCsrfRequests();
-	  GetCart(this);
-	  if (!ProductsActivity.IsProductsListInitialized()) {
-    	new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(
-        		rewards_url_, "GET", "", "", GET_REWARDS_PAGE_TASK);
-    	IncrementNumRequestsCounter();
-	  }
-	  if (GetNumRequestsCounter() == 0) {
-		LoadView();
+	  mobile_cart_url_ = GetUrlTask.GetJactDomain() + "/cart";
+
+	  // For Google Analytics.
+	  mTracker.setScreenName("Image~Shopping_Cart");
+	  mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+	  //PHBnavigation_drawer_.setActivityIndex(JactNavigationDrawer.ActivityIndex.CHECKOUT_MAIN);
+	  if (JactActionBarActivity.USE_MOBILE_SITE) {
+		  // Set cookies for WebView.
+		  SharedPreferences user_info = getSharedPreferences(
+				  getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+		  String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+		  List<String> cookie_headers = Arrays.asList(cookies.split(GetUrlTask.COOKIES_SEPERATOR));
+		  HttpCookie cookie = null;
+		  for (String cookie_str : cookie_headers) {
+			  cookie = HttpCookie.parse(cookie_str).get(0);
+		  }
+		  if (cookie != null) {
+			  CookieManager cookie_manager = CookieManager.getInstance();
+			  cookie_manager.setCookie(
+					  mobile_cart_url_,
+					  cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain());
+		  }
+
+		  // Set webview from mobile_cart_url_.
+		  WebView web_view = (WebView) findViewById(R.id.checkout_wrapper_webview);
+		  web_view.loadUrl(mobile_cart_url_);
+		  web_view.setWebViewClient(new WebViewClient() {
+			  @Override
+			  public void onPageFinished(WebView view, String url) {
+				  fadeAllViews(false);
+			  }
+		  });
+		  // Set spinner (and hide WebView) until page has finished loading.
+		  GetCart(this);
+		  fadeAllViews(num_server_tasks_ > 0);
 	  } else {
-		fadeAllViews(true);
+		  num_failed_requests_ = 0;
+		  if (InitializeOnce()) {
+			  GetInitialShoppingCart();
+		  }
+		  // Re-enable parent activity before transitioning to the next activity.
+		  // This ensures e.g. that when user hits 'back' button, the screen
+		  // is 'active' (not faded) when the user returns.
+		  view_has_been_loaded_ = false;
+		  ResetNumCsrfRequests();
+		  GetCart(this);
+		  if (!ProductsActivity.IsProductsListInitialized()) {
+			  new GetUrlTask(this, GetUrlTask.TargetType.JSON).execute(
+					  rewards_url_, "GET", "", "", GET_REWARDS_PAGE_TASK);
+			  IncrementNumRequestsCounter();
+		  }
+		  if (GetNumRequestsCounter() == 0) {
+			  LoadView();
+		  } else {
+			  fadeAllViews(true);
+		  }
 	  }
   }
   
   @Override
   public void onPause() {
-    if (items_to_remove_ != null) {
-      Iterator<String> itr = items_to_remove_.iterator();
-      while (itr.hasNext()) {
-    	String pid_str = itr.next();
-    	try {
-    	  int pid = Integer.parseInt(pid_str);
-    	  AccessCart(CartAccessType.REMOVE_QP_CART_ITEM, pid);
-    	} catch (NumberFormatException e) {
-    	  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ShoppingCartActivity::onPause", "Unable to parse as pid: " + pid_str);
-    	}
-      } 
-    }
+	if (!JactActionBarActivity.USE_MOBILE_SITE) {
+		if (items_to_remove_ != null) {
+			Iterator<String> itr = items_to_remove_.iterator();
+			while (itr.hasNext()) {
+				String pid_str = itr.next();
+				try {
+					int pid = Integer.parseInt(pid_str);
+					AccessCart(CartAccessType.REMOVE_QP_CART_ITEM, pid);
+				} catch (NumberFormatException e) {
+					if (!JactActionBarActivity.IS_PRODUCTION)
+						Log.e("ShoppingCartActivity::onPause", "Unable to parse as pid: " + pid_str);
+				}
+			}
+		}
+	}
     super.onPause();
   }
 
   @Override
   public void fadeAllViews(boolean should_fade) {
-    ProgressBar spinner = (ProgressBar) findViewById(R.id.checkout_progress_bar);
-    Button proceed_button = (Button) findViewById(R.id.proceed_to_checkout_button);
-    Button clear_button = (Button) findViewById(R.id.clear_cart_button);
-    AlphaAnimation alpha;
-    if (should_fade) {
-      proceed_button.setEnabled(false);
-      proceed_button.setTextColor(getResources().getColor(R.color.translucent_black));
-      clear_button.setEnabled(false);
-      clear_button.setTextColor(getResources().getColor(R.color.translucent_black));
-      spinner.setVisibility(View.VISIBLE);
-      alpha = new AlphaAnimation(0.5F, 0.5F);
-    } else {
-      spinner.setVisibility(View.GONE);
-      alpha = new AlphaAnimation(1.0F, 1.0F);
-      if (GetNumberCartItems() == 0) {
-        proceed_button.setEnabled(false);
-        proceed_button.setTextColor(getResources().getColor(R.color.translucent_black));
-        clear_button.setEnabled(false);
-        clear_button.setTextColor(getResources().getColor(R.color.translucent_black));
-      } else {
-        proceed_button.setEnabled(true);
-        proceed_button.setTextColor(getResources().getColor(R.color.white));
-        clear_button.setEnabled(true);
-        clear_button.setTextColor(getResources().getColor(R.color.white));
-      }
-    }
-    // The AlphaAnimation will make the whole content frame transparent
-    // (so that none of the views show).
-    alpha.setDuration(0); // Make animation instant
-    alpha.setFillAfter(true); // Tell it to persist after the animation ends
-    RelativeLayout layout = (RelativeLayout) findViewById(R.id.checkout_content_frame);
-    layout.startAnimation(alpha); // Add animation to the layout.
+	if (JactActionBarActivity.USE_MOBILE_SITE) {
+		ProgressBar spinner = (ProgressBar) findViewById(R.id.checkout_wrapper_progress_bar);
+		AlphaAnimation alpha;
+		if (should_fade) {
+			spinner.setVisibility(View.VISIBLE);
+			alpha = new AlphaAnimation(0.5F, 0.5F);
+		} else {
+			spinner.setVisibility(View.INVISIBLE);
+			alpha = new AlphaAnimation(1.0F, 1.0F);
+		}
+		// The AlphaAnimation will make the whole content frame transparent
+		// (so that none of the views show).
+		alpha.setDuration(0); // Make animation instant
+		alpha.setFillAfter(true); // Tell it to persist after the animation ends
+		RelativeLayout layout = (RelativeLayout) findViewById(R.id.checkout_wrapper_content_frame);
+		layout.startAnimation(alpha); // Add animation to the layout.
+	} else {
+		ProgressBar spinner = (ProgressBar) findViewById(R.id.checkout_progress_bar);
+		Button proceed_button = (Button) findViewById(R.id.proceed_to_checkout_button);
+		Button clear_button = (Button) findViewById(R.id.clear_cart_button);
+		AlphaAnimation alpha;
+		if (should_fade) {
+			proceed_button.setEnabled(false);
+			proceed_button.setTextColor(getResources().getColor(R.color.translucent_black));
+			clear_button.setEnabled(false);
+			clear_button.setTextColor(getResources().getColor(R.color.translucent_black));
+			spinner.setVisibility(View.VISIBLE);
+			alpha = new AlphaAnimation(0.5F, 0.5F);
+		} else {
+			spinner.setVisibility(View.GONE);
+			alpha = new AlphaAnimation(1.0F, 1.0F);
+			if (GetNumberCartItems() == 0) {
+				proceed_button.setEnabled(false);
+				proceed_button.setTextColor(getResources().getColor(R.color.translucent_black));
+				clear_button.setEnabled(false);
+				clear_button.setTextColor(getResources().getColor(R.color.translucent_black));
+			} else {
+				proceed_button.setEnabled(true);
+				proceed_button.setTextColor(getResources().getColor(R.color.white));
+				clear_button.setEnabled(true);
+				clear_button.setTextColor(getResources().getColor(R.color.white));
+			}
+		}
+		// The AlphaAnimation will make the whole content frame transparent
+		// (so that none of the views show).
+		alpha.setDuration(0); // Make animation instant
+		alpha.setFillAfter(true); // Tell it to persist after the animation ends
+		RelativeLayout layout = (RelativeLayout) findViewById(R.id.checkout_content_frame);
+		layout.startAnimation(alpha); // Add animation to the layout.
+	}
   }
   
   private boolean IsCartEmpty() {
@@ -1315,142 +1398,152 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 
 	@Override
 	public void ProcessUrlResponse(String webpage, String cookies, String extra_params) {
-	  if (!JactActionBarActivity.IS_PRODUCTION) Log.d("ShoppingCartActivity::ProcessUrlResponse", "Response:\n" + webpage);
-	  DecrementNumRequestsCounter();
-	  if (extra_params.equalsIgnoreCase(GET_REWARDS_PAGE_TASK)) {
-	    ProductsActivity.SetProductsList(webpage);
-	    AccessCart(CartAccessType.ADD_INFO_FROM_REWARDS);
-	  } else if (extra_params.equalsIgnoreCase(GET_SHIPPING_INFO_TASK)) {
-		ProcessShippingInfoResponse(webpage, cookies);
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.CLEAR_CART_TASK) ||
-			     extra_params.equalsIgnoreCase(ShoppingUtils.GET_CART_TASK)) {
-		// Parse webpage to a new cart.
-		ShoppingUtils.ShoppingCartInfo temp_cart = new ShoppingUtils.ShoppingCartInfo();
-		if (!ShoppingUtils.ParseCartFromGetCartPage(webpage, temp_cart)) {
-		  DisplayPopupFragment("Unable to fetch cart from server",
-				               "Check connection and try again.",
-				               "Unable_to_fetch_cart");
-		  return;
-		}
-		CartAccessResponse response = new CartAccessResponse();
-	    if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
-	      UpdateCart(temp_cart, response.cart_);
-	    }
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK)) {
-		SaveCookies(cookies);
-		ClearCart();
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK)) {
-		SaveCsrfToken(webpage);
-		ClearCart();
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK)) {
-		SaveCookies(cookies);
-		GetInitialShoppingCart();
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.CREATE_CART_TASK)) {
-		// Parse webpage to a new cart.
-		ShoppingUtils.ShoppingCartInfo temp_cart = new ShoppingUtils.ShoppingCartInfo();
-		if (!ShoppingUtils.ParseCartFromCreateCartPage(webpage, temp_cart)) {
-		  DisplayPopupFragment("Unable to fetch cart from server",
-					           "Check connection and try again.",
-					           "Unable_to_fetch_cart");
-		  return;
-		}
-		CartAccessResponse response = new CartAccessResponse();
-	    if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
-	      UpdateCart(temp_cart, response.cart_);
-	    }
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK)) {
-	    SaveCookies(cookies);
-	    CreateEmptyCart();
-	  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK)) {
-	    SaveCsrfToken(webpage);
-	    CreateEmptyCart();
-	  } else if (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
-		         extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0) {
-		try {
-		  JSONObject line_item = new JSONObject(webpage);
-		  ArrayList<ShoppingUtils.LineItem> new_line_items = new ArrayList<ShoppingUtils.LineItem>();
-		  if (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 &&
-			  !ShoppingUtils.ParseLineItemFromAddLineItemPage(line_item, new_line_items)) {
-			// TODO(PHB): Handle this error (e.g. popup warning to user).
-		    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
-		    return;
-		  } else if (extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 &&
-				     !ShoppingUtils.ParseLineItemFromUpdateLineItemPage(line_item, new_line_items)) {
-			// TODO(PHB): Handle this error (e.g. popup warning to user).
-		    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
-		    return;
-		  }
-		  if (new_line_items.size() != 1 ||
-			  !AccessCart(CartAccessType.UPDATE_LINE_ITEM, new_line_items.get(0))) {
-			// TODO(PHB): Handle this error (e.g. popup warning to user).
-			if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse cart response. " +
-			                   "Num new line items: " + new_line_items.size() + "; Webpage response:\n" + webpage);
-		  }
-		  // PHB Temp.
-		  //if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Updated line item. Now shopping cart is: " +
-		  //                  ShoppingCartActivity.PrintCart());
-		} catch (JSONException e) {
-		  // TODO(PHB): Handle this error (e.g. popup warning to user).
-		  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse add line-item response " +
-		                     "from server. Exception: " + e.getMessage() + "; webpage response:\n" + webpage);
-		}
-	  } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
-			     (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0 ||
-				  extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) == 0 ||
-				  extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) == 0 ||
-			      extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
-			      extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0)) {
-	    // Create Cart was called to create a new cart/order, but the new item was not
-		// yet added to the cart. Parse the response (e.g. to get order_id), and then
-		// add the new item to the cart (the specifics of the item to add are in extra_params).
-		String parsed_line_item = extra_params.substring(
-		    extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
-		    ShoppingUtils.TASK_CART_SEPARATOR.length());
-		if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
-			extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) == 0) {
-		  SaveCookies(cookies);
-		} else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
-				   extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) == 0) {
-		  SaveCsrfToken(webpage);
-		} else if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0) {
-		  // Parse webpage to a new cart.
-		  ShoppingUtils.ShoppingCartInfo temp_cart = new ShoppingUtils.ShoppingCartInfo();
-		  if (!ShoppingUtils.ParseCartFromCreateCartPage(webpage, temp_cart)) {
-			DisplayPopupFragment("Unable to fetch cart from server",
-					             "Check connection and try again.",
-					             "Unable_to_fetch_cart");
-			return;
-		  }
-	      CartAccessResponse response = new CartAccessResponse();
-		  if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
-		    UpdateCart(temp_cart, response.cart_);
-		  }
-		}
-		if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) == 0 ||
-		    extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) == 0) {
-		  CreateCartWithLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
-		} else {
-		  UpdateLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
-		}
-	  //} else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK)) {
-		//SaveCookies(cookies);
-	    //UpdateCart();
-	  //} else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK)) {
-	    //SaveCsrfToken(webpage);
-	    //UpdateCart();
-	  } else if (extra_params.equalsIgnoreCase(USER_POINTS)) {
-		  IncrementNumRequestsCounter();
+	  if (JactActionBarActivity.USE_MOBILE_SITE) {
 		  ProcessCartResponse(this, webpage, cookies, extra_params);
-		  return;
 	  } else {
-	    if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "ShoppingCartActivity::ProcessUrlResponse. Returning from " +
-	                       "unrecognized task:\n" + GetUrlTask.PrintExtraParams(extra_params));
-	  }
-	  if (GetNumRequestsCounter() == 0) {
-		SetCartIcon(this);
-		if (GetNumRequestsCounter() == 0) {
-		  LoadView();
-		}
+		  if (!JactActionBarActivity.IS_PRODUCTION)
+			  Log.d("ShoppingCartActivity::ProcessUrlResponse", "Response:\n" + webpage);
+		  DecrementNumRequestsCounter();
+		  if (extra_params.equalsIgnoreCase(GET_REWARDS_PAGE_TASK)) {
+			  ProductsActivity.SetProductsList(webpage);
+			  AccessCart(CartAccessType.ADD_INFO_FROM_REWARDS);
+		  } else if (extra_params.equalsIgnoreCase(GET_SHIPPING_INFO_TASK)) {
+			  ProcessShippingInfoResponse(webpage, cookies);
+		  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.CLEAR_CART_TASK) ||
+				  extra_params.equalsIgnoreCase(ShoppingUtils.GET_CART_TASK)) {
+			  // Parse webpage to a new cart.
+			  ShoppingUtils.ShoppingCartInfo temp_cart = new ShoppingUtils.ShoppingCartInfo();
+			  if (!ShoppingUtils.ParseCartFromGetCartPage(webpage, temp_cart)) {
+				  DisplayPopupFragment("Unable to fetch cart from server",
+						  "Check connection and try again.",
+						  "Unable_to_fetch_cart");
+				  return;
+			  }
+			  CartAccessResponse response = new CartAccessResponse();
+			  if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
+				  UpdateCart(temp_cart, response.cart_);
+			  }
+		  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK)) {
+			  SaveCookies(cookies);
+			  ClearCart();
+		  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK)) {
+			  SaveCsrfToken(webpage);
+			  ClearCart();
+		  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK)) {
+			  SaveCookies(cookies);
+			  GetInitialShoppingCart();
+		  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.CREATE_CART_TASK)) {
+			  // Parse webpage to a new cart.
+			  ShoppingUtils.ShoppingCartInfo temp_cart = new ShoppingUtils.ShoppingCartInfo();
+			  if (!ShoppingUtils.ParseCartFromCreateCartPage(webpage, temp_cart)) {
+				  DisplayPopupFragment("Unable to fetch cart from server",
+						  "Check connection and try again.",
+						  "Unable_to_fetch_cart");
+				  return;
+			  }
+			  CartAccessResponse response = new CartAccessResponse();
+			  if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
+				  UpdateCart(temp_cart, response.cart_);
+			  }
+		  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK)) {
+			  SaveCookies(cookies);
+			  CreateEmptyCart();
+		  } else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK)) {
+			  SaveCsrfToken(webpage);
+			  CreateEmptyCart();
+		  } else if (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
+				  extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0) {
+			  try {
+				  JSONObject line_item = new JSONObject(webpage);
+				  ArrayList<ShoppingUtils.LineItem> new_line_items = new ArrayList<ShoppingUtils.LineItem>();
+				  if (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 &&
+						  !ShoppingUtils.ParseLineItemFromAddLineItemPage(line_item, new_line_items)) {
+					  // TODO(PHB): Handle this error (e.g. popup warning to user).
+					  if (!JactActionBarActivity.IS_PRODUCTION)
+						  Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
+					  return;
+				  } else if (extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 &&
+						  !ShoppingUtils.ParseLineItemFromUpdateLineItemPage(line_item, new_line_items)) {
+					  // TODO(PHB): Handle this error (e.g. popup warning to user).
+					  if (!JactActionBarActivity.IS_PRODUCTION)
+						  Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse add line-item response:\n" + webpage);
+					  return;
+				  }
+				  if (new_line_items.size() != 1 ||
+						  !AccessCart(CartAccessType.UPDATE_LINE_ITEM, new_line_items.get(0))) {
+					  // TODO(PHB): Handle this error (e.g. popup warning to user).
+					  if (!JactActionBarActivity.IS_PRODUCTION)
+						  Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse cart response. " +
+								  "Num new line items: " + new_line_items.size() + "; Webpage response:\n" + webpage);
+				  }
+				  // PHB Temp.
+				  //if (!JactActionBarActivity.IS_PRODUCTION) Log.w("PHB TEMP", "ProductsActivity::ProcessUrlResponse. Updated line item. Now shopping cart is: " +
+				  //                  ShoppingCartActivity.PrintCart());
+			  } catch (JSONException e) {
+				  // TODO(PHB): Handle this error (e.g. popup warning to user).
+				  if (!JactActionBarActivity.IS_PRODUCTION)
+					  Log.e("PHB ERROR", "ProductsActivity::ProcessUrlResponse. Unable to parse add line-item response " +
+							  "from server. Exception: " + e.getMessage() + "; webpage response:\n" + webpage);
+			  }
+		  } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
+				  (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0 ||
+						  extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) == 0 ||
+						  extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) == 0 ||
+						  extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
+						  extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0)) {
+			  // Create Cart was called to create a new cart/order, but the new item was not
+			  // yet added to the cart. Parse the response (e.g. to get order_id), and then
+			  // add the new item to the cart (the specifics of the item to add are in extra_params).
+			  String parsed_line_item = extra_params.substring(
+					  extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
+							  ShoppingUtils.TASK_CART_SEPARATOR.length());
+			  if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
+					  extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) == 0) {
+				  SaveCookies(cookies);
+			  } else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
+					  extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) == 0) {
+				  SaveCsrfToken(webpage);
+			  } else if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0) {
+				  // Parse webpage to a new cart.
+				  ShoppingUtils.ShoppingCartInfo temp_cart = new ShoppingUtils.ShoppingCartInfo();
+				  if (!ShoppingUtils.ParseCartFromCreateCartPage(webpage, temp_cart)) {
+					  DisplayPopupFragment("Unable to fetch cart from server",
+							  "Check connection and try again.",
+							  "Unable_to_fetch_cart");
+					  return;
+				  }
+				  CartAccessResponse response = new CartAccessResponse();
+				  if (AccessCart(CartAccessType.UPDATE_CART, temp_cart, response)) {
+					  UpdateCart(temp_cart, response.cart_);
+				  }
+			  }
+			  if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) == 0 ||
+					  extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) == 0) {
+				  CreateCartWithLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
+			  } else {
+				  UpdateLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
+			  }
+			  //} else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK)) {
+			  //SaveCookies(cookies);
+			  //UpdateCart();
+			  //} else if (extra_params.equalsIgnoreCase(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK)) {
+			  //SaveCsrfToken(webpage);
+			  //UpdateCart();
+		  } else if (extra_params.equalsIgnoreCase(USER_POINTS)) {
+			  IncrementNumRequestsCounter();
+			  ProcessCartResponse(this, webpage, cookies, extra_params);
+			  return;
+		  } else {
+			  if (!JactActionBarActivity.IS_PRODUCTION)
+				  Log.e("PHB ERROR", "ShoppingCartActivity::ProcessUrlResponse. Returning from " +
+						  "unrecognized task:\n" + GetUrlTask.PrintExtraParams(extra_params));
+		  }
+		  if (GetNumRequestsCounter() == 0) {
+			  SetCartIcon(this);
+			  if (GetNumRequestsCounter() == 0) {
+				  LoadView();
+			  }
+		  }
 	  }
 	}
 
@@ -1461,87 +1554,94 @@ public class ShoppingCartActivity extends JactActionBarActivity implements Proce
 
 	@Override
 	public void ProcessFailedResponse(FetchStatus status, String extra_params) {
-	  // TODO(PHB): Handle failure cases below by more than just a Log error (e.g. popup
-	  // a dialog? Try query again (depending on status)?).
-      DecrementNumRequestsCounter();
-      num_failed_requests_++;
-	  if (status == GetUrlTask.FetchStatus.ERROR_CSRF_FAILED ||
-		  status == GetUrlTask.FetchStatus.ERROR_UNSUPPORTED_CONTENT_TYPE) {
-    	String task = "";
-	    if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) >= 0) {
-	      task = ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK;
-	    } else if (extra_params.indexOf(ShoppingUtils.CLEAR_CART_TASK) >= 0) {
-		  task = ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK;
-	    } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
-	    		   (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
-	    		    extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0)) {
-		  String parsed_line_item = extra_params.substring(
-		    extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
-		    ShoppingUtils.TASK_CART_SEPARATOR.length());
-	      task = ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK +
-	    		 ShoppingUtils.TASK_CART_SEPARATOR + parsed_line_item;
-	    } else {
-	      if (!JactActionBarActivity.IS_PRODUCTION) Log.e("PHB ERROR", "ShoppingCartActivity::ProcessFailedResponse. CSRF Failed. Status: " + status +
-	    		             "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params));
-	      return;
-	    }
-    	SharedPreferences user_info = getSharedPreferences(
-            getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
-        String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
-	    if (!ShoppingUtils.GetCsrfToken(this, cookies, task)) {
-	      // Nothing to do.
-	    }
-	  } else if (status == GetUrlTask.FetchStatus.ERROR_RESPONSE_CODE ||
-			     status == GetUrlTask.FetchStatus.ERROR_UNABLE_TO_CONNECT) {
-		// Failed to Connect with Jact Server. Retry, if we haven't had too many consecutive failures.
-		if (num_failed_requests_ >= MAX_FAILED_REQUESTS) {
-		  DisplayPopup("Unable to Reach Jact", "Your last action may not have been processed.");
-		  return;
-		}
-		if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) >= 0 ||
-			extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) >= 0) {
-		  CreateEmptyCart();
-		} else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) >= 0 ||
-				   extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK) >= 0) {
-		  GetInitialShoppingCart();
-		} else if (extra_params.indexOf(ShoppingUtils.CLEAR_CART_TASK) >= 0 ||
-				   extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK) >= 0) {
-		  ClearCart();
-		} else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
-	    		   (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
-	    		    extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 ||
-	    		    extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) >= 0)) {
-		  String parsed_line_item = extra_params.substring(
-					    extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
-					    ShoppingUtils.TASK_CART_SEPARATOR.length());
-		  UpdateLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
-		} else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) >= 0 ||
-				   extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK) >= 0 ||
-				   extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) >= 0) {
-	      SharedPreferences user_info = getSharedPreferences(
-	          getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
-	      String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
-	      ShoppingUtils.GetCsrfToken(this, cookies, extra_params);
-		} else {
-		  if (!JactActionBarActivity.IS_PRODUCTION) Log.e("ShoppingCartActivity::ProcessFailedResponse",
-				"Unrecognized task: " + GetUrlTask.PrintExtraParams(extra_params));
-		}
-	  } else if (extra_params.equalsIgnoreCase(USER_POINTS)) {
-		  IncrementNumRequestsCounter();
+	  if (JactActionBarActivity.USE_MOBILE_SITE) {
 		  ProcessFailedCartResponse(this, status, extra_params);
 	  } else {
-	    if (!JactActionBarActivity.IS_PRODUCTION) Log.w("ShoppingCartActivity::ProcessFailedResponse",
-			  "Status: " + status + "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params) +
-			  ". Trying parent resolution.");
-	    // ProcessFailedCartResponse will decrement num_server_tasks_, so re-increment it here so the net is no change.
-	    IncrementNumRequestsCounter();
-	    ProcessFailedCartResponse(this, status, extra_params);
-	  }
-	  if (GetNumRequestsCounter() == 0) {
-		SetCartIcon(this);
-		if (GetNumRequestsCounter() == 0) {
-		  fadeAllViews(false);
-		}
+		  // TODO(PHB): Handle failure cases below by more than just a Log error (e.g. popup
+		  // a dialog? Try query again (depending on status)?).
+		  DecrementNumRequestsCounter();
+		  num_failed_requests_++;
+		  if (status == GetUrlTask.FetchStatus.ERROR_CSRF_FAILED ||
+				  status == GetUrlTask.FetchStatus.ERROR_UNSUPPORTED_CONTENT_TYPE) {
+			  String task = "";
+			  if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) >= 0) {
+				  task = ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK;
+			  } else if (extra_params.indexOf(ShoppingUtils.CLEAR_CART_TASK) >= 0) {
+				  task = ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK;
+			  } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
+					  (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
+							  extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0)) {
+				  String parsed_line_item = extra_params.substring(
+						  extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
+								  ShoppingUtils.TASK_CART_SEPARATOR.length());
+				  task = ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK +
+						  ShoppingUtils.TASK_CART_SEPARATOR + parsed_line_item;
+			  } else {
+				  if (!JactActionBarActivity.IS_PRODUCTION)
+					  Log.e("PHB ERROR", "ShoppingCartActivity::ProcessFailedResponse. CSRF Failed. Status: " + status +
+							  "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params));
+				  return;
+			  }
+			  SharedPreferences user_info = getSharedPreferences(
+					  getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+			  String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+			  if (!ShoppingUtils.GetCsrfToken(this, cookies, task)) {
+				  // Nothing to do.
+			  }
+		  } else if (status == GetUrlTask.FetchStatus.ERROR_RESPONSE_CODE ||
+				  status == GetUrlTask.FetchStatus.ERROR_UNABLE_TO_CONNECT) {
+			  // Failed to Connect with Jact Server. Retry, if we haven't had too many consecutive failures.
+			  if (num_failed_requests_ >= MAX_FAILED_REQUESTS) {
+				  DisplayPopup("Unable to Reach Jact", "Your last action may not have been processed.");
+				  return;
+			  }
+			  if (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) >= 0 ||
+					  extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CREATE_CART_TASK) >= 0) {
+				  CreateEmptyCart();
+			  } else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) >= 0 ||
+					  extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK) >= 0) {
+				  GetInitialShoppingCart();
+			  } else if (extra_params.indexOf(ShoppingUtils.CLEAR_CART_TASK) >= 0 ||
+					  extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_CLEAR_CART_TASK) >= 0) {
+				  ClearCart();
+			  } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
+					  (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
+							  extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 ||
+							  extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) >= 0)) {
+				  String parsed_line_item = extra_params.substring(
+						  extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
+								  ShoppingUtils.TASK_CART_SEPARATOR.length());
+				  UpdateLineItem(ShoppingUtils.ParseLineItem(parsed_line_item));
+			  } else if (extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CREATE_CART_TASK) >= 0 ||
+					  extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_CLEAR_CART_TASK) >= 0 ||
+					  extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) >= 0) {
+				  SharedPreferences user_info = getSharedPreferences(
+						  getString(R.string.ui_master_file), Activity.MODE_PRIVATE);
+				  String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+				  ShoppingUtils.GetCsrfToken(this, cookies, extra_params);
+			  } else {
+				  if (!JactActionBarActivity.IS_PRODUCTION)
+					  Log.e("ShoppingCartActivity::ProcessFailedResponse",
+							  "Unrecognized task: " + GetUrlTask.PrintExtraParams(extra_params));
+			  }
+		  } else if (extra_params.equalsIgnoreCase(USER_POINTS)) {
+			  IncrementNumRequestsCounter();
+			  ProcessFailedCartResponse(this, status, extra_params);
+		  } else {
+			  if (!JactActionBarActivity.IS_PRODUCTION)
+				  Log.w("ShoppingCartActivity::ProcessFailedResponse",
+						  "Status: " + status + "; extra_params: " + GetUrlTask.PrintExtraParams(extra_params) +
+								  ". Trying parent resolution.");
+			  // ProcessFailedCartResponse will decrement num_server_tasks_, so re-increment it here so the net is no change.
+			  IncrementNumRequestsCounter();
+			  ProcessFailedCartResponse(this, status, extra_params);
+		  }
+		  if (GetNumRequestsCounter() == 0) {
+			  SetCartIcon(this);
+			  if (GetNumRequestsCounter() == 0) {
+				  fadeAllViews(false);
+			  }
+		  }
 	  }
 	}
 	

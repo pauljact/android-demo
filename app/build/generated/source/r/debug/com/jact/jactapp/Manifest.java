@@ -14,6 +14,6 @@ public final class Manifest {
          receives Jact GCM messages)
     
          */
-        public static final String C2D_MESSAGE="com.jact.jactapp.permission.C2D_MESSAGE";
+        public static final String C2D_MESSAGE="com.example.jactfirstdemo.permission.C2D_MESSAGE";
     }
 }

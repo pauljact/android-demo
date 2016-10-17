@@ -4,8 +4,6 @@ import java.net.HttpCookie;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.http.cookie.Cookie;
-
 import com.jact.jactapp.GetUrlTask.FetchStatus;
 import com.jact.jactapp.JactNavigationDrawer.ActivityIndex;
 
@@ -26,7 +24,6 @@ import android.widget.RelativeLayout;
 
 public class CheckoutActivity extends JactActionBarActivity implements ProcessUrlResponseCallback {
   JactWebViewClient webview_client_;
-  public static Cookie cookie_ = null;
   private static int order_id_;
   private static String checkout_url_;
   private static String order_url_;

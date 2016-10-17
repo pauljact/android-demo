@@ -1,19 +1,24 @@
 package com.jact.jactapp;
 
 import java.io.IOException;
+import java.net.HttpCookie;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.jact.jactapp.GetUrlTask.FetchStatus;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -47,6 +52,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AlphaAnimation;
+import android.webkit.CookieManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -137,6 +145,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   private static String featured_rewards_url_;
   private static String featured_earn_url_;
   private static String rewards_url_;
+  private static String login_home_mobile_url_;
   private static int next_drawing_bar_height_;
   private static boolean allow_click_actions_;
   private static boolean is_current_already_earned_;
@@ -144,86 +153,101 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   private static int current_earn_nid_;
   private static int num_failed_requests_;
 
+  private Tracker mTracker;  // For google analytics
+
   private static final String EARN_REDEEM_URL_BASE = "/node/";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState, R.string.app_name,
-            R.layout.jact_logged_in_home_screen,
-            JactNavigationDrawer.ActivityIndex.HOME);
+    //PHBlogin_home_mobile_url_ = GetUrlTask.GetJactDomain() + "/earn";
+    login_home_mobile_url_ = GetUrlTask.GetJactDomain() + "/mobile-home";
     init_once_ = false;
+    //AnalyticsApplication application = (AnalyticsApplication) getApplication();
+    // = application.getDefaultTracker();
+    super.onCreate(savedInstanceState, R.string.app_name,
+            (JactActionBarActivity.USE_MOBILE_SITE ?
+                    R.layout.jact_logged_in_home_screen_wrapper :
+                    R.layout.jact_logged_in_home_screen),
+            JactNavigationDrawer.ActivityIndex.HOME);
     is_current_already_earned_ = false;
     current_youtube_url_ = "";
 
+    // For Google Analytics tracking.
+    // Obtain the shared Tracker instance.
+    JactAnalyticsApplication application = (JactAnalyticsApplication) getApplication();
+    mTracker = application.getDefaultTracker();
+
     // Set Featured Rewards.
-    inflater_ = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    featured_image_loader_ =
-            new ProductsImageLoader(this, new FeaturedRewardsImageLoader(), "JactLoginActivity");
-    earn_image_loader_ =
-        new ProductsImageLoader(this, new FeaturedEarnImageLoader(), "JactLoginActivity");
-    featured_rewards_ll_ = (LinearLayout) findViewById(R.id.featured_rewards_ll);
-    featured_earn_ll_ = (LinearLayout) findViewById(R.id.featured_earn_ll);
-    featured_rewards_title_tv_ = (TextView) findViewById(R.id.featured_rewards_title_tv);
-    featured_earn_title_tv_ = (TextView) findViewById(R.id.featured_earn_title_tv);
-    left_caret_tv_ = (TextView) findViewById(R.id.featured_rewards_left_tv);
-    right_caret_tv_ = (TextView) findViewById(R.id.featured_rewards_right_tv);
-    earn_left_caret_tv_ = (TextView) findViewById(R.id.featured_earn_left_tv);
-    earn_right_caret_tv_ = (TextView) findViewById(R.id.featured_earn_right_tv);
-    right_caret_tv_.setVisibility(View.INVISIBLE);
-    left_caret_tv_.setVisibility(View.INVISIBLE);
-    earn_left_caret_tv_.setVisibility(View.INVISIBLE);
-    earn_right_caret_tv_.setVisibility(View.INVISIBLE);
-    scroll_view_ = (HorizontalScrollView) findViewById(R.id.featured_rewards_sv);
-    scroll_view_.getViewTreeObserver().addOnScrollChangedListener(
-            new ViewTreeObserver.OnScrollChangedListener() {
-              @Override
-              public void onScrollChanged() {
-                if (!featured_rewards_title_tv_.isShown()) {
-                  left_caret_tv_.setVisibility(View.INVISIBLE);
-                  right_caret_tv_.setVisibility(View.INVISIBLE);
-                  return;
+    if (!JactActionBarActivity.USE_MOBILE_SITE) {
+      inflater_ = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      featured_image_loader_ =
+              new ProductsImageLoader(this, new FeaturedRewardsImageLoader(), "JactLoginActivity");
+      earn_image_loader_ =
+              new ProductsImageLoader(this, new FeaturedEarnImageLoader(), "JactLoginActivity");
+      featured_rewards_ll_ = (LinearLayout) findViewById(R.id.featured_rewards_ll);
+      featured_earn_ll_ = (LinearLayout) findViewById(R.id.featured_earn_ll);
+      featured_rewards_title_tv_ = (TextView) findViewById(R.id.featured_rewards_title_tv);
+      featured_earn_title_tv_ = (TextView) findViewById(R.id.featured_earn_title_tv);
+      left_caret_tv_ = (TextView) findViewById(R.id.featured_rewards_left_tv);
+      right_caret_tv_ = (TextView) findViewById(R.id.featured_rewards_right_tv);
+      earn_left_caret_tv_ = (TextView) findViewById(R.id.featured_earn_left_tv);
+      earn_right_caret_tv_ = (TextView) findViewById(R.id.featured_earn_right_tv);
+      right_caret_tv_.setVisibility(View.INVISIBLE);
+      left_caret_tv_.setVisibility(View.INVISIBLE);
+      earn_left_caret_tv_.setVisibility(View.INVISIBLE);
+      earn_right_caret_tv_.setVisibility(View.INVISIBLE);
+      scroll_view_ = (HorizontalScrollView) findViewById(R.id.featured_rewards_sv);
+      scroll_view_.getViewTreeObserver().addOnScrollChangedListener(
+              new ViewTreeObserver.OnScrollChangedListener() {
+                @Override
+                public void onScrollChanged() {
+                  if (!featured_rewards_title_tv_.isShown()) {
+                    left_caret_tv_.setVisibility(View.INVISIBLE);
+                    right_caret_tv_.setVisibility(View.INVISIBLE);
+                    return;
+                  }
+                  int scrollX = scroll_view_.getScrollX();
+                  if (scrollX == 0) {
+                    left_caret_tv_.setVisibility(View.INVISIBLE);
+                  } else {
+                    left_caret_tv_.setVisibility(View.VISIBLE);
+                  }
+                  SetRewardsRightArrow();
                 }
-                int scrollX = scroll_view_.getScrollX();
-                if (scrollX == 0) {
-                  left_caret_tv_.setVisibility(View.INVISIBLE);
-                } else {
-                  left_caret_tv_.setVisibility(View.VISIBLE);
-                }
-                SetRewardsRightArrow();
-              }
-            });
+              });
 
-    earn_scroll_view_ = (HorizontalScrollView) findViewById(R.id.featured_earn_sv);
-    earn_scroll_view_.getViewTreeObserver().addOnScrollChangedListener(
-            new ViewTreeObserver.OnScrollChangedListener() {
-              @Override
-              public void onScrollChanged() {
-                if (!featured_earn_title_tv_.isShown()) {
-                  earn_left_caret_tv_.setVisibility(View.INVISIBLE);
-                  earn_right_caret_tv_.setVisibility(View.INVISIBLE);
-                  return;
+      earn_scroll_view_ = (HorizontalScrollView) findViewById(R.id.featured_earn_sv);
+      earn_scroll_view_.getViewTreeObserver().addOnScrollChangedListener(
+              new ViewTreeObserver.OnScrollChangedListener() {
+                @Override
+                public void onScrollChanged() {
+                  if (!featured_earn_title_tv_.isShown()) {
+                    earn_left_caret_tv_.setVisibility(View.INVISIBLE);
+                    earn_right_caret_tv_.setVisibility(View.INVISIBLE);
+                    return;
+                  }
+                  int scrollX = earn_scroll_view_.getScrollX();
+                  if (scrollX == 0) {
+                    earn_left_caret_tv_.setVisibility(View.INVISIBLE);
+                  } else {
+                    earn_left_caret_tv_.setVisibility(View.VISIBLE);
+                  }
+                  SetEarnRightArrow();
                 }
-                int scrollX = earn_scroll_view_.getScrollX();
-                if (scrollX == 0) {
-                  earn_left_caret_tv_.setVisibility(View.INVISIBLE);
-                } else {
-                  earn_left_caret_tv_.setVisibility(View.VISIBLE);
-                }
-                SetEarnRightArrow();
-              }
-            });
+              });
 
-    unfinished_rewards_elements_ = new boolean[100];
-    unfinished_earn_elements_ = new boolean[100];
-    featured_rewards_url_= GetUrlTask.GetJactDomain() + "/rest/featured";
-    featured_earn_url_= GetUrlTask.GetJactDomain() + "/rest/earn-featured";
-    rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
+      unfinished_rewards_elements_ = new boolean[100];
+      unfinished_earn_elements_ = new boolean[100];
+      featured_rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/featured";
+      featured_earn_url_ = GetUrlTask.GetJactDomain() + "/rest/earn-featured";
+      rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
 
-    // Get Original height of Next Drawing Bar.
-    next_drawing_bar_ = (RelativeLayout) findViewById(R.id.featured_prizes_ll);
-    ViewGroup.LayoutParams bar_params = next_drawing_bar_.getLayoutParams();
-    next_drawing_bar_height_ = bar_params.height;
-    next_drawing_bar_.setVisibility(View.INVISIBLE);
+      // Get Original height of Next Drawing Bar.
+      next_drawing_bar_ = (RelativeLayout) findViewById(R.id.featured_prizes_ll);
+      ViewGroup.LayoutParams bar_params = next_drawing_bar_.getLayoutParams();
+      next_drawing_bar_height_ = bar_params.height;
+      next_drawing_bar_.setVisibility(View.INVISIBLE);
+    }
 
     // =================================== GCM =================================
     app_is_registered_w_jact_ = false;
@@ -276,7 +300,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     gcm_send_msg_button_ = (Button) findViewById(R.id.send_gcm_upstream_msg);
     gcm_echo_msg_button_ = (Button) findViewById(R.id.echo_gcm_upstream_msg);
     if (!display_gcm_buttons_ || (!use_old_gcm_ && !use_new_gcm_) ||
-        JactActionBarActivity.IS_PRODUCTION) {
+            JactActionBarActivity.IS_PRODUCTION) {
       gcm_send_msg_button_.setVisibility(View.GONE);
       gcm_echo_msg_button_.setVisibility(View.GONE);
     }
@@ -286,12 +310,16 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   @Override
   protected void onResume() {
 	super.onResume();
-    featured_rewards_url_= GetUrlTask.GetJactDomain() + "/rest/featured";
-    featured_earn_url_= GetUrlTask.GetJactDomain() + "/rest/earn-featured";
+    featured_rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/featured";
+    featured_earn_url_ = GetUrlTask.GetJactDomain() + "/rest/earn-featured";
     rewards_url_ = GetUrlTask.GetJactDomain() + "/rest/rewards.json";
     register_app_url_ = GetUrlTask.GetJactDomain() + "/rest/push_notifications";
     num_failed_requests_ = 0;
     allow_click_actions_ = true;
+
+    // For Google Analytics.
+    mTracker.setScreenName("Image~Logged_In_Home_Screen");
+    mTracker.send(new HitBuilders.ScreenViewBuilder().build());
 
     // If user is returning to Jact after just having watched an Earn Video, take them to the
     // EarnRedeemActivity.
@@ -325,7 +353,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       }
     }
     // Make sure Google Play is on user's device (so they can use GCM).
-	if (use_old_gcm_ || use_new_gcm_) {
+    if (use_old_gcm_ || use_new_gcm_) {
       CheckPlayServices();
       // The below two lines were added to improve frequency of heartbeat, see e.g.
       // http://stackoverflow.com/questions/19560448/how-to-avoid-delay-in-android-gcm-messages-change-heartbeat
@@ -334,53 +362,81 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     }
     // Disable a temporary button if this is production code.
     if (!display_gcm_buttons_ || (!use_old_gcm_ && !use_new_gcm_) ||
-        JactActionBarActivity.IS_PRODUCTION) {
+            JactActionBarActivity.IS_PRODUCTION) {
       gcm_send_msg_button_.setVisibility(View.GONE);
       gcm_echo_msg_button_.setVisibility(View.GONE);
     }
-    
-	// Check if the Logged-In State is ready (all user info has already been fetched).
+
+    // Check if the Logged-In State is ready (all user info has already been fetched).
     SharedPreferences user_info_for_gcm = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
     String was_logged_off = user_info_for_gcm.getString(getString(R.string.was_logged_off_key), "");
     String was_logged_off_other_check = getIntent().getStringExtra(getString(R.string.was_logged_off_key));
     boolean was_logged_off_other_check_bool =
-    	(was_logged_off_other_check != null) && was_logged_off_other_check.equalsIgnoreCase("true");
+            (was_logged_off_other_check != null) && was_logged_off_other_check.equalsIgnoreCase("true");
     // Logged-In State is not ready. Fetch requisite items.
     if (!init_once_ || num_server_tasks_ != 0 || !was_logged_off.equalsIgnoreCase("false") ||
-    	was_logged_off_other_check_bool) {
+            was_logged_off_other_check_bool) {
       num_server_tasks_ = 0;
       init_once_ = true;
-      
+
       // Retrieve information that was retrieved from Jact Server on inital login.
       jact_user_name_ = user_info.getString(getString(R.string.ui_user_name), "");
       jact_user_id_ = user_info.getString(getString(R.string.ui_user_id), "");
       if (jact_user_name_.isEmpty() || jact_user_id_.isEmpty()) {
         if (!JactActionBarActivity.IS_PRODUCTION) {
           Log.e("JactLoggedInHomeActivity.onCreate",
-                "User Info file is missing the requisite info.");
+                  "User Info file is missing the requisite info.");
         }
       }
     }
-    
-    // Set Cart Icon. (Use 'GetCart' instead of 'SetCartIcon' since the latter doesn't
-	// grab a fresh cart from server)
+
+    if (JactActionBarActivity.USE_MOBILE_SITE) {
+      // Set cookies for WebView.
+      String cookies = user_info.getString(getString(R.string.ui_session_cookies), "");
+      List<String> cookie_headers = Arrays.asList(cookies.split(GetUrlTask.COOKIES_SEPERATOR));
+      HttpCookie cookie = null;
+      for (String cookie_str : cookie_headers) {
+        cookie = HttpCookie.parse(cookie_str).get(0);
+      }
+      if (cookie != null) {
+        CookieManager cookie_manager = CookieManager.getInstance();
+        cookie_manager.setCookie(
+                login_home_mobile_url_,
+                cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain());
+      }
+
+      // Set webview from mobile_earn_url_.
+      WebView web_view = (WebView) findViewById(R.id.jlih_webview);
+      web_view.loadUrl(login_home_mobile_url_);
+      web_view.setWebViewClient(new WebViewClient() {
+        @Override
+        public void onPageFinished(WebView view, String url) {
+          fadeAllViews(false);
+        }
+      });
+    }
+
+      // Set Cart Icon. (Use 'GetCart' instead of 'SetCartIcon' since the latter doesn't
+    // grab a fresh cart from server)
     GetCart(this);
 
-    // Get Featured Rewards.
-    FetchFeaturedRewardsPage();
-    first_rewards_image_ready_ = false;
+    if (!JactActionBarActivity.USE_MOBILE_SITE) {
+      // Get Featured Rewards.
+      FetchFeaturedRewardsPage();
+      first_rewards_image_ready_ = false;
 
-    // Get Featured Earn.
-    FetchFeaturedEarnPage();
-    first_earn_image_ready_ = false;
+      // Get Featured Earn.
+      FetchFeaturedEarnPage();
+      first_earn_image_ready_ = false;
 
-    // Get Rewards (to get Prize Drawings for Next Drawing Date).
-    FetchPrizeDrawings();
-
+      // Get Rewards (to get Prize Drawings for Next Drawing Date).
+      FetchPrizeDrawings();
+    }
     // Re-enable parent activity before transitioning to the next activity.
     // This ensures e.g. that when user hits 'back' button, the screen
     // is 'active' (not faded) when the user returns.
-    fadeAllViews(num_server_tasks_ != 0);
+    fadeAllViews(num_server_tasks_ > 0);
+    //PHBfadeAllViews(num_server_tasks_ != 0);
   }
 
   @Override
@@ -395,8 +451,12 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   
   @Override
   public void fadeAllViews(boolean should_fade) {
-    ProgressBar spinner = (ProgressBar) findViewById(R.id.my_profile_progress_bar);
-    RelativeLayout main_content = (RelativeLayout) findViewById(R.id.my_profile_content_frame);
+    ProgressBar spinner = (ProgressBar) findViewById(
+            JactActionBarActivity.USE_MOBILE_SITE ?
+                   R.id.jlih_progress_bar : R.id.my_profile_progress_bar);
+    RelativeLayout main_content = (RelativeLayout) findViewById(
+            JactActionBarActivity.USE_MOBILE_SITE ?
+            R.id.jlih_content_frame : R.id.my_profile_content_frame);
     AlphaAnimation alpha;
     allow_click_actions_ = !should_fade;
     if (should_fade) {
@@ -404,16 +464,17 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       spinner.setVisibility(View.VISIBLE);
       alpha = new AlphaAnimation(0.5F, 0.5F);
     } else {
-      SetRewardsRightArrow();
-      SetEarnRightArrow();
+      if (!JactActionBarActivity.USE_MOBILE_SITE) {
+        SetRewardsRightArrow();
+        SetEarnRightArrow();
+      }
       main_content.setBackgroundColor(getResources().getColor(R.color.white));
       spinner.setVisibility(View.INVISIBLE);
       alpha = new AlphaAnimation(1.0F, 1.0F);
     }
     alpha.setDuration(0); // Make animation instant
     alpha.setFillAfter(true); // Tell it to persist after the animation ends
-    RelativeLayout layout = (RelativeLayout) findViewById(R.id.my_profile_content_frame);
-    layout.startAnimation(alpha); // Add animation to the layout.
+    main_content.startAnimation(alpha); // Add animation to the layout.
   }
 
   @Override
@@ -503,6 +564,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       AddLineItem(item);
     }
   }
+
   private void AddLineItem(ShoppingUtils.LineItem line_item) {
     if (line_item == null) return;
 
@@ -1548,17 +1610,17 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
       SaveCsrfToken(webpage);
       RegisterAppWithJactServerForGcm(false, android_reg_id_);
     } else if (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_GET_CART_TASK) == 0) {
-  	  SaveCookies(cookies);
-  	  GetCart(this);
+      SaveCookies(cookies);
+      GetCart(this);
     } else if (extra_params.indexOf(GET_COOKIES_THEN_FEATURED_EARN_TASK) == 0) {
       SaveCookies(cookies);
       FetchFeaturedEarnPage(cookies);
-  	} else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
+    } else if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
       if (!ShoppingCartActivity.AccessCart(ShoppingCartActivity.CartAccessType.SET_CART_FROM_WEBPAGE, webpage)) {
         // TODO(PHB): Handle this gracefully (popup a dialog).
         if (!JactActionBarActivity.IS_PRODUCTION) {
           Log.e("JactActionBarActivity::ProcessCartResponse",
-                "Unable to parse cart response:\n" + webpage);
+                  "Unable to parse cart response:\n" + webpage);
         }
       }
       SetCartIcon(this);
@@ -1606,9 +1668,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         return;
       }
     } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
-            (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
-             extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0 ||
-             extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0)) {
+               (extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) == 0 ||
+                extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0 ||
+                extra_params.indexOf(ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK) == 0)) {
       String parsed_line_item = extra_params.substring(
               extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
                       ShoppingUtils.TASK_CART_SEPARATOR.length());
@@ -1626,20 +1688,20 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     } else if (extra_params.equalsIgnoreCase(USER_POINTS)) {
       ProcessCartResponse(this, webpage, cookies, extra_params);
       return;
-  	} else {
+    } else {
       if (!JactActionBarActivity.IS_PRODUCTION) {
         Log.e("JLIHA::ProcessUrlResponse",
-              "Unrecognized extra params: " + GetUrlTask.PrintExtraParams(extra_params));
+                "Unrecognized extra params: " + GetUrlTask.PrintExtraParams(extra_params));
       }
     }
     num_server_tasks_--;
-	if (num_server_tasks_ == 0) {
-	  SetLoginTrue();
-	  SetCartIcon(this);
-	  if (num_server_tasks_ == 0) {
-	    fadeAllViews(false);
-	  }
-	}
+    if (num_server_tasks_ == 0) {
+      SetLoginTrue();
+      SetCartIcon(this);
+      if (num_server_tasks_ == 0) {
+        fadeAllViews(false);
+      }
+    }
   }
 
   @Override
@@ -1660,7 +1722,7 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
   @Override
   public void ProcessFailedResponse(FetchStatus status, String extra_params) {
     num_failed_requests_++;
-	// TODO(PHB): Implement this.
+    // TODO(PHB): Implement this.
     if (extra_params.indexOf(ShoppingUtils.GET_CART_TASK) == 0) {
       GetCookiesThenGetCart(this);
       return;
@@ -1688,11 +1750,11 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     } else if (status == GetUrlTask.FetchStatus.ERROR_CSRF_FAILED) {
       if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
               (extra_params.indexOf(ShoppingUtils.CREATE_CART_TASK) == 0 ||
-               extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
-               extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0)) {
+                      extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
+                      extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0)) {
         String parsed_line_item = extra_params.substring(
                 extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
-                ShoppingUtils.TASK_CART_SEPARATOR.length());
+                        ShoppingUtils.TASK_CART_SEPARATOR.length());
         String task = ShoppingUtils.GET_CSRF_THEN_UPDATE_LINE_ITEM_TASK +
                 ShoppingUtils.TASK_CART_SEPARATOR + parsed_line_item;
         SharedPreferences user_info = getSharedPreferences(
@@ -1725,9 +1787,9 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
         Log.e("JLIHA::ProcessFailedResponse", "Failed to fetch Featured Earn Page.");
       }
     } else if (extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) > 0 &&
-               (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
-                extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 ||
-                extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) >= 0)) {
+            (extra_params.indexOf(ShoppingUtils.ADD_LINE_ITEM_TASK) == 0 ||
+                    extra_params.indexOf(ShoppingUtils.UPDATE_LINE_ITEM_TASK) == 0 ||
+                    extra_params.indexOf(ShoppingUtils.GET_COOKIES_THEN_UPDATE_LINE_ITEM_TASK) >= 0)) {
       String parsed_line_item = extra_params.substring(
               extra_params.indexOf(ShoppingUtils.TASK_CART_SEPARATOR) +
                       ShoppingUtils.TASK_CART_SEPARATOR.length());
@@ -1746,14 +1808,14 @@ public class JactLoggedInHomeActivity extends JactActionBarActivity implements
     } else {
       if (!JactActionBarActivity.IS_PRODUCTION) {
         Log.e("JLIHA::ProcessFailedResponse", "Failed for Unhandled task: " +
-              GetUrlTask.PrintExtraParams(extra_params));
+                GetUrlTask.PrintExtraParams(extra_params));
       }
     }
     num_server_tasks_--;
-	if (num_server_tasks_ == 0) {
-	  fadeAllViews(false);
-	  SetLoginTrue();
-	}
+    if (num_server_tasks_ == 0) {
+      fadeAllViews(false);
+      SetLoginTrue();
+    }
   }
 }
 // =============================================================================

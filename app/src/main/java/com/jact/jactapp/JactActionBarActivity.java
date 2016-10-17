@@ -30,7 +30,8 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
   protected JactDialogFragment dialog_;
   protected int activity_id_;
   protected static final String USER_POINTS = "user_points";
-  public static final boolean IS_PRODUCTION = true;
+  public static final boolean IS_PRODUCTION = false;
+  public static final boolean USE_MOBILE_SITE = true;
 	
   protected void onCreate(Bundle savedInstanceState, int activity_id,
 		                  int layout, JactNavigationDrawer.ActivityIndex index) {
@@ -257,7 +258,7 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
 	  // ShoppingCartActivity.ResetNumCsrfRequests();
       SharedPreferences user_info = getSharedPreferences(getString(R.string.ui_master_file), MODE_PRIVATE);
       SharedPreferences.Editor editor = user_info.edit();
-      editor.putString(getString(R.string.ui_csrf_token), token);
+    editor.putString(getString(R.string.ui_csrf_token), token);
       editor.commit();
   }
   protected void GetCookiesThenGetCart(ProcessUrlResponseCallback callback) {

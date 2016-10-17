@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Toggles highlighting of Navigation Drawer items, based on clicks
+     and what the current activity is -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
      <item
          android:state_activated="true"
