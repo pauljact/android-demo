@@ -1,40 +1,48 @@
 {
   "project_info": {
-    "project_number": "176825502237",
-    "project_id": "jact-android-app"
+    "project_number": "404003292102",
+    "project_id": "robust-carver-93112"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:176825502237:android:f051112a2cbab615",
+        "mobilesdk_app_id": "1:404003292102:android:83fc7456ec673dc0",
         "android_client_info": {
-          "package_name": "com.example.jactfirstdemo"
+          "package_name": "com.jact.jactapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "176825502237-o0j42mfkgfu6boit82lq29h2l331pi6f.apps.googleusercontent.com",
+          "client_id": "404003292102-jgdln44fdc5pt5kjn4ncl4n1nl0og4ck.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.jactfirstdemo",
+            "package_name": "com.jact.jactapp",
             "certificate_hash": "32361997D720593B441D441CB5FA72035698228E"
           }
         },
         {
-          "client_id": "176825502237-jcngfsk3ng7svp4vq4pq5p7sv8dhbja8.apps.googleusercontent.com",
+          "client_id": "404003292102-he6ja9btjbvi2qrna8f8p1sf0c5c51t0.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "404003292102-npfrg98e9tj4dqodau4kqh8cohqop0ce.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "404003292102-f9c37aio2pdjta5k811nhtnuni6sep4s.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDDcH8RS0YiPDNAVWCZTbl-DdCxmDUM7PA"
+          "current_key": "AIzaSyD9zxc4HkcXiCq4DtCzDWU2aJEQjE_R9PE"
         }
       ],
       "services": {
         "analytics_service": {
           "status": 2,
           "analytics_property": {
-            "tracking_id": "UA-85084812-1"
+            "tracking_id": "UA-86038952-1"
           }
         },
         "appinvite_service": {

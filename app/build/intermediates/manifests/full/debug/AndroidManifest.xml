@@ -38,8 +38,7 @@
 
     <uses-feature
         android:glEsVersion="0x00020000"
-        android:required="true" />
- <!-- PHB New 6/1/2016: Added the hardwareAccelerated=true to allow app to play HTML5 game in web view -->
+        android:required="true" /> <!-- PHB New 6/1/2016: Added the hardwareAccelerated=true to allow app to play HTML5 game in web view -->
     <!-- PHB New 10/10/2016: Added the android:name=".JactAnalyticsApplication" line for Google Analytics -->
     <application
         android:name="com.jact.jactapp.JactAnalyticsApplication"
@@ -461,8 +460,7 @@ Service handling Google Sign-In user revocation. For apps that do not integrate 
 
         <activity
             android:name="com.google.android.gms.tagmanager.TagManagerPreviewActivity"
-            android:noHistory="true" >
- <!-- optional, removes the previewActivity from the activity stack. -->
+            android:noHistory="true" > <!-- optional, removes the previewActivity from the activity stack. -->
             <intent-filter>
                 <data android:scheme="tagmanager.c.com.example.jactfirstdemo" />
 
