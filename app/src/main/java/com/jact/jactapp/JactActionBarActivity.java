@@ -43,7 +43,6 @@ public abstract class JactActionBarActivity extends ActionBarActivity implements
 	  onBackPressed();
 	  finish();
 	}
-	
     jact_shopping_cart_url_ = GetUrlTask.GetJactDomain() + "/rest/cart.json";
     num_server_tasks_ = 0;
     is_popup_showing_ = false;
