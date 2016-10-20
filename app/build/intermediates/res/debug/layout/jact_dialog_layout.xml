@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".JactLoginActivity"
+    style="@style/EmptyStyle"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerHorizontal="true"
+    android:layout_marginLeft="0dp"
+    android:layout_marginRight="0dp"
+    android:paddingRight="3dp"
+    android:paddingLeft="3dp"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp"
+    android:background="@color/dark_blue">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/white">
+
+    <!-- Only need the below if not setting title programmatically
+         via builder.setTitle(). --> 
+	<TextView
+	    android:id="@+id/jact_dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        android:text="Wrong Username or Password"
+        android:textSize="18sp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+    	android:layout_marginTop="5dp"
+    	android:layout_marginBottom="5dp"
+        android:textColor="#43BFC7"
+        android:background="#00FFFFFF"
+   	/>
+	<!-- Horizontal Bar -->
+	<LinearLayout
+    	android:orientation="vertical"
+	    android:id="@+id/jact_dialog_divider"
+	    android:layout_width="fill_parent"
+	    android:layout_height="2dip"
+	    android:background="#43BFC7">  
+	</LinearLayout>
+	<!-- Message -->
+	<TextView
+	    android:id="@+id/jact_dialog_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        android:text=""
+        android:textSize="18sp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+    	android:layout_marginTop="5dp"
+    	android:layout_marginBottom="5dp"
+        android:textColor="#000000"
+        android:background="#00FFFFFF"
+   	/>
+	<Button
+         android:id="@+id/jact_dialog_button"
+	     android:background="@drawable/button_selector_blue"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_marginTop="5dp"
+   	     android:layout_marginBottom="15dp"
+  	     android:layout_marginLeft="15dp"
+         android:layout_marginRight="15dp"
+		 android:gravity="center"
+         android:text="OK"
+	     android:textSize="14sp"
+	     android:textStyle="bold"
+	     android:textColor="#FFFFFFFF"
+	     android:onClick="doDialogOkClick" />
+    <!-- Empty LL to create vertical space/padding below button-->
+        <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="5dp">
+    </LinearLayout>
+    </LinearLayout>
+</LinearLayout><!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/layout/jact_dialog_layout.xml -->

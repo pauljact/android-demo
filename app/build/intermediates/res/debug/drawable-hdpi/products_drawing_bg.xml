@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+  <gradient
+      android:startColor="#FF9900"
+      android:centerColor="#FFCC00"
+      android:endColor="#FFEE00"
+      android:angle="270" />
+</shape>
+<!-- From: file:/C:/Users/Paul/StudioProjects/android-demo/app/src/main/res/drawable-hdpi/products_drawing_bg.xml -->

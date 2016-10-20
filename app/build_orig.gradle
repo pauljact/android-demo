@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "22.0.1"
+    defaultConfig {
+        applicationId 'com.jact.jactapp'
+        minSdkVersion 11
+        targetSdkVersion 17
+        multiDexEnabled true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    productFlavors {
+    }
+}
+
+repositories { mavenCentral() }
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
+    compile 'com.google.android.gms:play-services-analytics:9.0.0'
+    compile files('libs/commons-io-2.4.jar')
+    compile files('libs/YouTubeAndroidPlayerApi.jar')
+}

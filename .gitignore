@@ -5,7 +5,6 @@ bin/AndroidManifest.xml
 bin/classes.dex
 bin/AndroidManifest.xml
 bin/resources.ap_
-app/*
 .gradle/
 .idea
 captures
