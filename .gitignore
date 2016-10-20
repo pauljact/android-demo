@@ -8,4 +8,5 @@ bin/resources.ap_
 app/build/*
 .gradle/
 .idea
+.idea/*
 captures
